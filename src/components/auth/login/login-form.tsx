@@ -46,12 +46,6 @@ export function LoginForm() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Connexion</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Entrez vos identifiants pour accéder à votre compte
-        </p>
-      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(execute)} className="space-y-4">
           <FormField

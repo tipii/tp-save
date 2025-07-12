@@ -13,12 +13,16 @@ import { Button } from '@/components/ui/button';
 import { Bell, Search } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { APP_ALLOWED_ROLES, authRedirect } from '@/lib/auth-redirect';
 
-export default function Adminayout({
+export default async function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await authRedirect({
+    allowedRoles: APP_ALLOWED_ROLES,
+  });
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -50,14 +54,7 @@ export default function Adminayout({
             </Button>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
-        </div>
+        <main>{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

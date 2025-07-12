@@ -12,6 +12,7 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { Inbox, LayoutDashboard, LogOut, Package, Truck, UserPlus, Users } from 'lucide-react';
+import { NavUser } from './nav-user';
 
 const adminItems = [
   {
@@ -33,14 +34,14 @@ const items = [
     icon: Inbox,
   },
   {
-    title: 'Livreurs',
-    url: '#',
-    icon: Truck,
-  },
-  {
     title: 'Chargements',
     url: '#',
     icon: Package,
+  },
+  {
+    title: 'Livreurs',
+    url: '#',
+    icon: Truck,
   },
   {
     title: 'Clients',
@@ -93,12 +94,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenuButton asChild>
-          <a href="#">
-            <LogOut />
-            <span>Déconnexion</span>
-          </a>
-        </SidebarMenuButton>
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );
