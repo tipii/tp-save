@@ -1,4 +1,6 @@
-import { authRedirect } from '@/lib/auth-redirect';
+import ChargementDnd from '@/components/admin/chargement/chargement-dnd';
+import { DateNavigationComponent } from '@/components/admin/shared/date-navigation-example';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Metadata } from 'next';
 import React from 'react';
 
@@ -7,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminPage() {
-  return <div>Admin page</div>;
+  return <ChargementDnd />;
 }
