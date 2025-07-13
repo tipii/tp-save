@@ -15,6 +15,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { APP_ALLOWED_ROLES, authRedirect } from '@/lib/auth-redirect';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminLayout({
   children,
 }: Readonly<{

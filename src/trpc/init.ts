@@ -1,6 +1,9 @@
-import { initTRPC } from "@trpc/server";
-import { cache } from "react";
-import superjson from "superjson";
+import { auth } from '@/external-services/better-auth/auth';
+import { initTRPC, TRPCError } from '@trpc/server';
+import { headers } from 'next/headers';
+import { cache } from 'react';
+import superjson from 'superjson';
+import prisma from '@/lib/prisma';
 
 export const createTRPCContext = cache(async () => {
   /**
@@ -22,14 +25,63 @@ const t = initTRPC.create({
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 
-export const publicProcedure = t.procedure.use(async ({ next }) => {
-  return next({ ctx: {} });
-});
+// THERE SHOULD NOT BE ANY PUBLIC PROCEDURES
+// export const publicProcedure = t.procedure.use(async ({ next }) => {
+//   return next({ ctx: { prisma } });
+// });
 
 export const protectedProcedure = t.procedure.use(async ({ next }) => {
-  return next({ ctx: {} });
+  try {
+    // Get the session from Better Auth
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'You must be logged in to access this resource',
+      });
+    }
+
+    return next({
+      ctx: {
+        prisma,
+        user: session.user,
+      },
+    });
+  } catch (error) {
+    // If session retrieval fails, throw unauthorized error
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'Authentication failed',
+    });
+  }
 });
 
 export const adminProcedure = t.procedure.use(async ({ next }) => {
-  return next({ ctx: {} });
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (session?.user.role !== 'admin') {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'You must be an admin to access this resource',
+      });
+    }
+
+    return next({
+      ctx: {
+        prisma,
+        user: session.user,
+      },
+    });
+  } catch (error) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'Authentication failed',
+    });
+  }
 });

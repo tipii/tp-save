@@ -26,7 +26,6 @@ export async function authRedirect({
     // Check if session exists
     if (!session || !session.user) {
       redirect(unauthorizedRedirect);
-      return;
     }
 
     // If no role restrictions, allow access
