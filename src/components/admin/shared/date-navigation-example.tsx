@@ -17,7 +17,7 @@ export function DateNavigationComponent() {
       <DateNavigation
         selectedDate={selectedDate}
         onDateChange={handleDateChange}
-        className="bg-card flex w-full justify-between rounded-lg border p-4 shadow-sm"
+        className="bg-card flex w-full justify-between border-b border-gray-200 p-4"
       />
     </div>
   );

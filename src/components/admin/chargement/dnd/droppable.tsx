@@ -3,8 +3,10 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TrpcLivreurs } from '@/trpc/types/types';
 import { useDroppable } from '@dnd-kit/core';
 import DraggableCommande, { Commande } from './draggable';
-import { X } from 'lucide-react';
+import { Eye, X } from 'lucide-react';
 import { useMemo } from 'react';
+import CommandeModal from '@/components/modals/commande-modal/commande-modal';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export const DroppableLivreur = ({
   livreur,
@@ -28,24 +30,35 @@ export const DroppableLivreur = ({
       .filter((commande): commande is Commande => commande !== undefined);
   }, [droppedItems, livreur.id, commandes]);
 
+  const livreurInitials = livreur.name
+    .split(' ')
+    .map((name) => name.charAt(0))
+    .join('');
   return (
-    <Card
+    <div
       key={livreur.id}
-      className="m-2 flex w-md flex-col gap-4 rounded-2xl border border-gray-200 p-2"
+      className="m-2 flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-2"
     >
-      <CardHeader className="flex items-center gap-2">
-        <div className="flex-1">
-          <p className="text-sm font-medium">{livreur.name}</p>
-        </div>
-      </CardHeader>
+      <div className="flex items-center gap-2">
+        <Avatar className="h-10 w-10">
+          <AvatarFallback className="bg-slate-100 text-slate-700">{livreurInitials}</AvatarFallback>
+        </Avatar>
+        <p className="font-bold text-slate-900">{livreur.name}</p>
+      </div>
       <div
         ref={setNodeRef}
-        className="mx-2 flex flex-1 flex-col justify-between gap-2 rounded-md bg-gray-100 p-2"
+        className="rounded-lg border-2 border-dashed border-slate-200 p-2 text-center"
       >
-        <h3 className="text-sm font-medium">Chargement</h3>
+        <h3 className="mb-1 text-sm font-medium text-slate-900">Chargement</h3>
         <div className="flex flex-col items-center justify-center gap-1 pb-4">
           {droppedCommandes.map((commande) => (
             <div key={commande.id} className="flex w-full items-center gap-2">
+              <DraggableCommande key={commande.id} commande={commande} />
+              <CommandeModal commande={commande}>
+                <Button variant="ghost" className="h-5 w-5">
+                  <Eye size={16} />
+                </Button>
+              </CommandeModal>
               <Button
                 variant="ghost"
                 className="h-5 w-5"
@@ -53,16 +66,17 @@ export const DroppableLivreur = ({
               >
                 <X size={16} />
               </Button>
-              <DraggableCommande key={commande.id} commande={commande} />
             </div>
           ))}
           {droppedCommandes.length === 0 && (
-            <div className="text-sm text-gray-400">Drop commands here</div>
+            <div className="text-xs text-slate-500">Drop commands here</div>
           )}
         </div>
 
-        <Button variant="outline">Valider</Button>
+        <Button variant="outline" className="w-full bg-transparent">
+          Valider
+        </Button>
       </div>
-    </Card>
+    </div>
   );
 };

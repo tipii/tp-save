@@ -171,39 +171,38 @@ export default function ChargementDnd() {
       <div className="flex flex-col gap-4">
         <DateNavigationComponent />
         <div className="flex flex-col gap-4">
-          <Card className="m-0 h-full">
-            <CardHeader className="flex justify-between">
-              <CardTitle>Commande Drag Zone</CardTitle>
-              <div className="">Filter zone</div>
-            </CardHeader>
-            <CardContent className="m-0 flex h-full min-h-64 gap-x-4">
+          <div className="flex flex-col gap-4 border-b border-gray-200 px-4 pb-4">
+            <div className="flex justify-between">
+              <h2 className="text-lg font-bold">Commande Drag Zone</h2>
+            </div>
+            <div className="m-0 flex h-full min-h-64 gap-x-4">
               <PriorityZone
                 title="Priorité"
                 priority="Urgent"
-                backgroundColor="bg-red-50"
+                backgroundColor="bg-red-50 shadow-none border-red-200"
                 commandes={commandes}
                 droppedItems={droppedItems}
               />
               <PriorityZone
                 title="Normal"
                 priority="Normal"
-                backgroundColor="bg-yellow-50"
+                backgroundColor="bg-yellow-50 shadow-none border-yellow-300"
                 commandes={commandes}
                 droppedItems={droppedItems}
               />
               <PriorityZone
                 title="Îles"
                 priority="Îles"
-                backgroundColor="bg-blue-50"
+                backgroundColor="bg-blue-50 shadow-none border-blue-200"
                 commandes={commandes}
                 droppedItems={droppedItems}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader className="flex justify-between">
-              <CardTitle>Livreur Drop Zone</CardTitle>
+          <div className="flex flex-col gap-4 border-b border-gray-200 px-4 pb-4">
+            <div className="flex justify-between">
+              <h2 className="text-lg font-bold">Livreur Drop Zone</h2>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -216,8 +215,8 @@ export default function ChargementDnd() {
                   <span className="text-sm">Sort by name</span>
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent className="flex min-h-64 flex-wrap gap-2">
+            </div>
+            <div className="grid min-h-64 grid-cols-1 gap-2 md:grid-cols-3 lg:grid-cols-5">
               {sortedLivreurs?.map((livreur, index) => (
                 <DroppableLivreur
                   key={livreur.id}
@@ -227,8 +226,8 @@ export default function ChargementDnd() {
                   onRemoveCommande={handleRemoveCommande}
                 />
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </DndContext>

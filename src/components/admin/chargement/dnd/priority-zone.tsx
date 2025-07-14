@@ -1,6 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMemo } from 'react';
 import DraggableCommande, { Commande } from './draggable';
+import CommandeModal from '@/components/modals/commande-modal/commande-modal';
+import { Button } from '@/components/ui/button';
+import { Eye } from 'lucide-react';
 
 interface PriorityZoneProps {
   title: string;
@@ -26,16 +29,23 @@ export const PriorityZone = ({
   }, [commandes, droppedItems, priority]);
 
   return (
-    <Card className={`flex-1 rounded-2xl ${backgroundColor} p-4 text-2xl font-bold`}>
-      <CardHeader className="flex justify-between">
-        <CardTitle className="">{title}</CardTitle>
+    <div className={`flex-1 rounded-lg border ${backgroundColor} p-4 text-2xl font-bold`}>
+      <div className="flex justify-between">
+        <div className="">{title}</div>
         <div className="text-sm text-gray-500">Filter zone</div>
-      </CardHeader>
-      <CardContent className="flex h-full w-full flex-col gap-x-4">
+      </div>
+      <div className="flex h-full w-full flex-col gap-2">
         {availableCommandes.map((commande) => (
-          <DraggableCommande key={commande.id} commande={commande} />
+          <div key={commande.id} className="flex items-center gap-2">
+            <DraggableCommande key={commande.id} commande={commande} />
+            <CommandeModal commande={commande}>
+              <Button variant="ghost" className="h-5 w-5">
+                <Eye size={16} />
+              </Button>
+            </CommandeModal>
+          </div>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
