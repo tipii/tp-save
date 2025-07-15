@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/sidebar';
 import { Inbox, LayoutDashboard, LogOut, Package, Truck, UserPlus, Users } from 'lucide-react';
 import { NavUser } from './nav-user';
+import Link from 'next/link';
+import SidebarButton from './sidebar-button';
 
 const adminItems = [
   {
@@ -25,7 +27,7 @@ const adminItems = [
 const items = [
   {
     title: 'Dashboard',
-    url: '#',
+    url: '/app',
     icon: LayoutDashboard,
   },
   {
@@ -56,18 +58,15 @@ export function AppSidebar() {
       <SidebarHeader>Tallin Pi</SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="flex flex-col gap-2">
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <SidebarButton
+                  key={item.title}
+                  title={item.title}
+                  url={item.url}
+                  icon={<item.icon />}
+                />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>

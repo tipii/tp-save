@@ -34,6 +34,7 @@ export const DroppableLivreur = ({
     .split(' ')
     .map((name) => name.charAt(0))
     .join('');
+
   return (
     <div
       key={livreur.id}
@@ -52,20 +53,22 @@ export const DroppableLivreur = ({
         <h3 className="mb-1 text-sm font-medium text-slate-900">Chargement</h3>
         <div className="flex flex-col items-center justify-center gap-1 pb-4">
           {droppedCommandes.map((commande) => (
-            <div key={commande.id} className="flex w-full items-center gap-2">
+            <div key={commande.id} className="flex w-full items-center">
               <DraggableCommande key={commande.id} commande={commande} />
-              <CommandeModal commande={commande}>
-                <Button variant="ghost" className="h-5 w-5">
-                  <Eye size={16} />
+              <div className="">
+                <CommandeModal commande={commande}>
+                  <Button variant="ghost" className="h-5 w-5">
+                    <Eye size={16} />
+                  </Button>
+                </CommandeModal>
+                <Button
+                  variant="ghost"
+                  className="h-5 w-5"
+                  onClick={() => onRemoveCommande(commande.id)}
+                >
+                  <X size={16} />
                 </Button>
-              </CommandeModal>
-              <Button
-                variant="ghost"
-                className="h-5 w-5"
-                onClick={() => onRemoveCommande(commande.id)}
-              >
-                <X size={16} />
-              </Button>
+              </div>
             </div>
           ))}
           {droppedCommandes.length === 0 && (

@@ -34,7 +34,7 @@ export const PriorityZone = ({
         <div className="">{title}</div>
         <div className="text-sm text-gray-500">Filter zone</div>
       </div>
-      <div className="flex h-full w-full flex-col gap-2">
+      <div className={`grid grid-cols-1 gap-2 2xl:grid-cols-2 ${backgroundColor}`}>
         {availableCommandes.map((commande) => (
           <div key={commande.id} className="flex items-center gap-2">
             <DraggableCommande key={commande.id} commande={commande} />
