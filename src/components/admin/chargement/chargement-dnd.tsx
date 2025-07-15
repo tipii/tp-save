@@ -15,7 +15,7 @@ import { PriorityZone } from './dnd/priority-zone';
 
 export default function ChargementDnd() {
   const trpc = useTRPC();
-  const { data: commandes } = useQuery(trpc.commandes.getCommandes.queryOptions());
+  const { data: commandes } = useQuery(trpc.commandes.getPendingCommandes.queryOptions());
   const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
 
   const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>({});
