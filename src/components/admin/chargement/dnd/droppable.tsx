@@ -22,7 +22,7 @@ export const DroppableLivreur = ({
   droppedItems: Record<string, string[]>;
   commandes: TrpcCommandes[];
   onRemoveCommande: (commandeId: string) => void;
-  setDroppedItems: (items: Record<string, string[]>) => void;
+  setDroppedItems: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
 }) => {
   const trpc = useTRPC();
   const { refetch } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
@@ -51,7 +51,12 @@ export const DroppableLivreur = ({
           toast.success('Chargement créé avec succès');
           refetch();
           refetchCommandes();
-          setDroppedItems({});
+          // Only clear items from this droppable zone
+          setDroppedItems((prev) => {
+            const newItems = { ...prev };
+            delete newItems[`droppable-${livreur.id}`];
+            return newItems;
+          });
         } else {
           toast.error('Erreur lors de la création du chargement');
         }
