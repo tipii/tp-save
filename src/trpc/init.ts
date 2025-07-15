@@ -3,7 +3,7 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import { headers } from 'next/headers';
 import { cache } from 'react';
 import superjson from 'superjson';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 export const createTRPCContext = cache(async () => {
   /**
