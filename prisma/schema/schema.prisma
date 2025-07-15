@@ -35,10 +35,14 @@ model User {
   sessions            Session[]
   accounts            Account[]
 
-  commandeReceptionnePar DeliveryOrder[]   @relation("commandeReceptionnePar")
-  commandeTransmissePar  DeliveryOrder[]   @relation("commandeTransmissePar")
-  livreur                DeliveryOrder[]   @relation("livreur")
-  commandeHistory        CommandeHistory[]
+  commandeHistory   CommandeHistory[]
+  chargements       Chargement[]
+  chargementHistory ChargementHistory[]
+
+  // commandeReceptionnePar DeliveryOrder[]        @relation("commandeReceptionnePar")
+  // commandeTransmissePar  DeliveryOrder[]        @relation("commandeTransmissePar")
+  // deliveryOrder          DeliveryOrder[]
+  // deliveryOrderHistory   DeliveryOrderHistory[]
 
   @@unique([email])
   @@unique([username])

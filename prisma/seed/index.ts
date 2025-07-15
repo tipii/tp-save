@@ -1,12 +1,18 @@
 import { PrismaClient } from '../../src/generated/prisma';
 import { usersData } from './data/users-data';
+import { clientsData } from './data/clients-data';
+import { commandesData } from './data/commandes-data';
 import { seedUsers } from './seeders/users-seeder';
+import { seedClients } from './seeders/clients-seeder';
+import { seedCommandes } from './seeders/commandes-seeder';
 
 const prisma = new PrismaClient();
 
 // Configuration for seeding
 interface SeedConfig {
   users: boolean;
+  clients: boolean;
+  commandes: boolean;
   // Add other seeders here as they're created
   // posts: boolean;
   // comments: boolean;
@@ -15,6 +21,8 @@ interface SeedConfig {
 // Default configuration - can be overridden via environment variables
 const defaultConfig: SeedConfig = {
   users: true,
+  clients: true,
+  commandes: true,
 };
 
 // Parse environment variables for seeding configuration
@@ -23,6 +31,8 @@ function getSeedConfig(): SeedConfig {
 
   // Allow selective seeding via environment variables
   if (process.env.SEED_USERS === 'false') config.users = false;
+  if (process.env.SEED_CLIENTS === 'false') config.clients = false;
+  if (process.env.SEED_COMMANDES === 'false') config.commandes = false;
 
   return config;
 }
@@ -40,6 +50,20 @@ async function main() {
       await seedUsers(usersData);
     } else {
       console.log('⏭️  Skipping users seeding');
+    }
+
+    // Seed clients (must run before commandes)
+    if (config.clients) {
+      await seedClients(clientsData);
+    } else {
+      console.log('⏭️  Skipping clients seeding');
+    }
+
+    // Seed commandes
+    if (config.commandes) {
+      await seedCommandes(commandesData);
+    } else {
+      console.log('⏭️  Skipping commandes seeding');
     }
 
     // Add other seeders here as they're created
@@ -75,6 +99,9 @@ export async function clearDatabase() {
   console.log('🧹 Clearing database...');
 
   // Clear in reverse order of dependencies
+  await prisma.commandeHistory.deleteMany();
+  await prisma.commande.deleteMany();
+  await prisma.client.deleteMany();
   await prisma.account.deleteMany();
   await prisma.session.deleteMany();
   await prisma.verification.deleteMany();
