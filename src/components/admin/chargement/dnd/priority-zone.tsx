@@ -1,15 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMemo } from 'react';
-import DraggableCommande, { Commande } from './draggable';
+import DraggableCommande from './draggable';
 import CommandeModal from '@/components/modals/commande-modal/commande-modal';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
+import { TrpcCommandes } from '@/trpc/types/types';
 
 interface PriorityZoneProps {
   title: string;
   priority: string;
   backgroundColor: string;
-  commandes: Commande[];
+  commandes: TrpcCommandes[];
   droppedItems: Record<string, string[]>;
 }
 

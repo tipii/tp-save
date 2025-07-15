@@ -1,20 +1,13 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { TrpcCommandes } from '@/trpc/types/types';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { X } from 'lucide-react';
 import React from 'react';
 
-export interface Commande {
-  id: string;
-  ref: string;
-  client: string;
-  items: number;
-  priority: string;
-}
-
-export default function DraggableCommande({ commande }: { commande: Commande }) {
+export default function DraggableCommande({ commande }: { commande: TrpcCommandes }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `draggable-${commande.id}`,
   });
@@ -53,7 +46,7 @@ export default function DraggableCommande({ commande }: { commande: Commande }) 
         {getBadgeColor(commande.priority)}
       </div>
       <div className="flex items-center justify-between">
-        <div className="text-sm font-medium">{commande.client}</div>
+        <div className="text-sm font-medium">{commande.client?.name || 'Sans client'}</div>
         <div className="text-sm font-medium">{commande.items} items</div>
       </div>
     </div>

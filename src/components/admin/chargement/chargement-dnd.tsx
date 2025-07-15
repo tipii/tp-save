@@ -13,81 +13,9 @@ import DraggableCommande from './dnd/draggable';
 import { DroppableLivreur } from './dnd/droppable';
 import { PriorityZone } from './dnd/priority-zone';
 
-const commandes = [
-  {
-    id: '1',
-    ref: 'FA256988',
-    client: 'Pearl Bora',
-    items: 7,
-    priority: 'Urgent',
-  },
-  {
-    id: '2',
-    ref: 'FA256988',
-    client: 'Marie Dubois',
-    items: 3,
-    priority: 'Normal',
-  },
-  {
-    id: '3',
-    ref: 'FA256988',
-    client: 'Pierre Martin',
-    items: 12,
-    priority: 'Urgent',
-  },
-  {
-    id: '4',
-    ref: 'FA256988',
-    client: 'Jean Technicien',
-    items: 5,
-    priority: 'Îles',
-  },
-  {
-    id: '5',
-    ref: 'FA256988',
-    client: 'Sophie Depot',
-    items: 9,
-    priority: 'Normal',
-  },
-  {
-    id: '6',
-    ref: 'FA256988',
-    client: 'Marc Livreur',
-    items: 2,
-    priority: 'Urgent',
-  },
-  {
-    id: '7',
-    ref: 'FA256988',
-    client: 'Julien Rouleur',
-    items: 8,
-    priority: 'Îles',
-  },
-  {
-    id: '8',
-    ref: 'FA256988',
-    client: 'Thomas Coursier',
-    items: 4,
-    priority: 'Normal',
-  },
-  {
-    id: '9',
-    ref: 'FA256988',
-    client: 'Antoine Rapide',
-    items: 6,
-    priority: 'Urgent',
-  },
-  {
-    id: '10',
-    ref: 'FA256988',
-    client: 'Lucas Vélo',
-    items: 10,
-    priority: 'Normal',
-  },
-];
-
 export default function ChargementDnd() {
   const trpc = useTRPC();
+  const { data: commandes } = useQuery(trpc.commandes.getCommandes.queryOptions());
   const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
   const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>({});
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'none'>('none');
@@ -165,6 +93,8 @@ export default function ChargementDnd() {
     if (sortOrder === 'desc') return <ArrowDown className="h-4 w-4" />;
     return <ArrowUpDown className="h-4 w-4" />;
   }
+
+  if (!commandes || !livreurs) return null;
 
   return (
     <DndContext onDragEnd={handleDragEnd}>

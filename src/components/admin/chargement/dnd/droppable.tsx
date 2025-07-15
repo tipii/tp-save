@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { TrpcLivreurs } from '@/trpc/types/types';
+import { TrpcCommandes, TrpcLivreurs } from '@/trpc/types/types';
 import { useDroppable } from '@dnd-kit/core';
-import DraggableCommande, { Commande } from './draggable';
+import DraggableCommande from './draggable';
 import { Eye, X } from 'lucide-react';
 import { useMemo } from 'react';
 import CommandeModal from '@/components/modals/commande-modal/commande-modal';
@@ -16,7 +16,7 @@ export const DroppableLivreur = ({
 }: {
   livreur: TrpcLivreurs;
   droppedItems: Record<string, string[]>;
-  commandes: Commande[];
+  commandes: TrpcCommandes[];
   onRemoveCommande: (commandeId: string) => void;
 }) => {
   const { isOver, setNodeRef } = useDroppable({
@@ -27,7 +27,7 @@ export const DroppableLivreur = ({
     const droppedCommandIds = droppedItems[`droppable-${livreur.id}`] || [];
     return droppedCommandIds
       .map((commandId: string) => commandes.find((c) => c.id === commandId))
-      .filter((commande): commande is Commande => commande !== undefined);
+      .filter((commande): commande is TrpcCommandes => commande !== undefined);
   }, [droppedItems, livreur.id, commandes]);
 
   const livreurInitials = livreur.name
