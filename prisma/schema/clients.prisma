@@ -1,0 +1,32 @@
+model Client {
+  id   String @id @default(cuid())
+  code String @unique // Client reference code (e.g., "CLI001")
+  name String // Client name or company name
+  type String @default("particulier") // "particulier", "entreprise", "professionnel"
+
+  // Contact Information
+  email         String?
+  phone         String?
+  phoneSecond   String? // Secondary phone number
+  contactPerson String? // Main contact person name
+
+  // Address Information
+  address    String
+  city       String
+  postalCode String
+  country    String @default("France")
+
+  notes String? // Internal notes about the client
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  commandes Commande[]
+
+  @@index([code])
+  @@index([name])
+  @@index([city])
+  @@map("client")
+}

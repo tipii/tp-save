@@ -1,0 +1,70 @@
+// // Delivery and Order Management Schema
+// // Based on French delivery tracking system
+
+// model DeliveryOrder {
+//   id        String   @id @default(cuid())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Basic order information
+//   datePriseCommande        DateTime
+//   // Relationships
+//   commandeReceptionneParId String?
+//   commandeTransmisseParId  String?
+//   livreurId                String?
+//   modeReceptionCommande    String? // Order reception mode
+
+//   dateDeLivraison DateTime? // Delivery date
+
+//   // Order reception and transmission
+
+//   // Document numbers and references
+//   numeroDevis                   String? // Quote number
+//   cfBlDuOuNumeroRq              String? // CF BL or RQ number
+//   numeroBonPreparationLivraison String? // Preparation and delivery slip number
+//   numeroBonLivraison            String? // Delivery slip number
+//   numeroBonCommandeBpa          String? // Purchase order / BPA number
+//   numeroFacture                 String? // Invoice number
+//   ref16tpi                      String? // Reference 16TPI
+
+//   // Delivery scheduling
+//   creneauxLivraison String? // Delivery time slots
+
+//   // Gesco system integration
+//   bonPrepaGesco String? // Gesco preparation slip
+//   docGesco      String? // Gesco document
+//   docGescoImp   String? // Gesco printed document
+
+//   // Order status and logistics
+//   cdePreteDepot         Boolean? @default(false) // Order ready in depot
+//   ordrePriorite         Int? // Priority order
+//   commandeEmbarquee     Boolean? @default(false) // Order loaded
+//   receptionBlFactSignee String? // Reception BL or signed invoice
+
+//   // Business information
+//   commercial  String? // Sales person
+//   entreprises String? // Company
+//   lieu        String? // Location
+
+//   // Product information
+//   designations String? // Product designations
+//   quantite     Int? // Quantity
+
+//   // Additional information
+//   note         String? // Notes
+//   commentaires String? // Comments
+
+//   commandeReceptionnePar User? @relation("commandeReceptionnePar", fields: [commandeReceptionneParId], references: [id]) // Order received by
+//   commandeTransmissePar  User? @relation("commandeTransmissePar", fields: [commandeTransmisseParId], references: [id]) // Order transmitted by
+//   livreur                User? @relation("livreur", fields: [livreurId], references: [id]) // Delivery person
+
+//   // Indexes for performance
+//   @@index([datePriseCommande])
+//   @@index([dateDeLivraison])
+//   @@index([livreurId])
+//   @@index([commercial])
+//   @@index([entreprises])
+//   @@index([numeroBonCommandeBpa])
+//   @@index([numeroFacture])
+//   @@map("delivery_orders")
+// }
