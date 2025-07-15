@@ -3,7 +3,12 @@ import { createTRPCRouter, protectedProcedure } from '../init';
 
 export const chargementsRouter = createTRPCRouter({
   getChargements: protectedProcedure.query(async ({ ctx }) => {
-    const chargements = await ctx.prisma.chargement.findMany();
+    const chargements = await ctx.prisma.chargement.findMany({
+      include: {
+        commandes: true,
+        livreur: true,
+      },
+    });
     return chargements;
   }),
   createChargement: protectedProcedure

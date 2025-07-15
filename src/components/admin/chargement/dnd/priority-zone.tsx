@@ -35,18 +35,25 @@ export const PriorityZone = ({
         <div className="">{title}</div>
         <div className="text-sm text-gray-500">Filter zone</div>
       </div>
-      <div className={`grid grid-cols-1 gap-2 2xl:grid-cols-2 ${backgroundColor}`}>
-        {availableCommandes.map((commande) => (
-          <div key={commande.id} className="flex items-center gap-2">
-            <DraggableCommande key={commande.id} commande={commande} />
-            <CommandeModal commande={commande}>
-              <Button variant="ghost" className="h-5 w-5">
-                <Eye size={16} />
-              </Button>
-            </CommandeModal>
-          </div>
-        ))}
-      </div>
+      {availableCommandes.length > 0 ? (
+        <div className={`grid grid-cols-1 gap-2 2xl:grid-cols-2 ${backgroundColor}`}>
+          {availableCommandes.map((commande) => (
+            <div key={commande.id} className="flex items-center gap-2">
+              <DraggableCommande key={commande.id} commande={commande} />
+              <CommandeModal commande={commande}>
+                <Button variant="ghost" className="h-5 w-5">
+                  <Eye size={16} />
+                </Button>
+              </CommandeModal>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex h-full flex-col items-center justify-center">
+          <p className="text-sm text-gray-500">Aucune commande à traiter</p>
+          <p className="text-sm text-gray-500">Voir les commandes en attentes</p>
+        </div>
+      )}
     </div>
   );
 };

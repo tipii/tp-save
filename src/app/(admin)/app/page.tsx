@@ -1,13 +1,18 @@
-import ChargementDnd from '@/components/admin/chargement/chargement-dnd';
-import { DateNavigationComponent } from '@/components/admin/shared/date-navigation-example';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Metadata } from 'next';
+'use client';
+
 import React from 'react';
+import { useBreadcrumb } from '@/components/admin/shared/breadcrumb/useBreadcrumb';
 
-export const metadata: Metadata = {
-  title: 'Dashboard',
-};
+export default function DashboardPage() {
+  // One-liner to set breadcrumb
+  useBreadcrumb([], 'Accueil');
 
-export default async function AdminPage() {
-  return <ChargementDnd />;
+  return (
+    <div className="p-6">
+      <h1 className="mb-4 text-2xl font-bold">Dashboard</h1>
+      <p className="text-gray-600">
+        Cette page utilise le hook useBreadcrumb en une ligne pour mettre à jour le fil d'Ariane.
+      </p>
+    </div>
+  );
 }

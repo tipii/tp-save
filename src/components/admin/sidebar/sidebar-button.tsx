@@ -14,7 +14,9 @@ export default function SidebarButton({
   icon: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isActive = pathname.startsWith(url);
+  // Handle the /app route as a special case
+  const isActive =
+    (url === '/app' && pathname === '/app') || (url !== '/app' && pathname.startsWith(url));
 
   return (
     <SidebarMenuItem>

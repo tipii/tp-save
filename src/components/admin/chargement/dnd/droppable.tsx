@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useTRPC } from '@/trpc/client';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import ChargementModal from '@/components/modals/chargement-modal/chargement-modal';
 
 export const DroppableLivreur = ({
   livreur,
@@ -106,9 +107,11 @@ export const DroppableLivreur = ({
               <p className="text-xs text-slate-500">{getStatusIcon(chargement.status)}</p>
               <p className="text-sm">{chargement.name}</p>
             </div>
-            <Button variant="ghost" size="icon">
-              <Eye size={16} />
-            </Button>
+            <ChargementModal chargement={chargement}>
+              <Button variant="ghost" size="icon">
+                <Eye size={16} />
+              </Button>
+            </ChargementModal>
           </div>
         ))}
       </div>

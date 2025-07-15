@@ -32,22 +32,22 @@ const items = [
   },
   {
     title: 'Commandes',
-    url: '#',
+    url: '/app/commandes',
     icon: Inbox,
   },
   {
     title: 'Chargements',
-    url: '#',
+    url: '/app/chargements',
     icon: Package,
   },
   {
     title: 'Livreurs',
-    url: '#',
+    url: '/app/livreurs',
     icon: Truck,
   },
   {
     title: 'Clients',
-    url: '#',
+    url: '/app/clients',
     icon: Users,
   },
 ];
