@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 
 // Configuration for seeding
 interface SeedConfig {
+  clearDatabase: boolean;
   users: boolean;
   clients: boolean;
   commandes: boolean;
@@ -20,6 +21,7 @@ interface SeedConfig {
 
 // Default configuration - can be overridden via environment variables
 const defaultConfig: SeedConfig = {
+  clearDatabase: true,
   users: true,
   clients: true,
   commandes: true,
@@ -45,6 +47,10 @@ async function main() {
   console.log('📋 Seeding configuration:', config);
 
   try {
+    if (config.clearDatabase) {
+      await clearDatabase();
+    }
+
     // Seed users
     if (config.users) {
       await seedUsers(usersData);

@@ -6,6 +6,7 @@ model Commande {
   priority  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  status    String   @default("pending")
 
   chargementId String?
   chargement   Chargement? @relation(fields: [chargementId], references: [id])
