@@ -17,6 +17,7 @@ export default function ChargementDnd() {
   const trpc = useTRPC();
   const { data: commandes } = useQuery(trpc.commandes.getCommandes.queryOptions());
   const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
+
   const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>({});
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'none'>('none');
 
@@ -146,7 +147,7 @@ export default function ChargementDnd() {
                 </Button>
               </div>
             </div>
-            <div className="grid min-h-64 grid-cols-1 gap-2 md:grid-cols-3 lg:grid-cols-5">
+            <div className="grid min-h-64 grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
               {sortedLivreurs?.map((livreur, index) => (
                 <DroppableLivreur
                   key={livreur.id}
@@ -154,6 +155,7 @@ export default function ChargementDnd() {
                   droppedItems={droppedItems}
                   commandes={commandes}
                   onRemoveCommande={handleRemoveCommande}
+                  setDroppedItems={setDroppedItems}
                 />
               ))}
             </div>

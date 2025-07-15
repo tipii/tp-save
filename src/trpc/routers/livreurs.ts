@@ -6,6 +6,13 @@ export const livreursRouter = createTRPCRouter({
       where: {
         role: 'livreur',
       },
+      include: {
+        chargements: {
+          include: {
+            commandes: true,
+          },
+        },
+      },
     });
     return livreurs;
   }),

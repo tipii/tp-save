@@ -26,6 +26,7 @@ model CommandeHistory {
   id         String   @id @default(cuid())
   commandeId String
   userId     String
+  action     String
   user       User     @relation(fields: [userId], references: [id])
   snapshot   Json // Full commande state at time of change
   timestamp  DateTime @default(now())

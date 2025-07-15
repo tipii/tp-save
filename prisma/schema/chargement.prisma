@@ -17,6 +17,7 @@ model Chargement {
 model ChargementHistory {
   id           String   @id @default(cuid())
   chargementId String
+  action       String
   userId       String
   user         User     @relation(fields: [userId], references: [id])
   snapshot     Json // Full chargement state at time of change
