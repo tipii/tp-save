@@ -146,11 +146,6 @@ export const lotsRouter = createTRPCRouter({
       }
 
       // Parse current items
-      console.log('Source lot items raw:', sourceLot.items);
-      console.log('Target lot items raw:', targetLot.items);
-      console.log('Source lot items type:', typeof sourceLot.items);
-      console.log('Target lot items type:', typeof targetLot.items);
-
       const sourceItems = (
         typeof sourceLot.items === 'string' ? JSON.parse(sourceLot.items) : sourceLot.items
       ) as Array<{
@@ -164,10 +159,6 @@ export const lotsRouter = createTRPCRouter({
         name: string;
         quantity: number;
       }>;
-
-      console.log('Parsed source items:', sourceItems);
-      console.log('Parsed target items:', targetItems);
-      console.log('Items to transfer:', items);
 
       // Process transfer for each item
       const updatedSourceItems = [...sourceItems];
@@ -200,6 +191,102 @@ export const lotsRouter = createTRPCRouter({
         } else {
           updatedTargetItems[targetItemIndex].quantity += transferItem.quantity;
         }
+      }
+
+      // Update both lots
+      await Promise.all([
+        ctx.prisma.lot.update({
+          where: { id: sourceLotId },
+          data: { items: updatedSourceItems },
+        }),
+        ctx.prisma.lot.update({
+          where: { id: targetLotId },
+          data: { items: updatedTargetItems },
+        }),
+      ]);
+
+      return { success: true };
+    }),
+
+  transferSingleItem: protectedProcedure
+    .input(
+      z.object({
+        sourceLotId: z.string(),
+        targetLotId: z.string(),
+        itemName: z.string(),
+        quantity: z.number().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { sourceLotId, targetLotId, itemName, quantity } = input;
+
+      // Get both lots with their commande data
+      const [sourceLot, targetLot] = await Promise.all([
+        ctx.prisma.lot.findUnique({
+          where: { id: sourceLotId },
+          include: { commande: { select: { lockedBy: true } } },
+        }),
+        ctx.prisma.lot.findUnique({
+          where: { id: targetLotId },
+          include: { commande: { select: { lockedBy: true } } },
+        }),
+      ]);
+
+      if (!sourceLot || !targetLot) {
+        throw new Error('One or both lots not found');
+      }
+
+      // Check permissions for both lots
+      if (
+        sourceLot.commande?.lockedBy !== ctx.user.id ||
+        targetLot.commande?.lockedBy !== ctx.user.id
+      ) {
+        throw new Error('You must unlock the commande before transferring items');
+      }
+
+      // Parse current items
+      const sourceItems = (
+        typeof sourceLot.items === 'string' ? JSON.parse(sourceLot.items) : sourceLot.items
+      ) as Array<{
+        name: string;
+        quantity: number;
+      }>;
+
+      const targetItems = (
+        typeof targetLot.items === 'string' ? JSON.parse(targetLot.items) : targetLot.items
+      ) as Array<{
+        name: string;
+        quantity: number;
+      }>;
+
+      // Find the source item
+      const sourceItemIndex = sourceItems.findIndex((item) => item.name === itemName);
+      if (sourceItemIndex === -1) {
+        throw new Error(`Item "${itemName}" not found in source lot`);
+      }
+
+      const sourceItem = sourceItems[sourceItemIndex];
+      if (sourceItem.quantity < quantity) {
+        throw new Error(`Insufficient quantity for item: ${itemName}`);
+      }
+
+      // Update source items
+      const updatedSourceItems = [...sourceItems];
+      updatedSourceItems[sourceItemIndex].quantity -= quantity;
+
+      // Remove item if quantity becomes 0
+      if (updatedSourceItems[sourceItemIndex].quantity === 0) {
+        updatedSourceItems.splice(sourceItemIndex, 1);
+      }
+
+      // Update target items
+      const updatedTargetItems = [...targetItems];
+      const targetItemIndex = updatedTargetItems.findIndex((item) => item.name === itemName);
+
+      if (targetItemIndex === -1) {
+        updatedTargetItems.push({ name: itemName, quantity });
+      } else {
+        updatedTargetItems[targetItemIndex].quantity += quantity;
       }
 
       // Update both lots

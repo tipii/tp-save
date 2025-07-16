@@ -79,10 +79,10 @@ export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) 
             <div className="space-y-2">
               {commande.lots.map((lot) => (
                 <div key={lot.id} className="rounded border p-2">
-                  <div className="font-medium">Lot {lot.id}</div>
+                  <div className="font-medium">Lot {lot.name}</div>
                   {lot.chargement && (
                     <div className="text-muted-foreground text-sm">
-                      Chargement: {lot.chargement.id}
+                      Chargement: {lot.chargement.name}
                     </div>
                   )}
                 </div>

@@ -31,7 +31,6 @@ const commandeUpdateSchema = z.object({
   ref: z.string().min(1, 'La référence est requise'),
   priority: z.enum([Priority.URGENT, Priority.NORMAL, Priority.ILES]),
   status: z.enum([Status.PENDING, Status.READY, Status.DELIVERING]),
-  originalItems: z.string().optional(),
 });
 
 type CommandeUpdateForm = z.infer<typeof commandeUpdateSchema>;
@@ -47,9 +46,8 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
     resolver: zodResolver(commandeUpdateSchema),
     defaultValues: {
       ref: '',
-      priority: Priority.NORMAL,
-      status: Status.PENDING,
-      originalItems: '',
+      priority: commande?.priority as Priority,
+      status: commande?.status as Status,
     },
   });
 
@@ -60,31 +58,15 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
         ref: commande.ref,
         priority: commande.priority as Priority,
         status: commande.status as Status,
-        originalItems: commande.originalItems
-          ? JSON.stringify(commande.originalItems, null, 2)
-          : '',
       });
     }
   }, [commande, form]);
 
   const handleSave = async (data: CommandeUpdateForm) => {
-    let originalItems;
-    if (data.originalItems) {
-      try {
-        originalItems = JSON.parse(data.originalItems);
-      } catch (e) {
-        toast.error('JSON invalide', {
-          description: 'Les éléments originaux doivent être au format JSON valide',
-        });
-        return;
-      }
-    }
-
     await updateCommande({
       ref: data.ref,
       priority: data.priority,
       status: data.status,
-      originalItems,
     });
   };
 
@@ -94,9 +76,6 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
         ref: commande.ref,
         priority: commande.priority as Priority,
         status: commande.status as Status,
-        originalItems: commande.originalItems
-          ? JSON.stringify(commande.originalItems, null, 2)
-          : '',
       });
     }
   };
@@ -182,26 +161,6 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="originalItems"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Éléments originaux (JSON)</FormLabel>
-                  <FormControl>
-                    <textarea
-                      {...field}
-                      disabled={!canEdit}
-                      rows={6}
-                      placeholder="Saisir les données JSON..."
-                      className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 font-mono text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             {canEdit && (
               <div className="flex gap-2">

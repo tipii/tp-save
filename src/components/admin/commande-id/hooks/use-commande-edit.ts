@@ -59,58 +59,68 @@ export function useCommandeEdit(commandeId: string) {
   }, [commande?.lockedUntil, commande?.lockedBy, user?.id, refetchCommande]);
 
   const enableEdit = async () => {
-    try {
-      await enableEditMutation.mutateAsync({ id: commandeId });
-      setIsEditing(true);
-      refetchCommande();
-      toast.success('Commande déverrouillée', {
-        description: 'Vous pouvez maintenant modifier cette commande.',
-      });
-    } catch (error) {
-      toast.error('Erreur', {
-        description:
-          error instanceof Error ? error.message : 'Impossible de déverrouiller la commande',
-      });
-    }
+    await enableEditMutation.mutateAsync(
+      { id: commandeId },
+      {
+        onError: (error) => {
+          toast.error('Erreur', {
+            description:
+              error instanceof Error ? error.message : 'Impossible de déverrouiller la commande',
+          });
+        },
+        onSuccess: () => {
+          setIsEditing(true);
+          refetchCommande();
+          toast.success('Commande déverrouillée', {
+            description: 'Vous pouvez maintenant modifier cette commande.',
+          });
+        },
+      },
+    );
   };
 
   const disableEdit = async () => {
-    try {
-      await disableEditMutation.mutateAsync({ id: commandeId });
-      setIsEditing(false);
-      refetchCommande();
-      toast.success('Commande verrouillée', {
-        description: "Le mode d'édition a été désactivé.",
-      });
-    } catch (error) {
-      toast.error('Erreur', {
-        description:
-          error instanceof Error ? error.message : 'Impossible de verrouiller la commande',
-      });
-    }
+    await disableEditMutation.mutateAsync(
+      { id: commandeId },
+      {
+        onError: (error) => {
+          toast.error('Erreur', {
+            description:
+              error instanceof Error ? error.message : 'Impossible de verrouiller la commande',
+          });
+        },
+        onSuccess: () => {
+          setIsEditing(false);
+          refetchCommande();
+          toast.success('Commande verrouillée', {
+            description: "Le mode d'édition a été désactivé.",
+          });
+        },
+      },
+    );
   };
 
-  const updateCommande = async (data: {
-    ref?: string;
-    priority?: Priority;
-    status?: Status;
-    originalItems?: Item[];
-  }) => {
-    try {
-      await updateMutation.mutateAsync({
+  const updateCommande = async (data: { ref?: string; priority?: Priority; status?: Status }) => {
+    await updateMutation.mutateAsync(
+      {
         id: commandeId,
         ...data,
-      });
-      refetchCommande();
-      toast.success('Commande mise à jour', {
-        description: 'Les modifications ont été enregistrées avec succès.',
-      });
-    } catch (error) {
-      toast.error('Erreur', {
-        description:
-          error instanceof Error ? error.message : 'Impossible de mettre à jour la commande',
-      });
-    }
+      },
+      {
+        onError: (error) => {
+          toast.error('Erreur', {
+            description:
+              error instanceof Error ? error.message : 'Impossible de mettre à jour la commande',
+          });
+        },
+        onSuccess: () => {
+          refetchCommande();
+          toast.success('Commande mise à jour', {
+            description: 'Les modifications ont été enregistrées avec succès.',
+          });
+        },
+      },
+    );
   };
 
   const isUnlockedByCurrentUser = commande?.lockedBy === user?.id;
