@@ -1,5 +1,14 @@
+import CommandeIdPage from '@/components/admin/commande-id/commande-id-page';
 import React from 'react';
 
-export default function CommandePage() {
-  return <div>CommandePage</div>;
+interface CommandePageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default async function CommandePage({ params }: CommandePageProps) {
+  const { id } = await params;
+
+  return <CommandeIdPage id={id} />;
 }

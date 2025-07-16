@@ -148,4 +148,139 @@ export const commandesRouter = createTRPCRouter({
         },
       };
     }),
+  getCommandeById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { id } = input;
+      const commande = await ctx.prisma.commande.findUnique({
+        where: { id },
+        include: {
+          client: true,
+          history: {
+            include: {
+              user: true,
+            },
+          },
+          lots: {
+            include: {
+              chargement: true,
+            },
+          },
+        },
+      });
+      return commande;
+    }),
+
+  enableEdit: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input;
+      const userId = ctx.user.id;
+
+      // Check if commande is already unlocked for editing by someone else
+      const existing = await ctx.prisma.commande.findUnique({
+        where: { id },
+        select: { lockedBy: true, lockedUntil: true },
+      });
+
+      if (existing?.lockedBy && existing.lockedBy !== userId) {
+        const isUnlockExpired = existing.lockedUntil && new Date() > existing.lockedUntil;
+        if (!isUnlockExpired) {
+          throw new Error('Commande is already being edited by another user');
+        }
+      }
+
+      // Unlock for editing for 15 minutes
+      const lockedUntil = new Date(Date.now() + 15 * 60 * 1000);
+
+      return await ctx.prisma.commande.update({
+        where: { id },
+        data: {
+          lockedBy: userId,
+          lockedUntil,
+        },
+      });
+    }),
+
+  disableEdit: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input;
+      const userId = ctx.user.id;
+
+      return await ctx.prisma.commande.update({
+        where: { id },
+        data: {
+          lockedBy: null,
+          lockedUntil: null,
+        },
+      });
+    }),
+
+  updateCommande: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        ref: z.string().optional(),
+        priority: z.enum(Priority).optional(),
+        status: z.enum(Status).optional(),
+        originalItems: z.any().optional(), // JSON data
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...updateData } = input;
+      const userId = ctx.user.id;
+
+      // Check if user has unlocked the commande for editing
+      const existing = await ctx.prisma.commande.findUnique({
+        where: { id },
+        select: { lockedBy: true, lockedUntil: true },
+      });
+
+      if (existing?.lockedBy !== userId) {
+        throw new Error('You must unlock the commande before editing');
+      }
+
+      // Get current state for history
+      const currentCommande = await ctx.prisma.commande.findUnique({
+        where: { id },
+        include: {
+          client: true,
+          lots: {
+            include: {
+              chargement: true,
+            },
+          },
+        },
+      });
+
+      // Update the commande
+      const updatedCommande = await ctx.prisma.commande.update({
+        where: { id },
+        data: {
+          ...updateData,
+          updatedAt: new Date(),
+        },
+        include: {
+          client: true,
+          lots: {
+            include: {
+              chargement: true,
+            },
+          },
+        },
+      });
+
+      // Create history entry
+      await ctx.prisma.commandeHistory.create({
+        data: {
+          commandeId: id,
+          userId,
+          action: 'UPDATE',
+          snapshot: JSON.parse(JSON.stringify(currentCommande)),
+        },
+      });
+
+      return updatedCommande;
+    }),
 });
