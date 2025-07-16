@@ -9,7 +9,6 @@ import { useTRPC } from '@/trpc/client';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import DraggableCommande from './dnd/draggable';
 import { DroppableLivreur } from './dnd/droppable';
 import { PriorityZone } from './dnd/priority-zone';
 
@@ -18,7 +17,6 @@ export default function ChargementDnd() {
   const { data: lots } = useQuery(trpc.lots.getPendingLots.queryOptions());
   const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
 
-  console.log(lots);
   const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>({});
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'none'>('none');
 
@@ -148,7 +146,7 @@ export default function ChargementDnd() {
                 </Button>
               </div>
             </div>
-            <div className="grid min-h-64 grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+            <div className="grid min-h-64 grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {sortedLivreurs?.map((livreur, index) => (
                 <DroppableLivreur
                   key={livreur.id}
