@@ -4,6 +4,7 @@ import React from 'react';
 import { CommandeEditControls } from './components/commande-edit-controls';
 import { CommandeEditForm } from './components/commande-edit-form';
 import { CommandeReadOnlyInfo } from './components/commande-read-only-info';
+import { LotEdit } from './components/lot-edit';
 import { useCommandeEdit } from './hooks/use-commande-edit';
 
 interface CommandeIdPageProps {
@@ -27,6 +28,7 @@ export default function CommandeIdPage({ id }: CommandeIdPageProps) {
         {/* Editable Form */}
         <div className="lg:col-span-2">
           <CommandeEditForm commandeId={id} />
+          <LotEdit commandeId={id} />
         </div>
 
         {/* Read-only Information */}

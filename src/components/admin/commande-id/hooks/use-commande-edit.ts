@@ -16,9 +16,20 @@ export function useCommandeEdit(commandeId: string) {
   const { user } = useUser();
   const queryClient = useQueryClient();
 
-  const { data: commande, refetch } = useQuery(
+  const { data: commande, refetch: refetchCommande } = useQuery(
     trpc.commandes.getCommandeById.queryOptions({ id: commandeId }),
   );
+
+  // Sync isEditing state with server state when commande data changes
+  useEffect(() => {
+    if (commande && user) {
+      const isUnlockedByCurrentUser = commande.lockedBy === user.id;
+      const hasValidLock = commande.lockedUntil && new Date(commande.lockedUntil) > new Date();
+      setIsEditing(isUnlockedByCurrentUser && Boolean(hasValidLock));
+    } else {
+      setIsEditing(false);
+    }
+  }, [commande, user]);
 
   const enableEditMutation = useMutation(trpc.commandes.enableEdit.mutationOptions());
   const disableEditMutation = useMutation(trpc.commandes.disableEdit.mutationOptions());
@@ -35,7 +46,7 @@ export function useCommandeEdit(commandeId: string) {
 
         if (timeLeft === 0) {
           setIsEditing(false);
-          refetch();
+          refetchCommande();
         }
       };
 
@@ -45,13 +56,13 @@ export function useCommandeEdit(commandeId: string) {
     } else {
       setEditTimer(null);
     }
-  }, [commande?.lockedUntil, commande?.lockedBy, user?.id, refetch]);
+  }, [commande?.lockedUntil, commande?.lockedBy, user?.id, refetchCommande]);
 
   const enableEdit = async () => {
     try {
       await enableEditMutation.mutateAsync({ id: commandeId });
       setIsEditing(true);
-      refetch();
+      refetchCommande();
       toast.success('Commande déverrouillée', {
         description: 'Vous pouvez maintenant modifier cette commande.',
       });
@@ -67,7 +78,7 @@ export function useCommandeEdit(commandeId: string) {
     try {
       await disableEditMutation.mutateAsync({ id: commandeId });
       setIsEditing(false);
-      refetch();
+      refetchCommande();
       toast.success('Commande verrouillée', {
         description: "Le mode d'édition a été désactivé.",
       });
@@ -90,7 +101,7 @@ export function useCommandeEdit(commandeId: string) {
         id: commandeId,
         ...data,
       });
-      refetch();
+      refetchCommande();
       toast.success('Commande mise à jour', {
         description: 'Les modifications ont été enregistrées avec succès.',
       });
@@ -108,6 +119,7 @@ export function useCommandeEdit(commandeId: string) {
 
   return {
     commande,
+    refetchCommande,
     isEditing,
     editTimer,
     canEdit,
