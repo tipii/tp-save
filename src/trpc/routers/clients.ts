@@ -4,7 +4,15 @@ export const clientsRouter = createTRPCRouter({
   getClients: protectedProcedure.query(async ({ ctx }) => {
     const clients = await ctx.prisma.client.findMany({
       include: {
-        commandes: true,
+        commandes: {
+          include: {
+            lots: {
+              include: {
+                chargement: true,
+              },
+            },
+          },
+        },
       },
     });
     return clients;

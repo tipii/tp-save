@@ -9,7 +9,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Building } from 'lucide-react';
 import React from 'react';
-import { TrpcCommandes } from '@/trpc/types/types';
+import { TrpcClient, TrpcCommande } from '@/types/trpc-types';
 import ClientCard from '@/components/clients/client-card';
 
 export default function CommandeModal({
@@ -17,7 +17,7 @@ export default function CommandeModal({
   commande,
 }: {
   children: React.ReactNode;
-  commande: TrpcCommandes;
+  commande: TrpcCommande;
 }) {
   return (
     <Dialog modal>
@@ -26,14 +26,14 @@ export default function CommandeModal({
         <DialogHeader>
           <DialogTitle>Commande: {commande.ref}</DialogTitle>
           <DialogDescription>
-            {commande.items} items - Priorité: {commande.priority}
+            {commande.lots.length} lots - Priorité: {commande.priority}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Client Section */}
           {commande.client ? (
-            <ClientCard client={commande.client} />
+            <ClientCard client={commande.client as TrpcClient} />
           ) : (
             <Card>
               <CardContent className="py-6">

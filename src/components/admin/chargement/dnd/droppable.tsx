@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { TrpcCommandes, TrpcLivreurs } from '@/trpc/types/types';
+import { TrpcCommande, TrpcLivreur, TrpcLot } from '@/types/trpc-types';
 import { useDroppable } from '@dnd-kit/core';
 import DraggableCommande from './draggable';
 import { Check, CircleQuestionMark, Eye, EyeClosed, Truck, Warehouse, X } from 'lucide-react';
@@ -11,38 +11,39 @@ import { useTRPC } from '@/trpc/client';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import ChargementModal from '@/components/modals/chargement-modal/chargement-modal';
+import DraggableLot from './draggable';
 
 export const DroppableLivreur = ({
   livreur,
   droppedItems,
-  commandes,
+  lots,
   onRemoveCommande,
   setDroppedItems,
 }: {
-  livreur: TrpcLivreurs;
+  livreur: TrpcLivreur;
   droppedItems: Record<string, string[]>;
-  commandes: TrpcCommandes[];
+  lots: TrpcLot[];
   onRemoveCommande: (commandeId: string) => void;
   setDroppedItems: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
 }) => {
   const trpc = useTRPC();
   const { refetch } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
-  const { refetch: refetchCommandes } = useQuery(trpc.commandes.getCommandes.queryOptions());
+  const { refetch: refetchLots } = useQuery(trpc.lots.getPendingLots.queryOptions());
 
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-${livreur.id}`,
   });
 
-  const droppedCommandes = useMemo(() => {
-    const droppedCommandIds = droppedItems[`droppable-${livreur.id}`] || [];
-    return droppedCommandIds
-      .map((commandId: string) => commandes.find((c) => c.id === commandId))
-      .filter((commande): commande is TrpcCommandes => commande !== undefined);
-  }, [droppedItems, livreur.id, commandes]);
+  const droppedLots = useMemo(() => {
+    const droppedLotIds = droppedItems[`droppable-${livreur.id}`] || [];
+    return droppedLotIds
+      .map((lotId) => lots.find((c) => c.id === lotId))
+      .filter((lot): lot is TrpcLot => lot !== undefined);
+  }, [droppedItems, livreur.id, lots]);
 
   const livreurInitials = livreur.name
     .split(' ')
-    .map((name) => name.charAt(0))
+    .map((name: string) => name.charAt(0))
     .join('');
 
   const { mutate } = useMutation(
@@ -51,7 +52,7 @@ export const DroppableLivreur = ({
         if (data.success) {
           toast.success('Chargement créé avec succès');
           refetch();
-          refetchCommandes();
+          refetchLots();
           // Only clear items from this droppable zone
           setDroppedItems((prev) => {
             const newItems = { ...prev };
@@ -67,9 +68,9 @@ export const DroppableLivreur = ({
       },
     }),
   );
-  const handleCreateChargement = (commandeIds: string[], livreurId: string) => {
+  const handleCreateChargement = (lotIds: string[], livreurId: string) => {
     mutate({
-      commandes: commandeIds,
+      lots: lotIds,
       livreurId,
     });
   };
@@ -107,7 +108,7 @@ export const DroppableLivreur = ({
               <p className="text-xs text-slate-500">{getStatusIcon(chargement.status)}</p>
               <p className="text-sm">{chargement.name}</p>
             </div>
-            <ChargementModal chargement={chargement}>
+            <ChargementModal chargementId={chargement.id}>
               <Button variant="ghost" size="icon">
                 <Eye size={16} />
               </Button>
@@ -121,11 +122,11 @@ export const DroppableLivreur = ({
       >
         <h3 className="mb-1 text-sm font-medium text-slate-900">Chargement</h3>
         <div className="flex flex-col items-center justify-center gap-1 pb-4">
-          {droppedCommandes.map((commande) => (
-            <div key={commande.id} className="flex w-full items-center">
-              <DraggableCommande key={commande.id} commande={commande} />
+          {droppedLots.map((lot) => (
+            <div key={lot.id} className="flex w-full items-center">
+              <DraggableLot key={lot.id} lot={lot} />
               <div className="">
-                <CommandeModal commande={commande}>
+                <CommandeModal commande={lot.commande as TrpcCommande}>
                   <Button variant="ghost" className="h-5 w-5">
                     <Eye size={16} />
                   </Button>
@@ -133,14 +134,14 @@ export const DroppableLivreur = ({
                 <Button
                   variant="ghost"
                   className="h-5 w-5"
-                  onClick={() => onRemoveCommande(commande.id)}
+                  onClick={() => onRemoveCommande(lot.id)}
                 >
                   <X size={16} />
                 </Button>
               </div>
             </div>
           ))}
-          {droppedCommandes.length === 0 && (
+          {droppedLots.length === 0 && (
             <div className="text-xs text-slate-500">Déposer les commandes ici</div>
           )}
         </div>
@@ -149,7 +150,7 @@ export const DroppableLivreur = ({
           variant="outline"
           className="w-full bg-transparent"
           onClick={() => {
-            const commandeIds = droppedCommandes.map((commande) => commande.id);
+            const commandeIds = droppedLots.map((lot) => lot.id);
 
             handleCreateChargement(commandeIds, livreur.id);
             console.log(

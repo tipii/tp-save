@@ -6,7 +6,10 @@ export interface CommandeSeedData {
   id: string;
   ref: string;
   clientId: string;
-  items: number;
+  items: Array<{
+    name: string;
+    quantity: number;
+  }>;
   priority: string;
 }
 
@@ -55,18 +58,26 @@ export async function seedCommandes(
 
         // Create commande
         const now = new Date();
-        const commandeCreateData = {
-          id: commandeData.id,
-          ref: commandeData.ref,
-          clientId: commandeData.clientId,
-          items: commandeData.items,
-          priority: commandeData.priority,
-          createdAt: now,
-          updatedAt: now,
-        };
 
-        await prisma.commande.create({
-          data: commandeCreateData,
+        const commande = await prisma.commande.create({
+          data: {
+            id: commandeData.id,
+            ref: commandeData.ref,
+            clientId: commandeData.clientId,
+            originalItems: commandeData.items,
+            priority: commandeData.priority,
+            createdAt: now,
+            updatedAt: now,
+          },
+        });
+
+        const lot = await prisma.lot.create({
+          data: {
+            name: 'Lot 1',
+            commandeId: commande.id,
+            items: commandeData.items,
+            status: 'pending',
+          },
         });
 
         console.log(

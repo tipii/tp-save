@@ -2,17 +2,17 @@ model Commande {
   id        String   @id @default(cuid())
   ref       String
   clientId  String? // Foreign key to Client model
-  items     Int
   priority  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   status    String   @default("pending")
 
-  chargementId String?
-  chargement   Chargement? @relation(fields: [chargementId], references: [id])
+  lots          Lot[]
+  originalItems Json
+
   // Simple Edit Lock
-  lockedBy     String? // User ID who locked it
-  lockedUntil  DateTime? // Auto-unlock after timeout (e.g., 15 minutes)
+  lockedBy    String? // User ID who locked it
+  lockedUntil DateTime? // Auto-unlock after timeout (e.g., 15 minutes)
 
   // Relations
   client  Client?           @relation(fields: [clientId], references: [id])

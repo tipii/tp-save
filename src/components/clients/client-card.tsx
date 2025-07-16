@@ -3,9 +3,9 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { MapPin, Phone, Mail, User, Building, FileText } from 'lucide-react';
 import React from 'react';
-import { TrpcClients } from '@/trpc/types/types';
+import { TrpcClient } from '@/types/trpc-types';
 
-export default function ClientCard({ client }: { client: TrpcClients }) {
+export default function ClientCard({ client }: { client: TrpcClient }) {
   return (
     <Card>
       <CardHeader className="pb-3">

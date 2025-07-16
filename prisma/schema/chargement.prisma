@@ -1,13 +1,14 @@
 model Chargement {
-  id        String     @id @default(uuid())
-  name      String
-  commandes Commande[]
-  livreurId String?
-  livreur   User?      @relation(fields: [livreurId], references: [id])
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id   String @id @default(uuid())
+  name String
+  lots Lot[]
 
-  status String @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  livreurId String?
+  livreur   User?   @relation(fields: [livreurId], references: [id])
+  status    String  @default("pending")
 
   history ChargementHistory[]
 

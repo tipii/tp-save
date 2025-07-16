@@ -15,9 +15,10 @@ import { PriorityZone } from './dnd/priority-zone';
 
 export default function ChargementDnd() {
   const trpc = useTRPC();
-  const { data: commandes } = useQuery(trpc.commandes.getPendingCommandes.queryOptions());
+  const { data: lots } = useQuery(trpc.lots.getPendingLots.queryOptions());
   const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
 
+  console.log(lots);
   const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>({});
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'none'>('none');
 
@@ -95,7 +96,7 @@ export default function ChargementDnd() {
     return <ArrowUpDown className="h-4 w-4" />;
   }
 
-  if (!commandes || !livreurs) return null;
+  if (!lots || !livreurs) return null;
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
@@ -111,21 +112,21 @@ export default function ChargementDnd() {
                 title="Priorité"
                 priority="Urgent"
                 backgroundColor="bg-red-50 shadow-none border-red-200"
-                commandes={commandes}
+                lots={lots}
                 droppedItems={droppedItems}
               />
               <PriorityZone
                 title="Normal"
                 priority="Normal"
                 backgroundColor="bg-yellow-50 shadow-none border-yellow-300"
-                commandes={commandes}
+                lots={lots}
                 droppedItems={droppedItems}
               />
               <PriorityZone
                 title="Îles"
                 priority="Îles"
                 backgroundColor="bg-blue-50 shadow-none border-blue-200"
-                commandes={commandes}
+                lots={lots}
                 droppedItems={droppedItems}
               />
             </div>
@@ -153,7 +154,7 @@ export default function ChargementDnd() {
                   key={livreur.id}
                   livreur={livreur}
                   droppedItems={droppedItems}
-                  commandes={commandes}
+                  lots={lots}
                   onRemoveCommande={handleRemoveCommande}
                   setDroppedItems={setDroppedItems}
                 />

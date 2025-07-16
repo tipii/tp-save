@@ -297,7 +297,7 @@ export default function ClientPageComponent() {
                                           {getPriorityBadge(commande.priority)}
                                         </div>
                                         <div className="text-muted-foreground text-sm">
-                                          {commande.items} items
+                                          {commande.lots.length} lots
                                         </div>
                                       </div>
                                       <div className="text-muted-foreground text-sm">

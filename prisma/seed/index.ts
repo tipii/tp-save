@@ -104,14 +104,21 @@ export async function seedWithTransaction<T>(
 export async function clearDatabase() {
   console.log('🧹 Clearing database...');
 
+  try {
+    await prisma.commandeHistory.deleteMany();
+    await prisma.commande.deleteMany();
+    // await prisma.lot.deleteMany();
+    await prisma.chargement.deleteMany();
+    await prisma.client.deleteMany();
+    await prisma.account.deleteMany();
+    await prisma.session.deleteMany();
+    await prisma.verification.deleteMany();
+    await prisma.user.deleteMany();
+  } catch (error) {
+    console.error('💥 Error clearing database:', error);
+    throw error;
+  }
   // Clear in reverse order of dependencies
-  await prisma.commandeHistory.deleteMany();
-  await prisma.commande.deleteMany();
-  await prisma.client.deleteMany();
-  await prisma.account.deleteMany();
-  await prisma.session.deleteMany();
-  await prisma.verification.deleteMany();
-  await prisma.user.deleteMany();
 
   console.log('✅ Database cleared');
 }

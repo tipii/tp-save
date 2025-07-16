@@ -1,0 +1,19 @@
+model Lot {
+  id        String   @id @default(cuid())
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items     Json
+
+  commandeId String
+  commande   Commande @relation(fields: [commandeId], references: [id], onDelete: Cascade)
+
+  // livraison data
+  priority String?
+  status   String  @default("pending")
+
+  chargementId String?
+  chargement   Chargement? @relation(fields: [chargementId], references: [id])
+
+  @@map("lot")
+}
