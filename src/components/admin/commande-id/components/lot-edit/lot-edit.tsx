@@ -152,40 +152,17 @@ export function LotEdit({ commandeId }: LotEditProps) {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Gestion des lots</h3>
           {canEdit && (
-            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-              <DialogTrigger asChild>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Nouveau lot
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Créer un nouveau lot vide</p>
-                  </TooltipContent>
-                </Tooltip>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Créer un nouveau lot</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <p className="text-muted-foreground text-sm">
-                    Un nouveau lot vide sera créé. Vous pourrez y ajouter des éléments après sa
-                    création.
-                  </p>
-                  <div className="flex gap-2">
-                    <Button onClick={handleCreateLot} disabled={createLotMutation.isPending}>
-                      Créer le lot
-                    </Button>
-                    <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                      Annuler
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" onClick={handleCreateLot} disabled={createLotMutation.isPending}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nouveau lot
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Créer un nouveau lot vide</p>
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
 

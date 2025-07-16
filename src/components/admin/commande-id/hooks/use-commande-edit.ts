@@ -10,7 +10,6 @@ import { Item } from '@/types/types';
 
 export function useCommandeEdit(commandeId: string) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editTimer, setEditTimer] = useState<number | null>(null);
 
   const trpc = useTRPC();
   const { user } = useUser();
@@ -35,26 +34,15 @@ export function useCommandeEdit(commandeId: string) {
   const disableEditMutation = useMutation(trpc.commandes.disableEdit.mutationOptions());
   const updateMutation = useMutation(trpc.commandes.updateCommande.mutationOptions());
 
-  // Edit timer countdown
+  // Check if edit session has expired
   useEffect(() => {
     if (commande?.lockedUntil && commande.lockedBy === user?.id) {
-      const updateTimer = () => {
-        const now = new Date().getTime();
-        const editUntil = new Date(commande.lockedUntil!).getTime();
-        const timeLeft = Math.max(0, editUntil - now);
-        setEditTimer(timeLeft);
+      const editUntil = new Date(commande.lockedUntil).getTime();
+      const now = new Date().getTime();
 
-        if (timeLeft === 0) {
-          setIsEditing(false);
-          refetchCommande();
-        }
-      };
-
-      updateTimer();
-      const interval = setInterval(updateTimer, 1000);
-      return () => clearInterval(interval);
-    } else {
-      setEditTimer(null);
+      if (now >= editUntil) {
+        setIsEditing(false);
+      }
     }
   }, [commande?.lockedUntil, commande?.lockedBy, user?.id, refetchCommande]);
 
@@ -131,7 +119,6 @@ export function useCommandeEdit(commandeId: string) {
     commande,
     refetchCommande,
     isEditing,
-    editTimer,
     canEdit,
     isUnlockedByCurrentUser,
     isUnlockedByOther,

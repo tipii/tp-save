@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Lock, Unlock, Edit, Clock } from 'lucide-react';
+import { Lock, Unlock, Edit } from 'lucide-react';
 import { useCommandeEdit } from '../hooks/use-commande-edit';
 
 interface CommandeEditControlsProps {
@@ -11,14 +11,8 @@ interface CommandeEditControlsProps {
 }
 
 export function CommandeEditControls({ commandeId, commandeRef }: CommandeEditControlsProps) {
-  const { editTimer, canEdit, isUnlockedByOther, isEditing, enableEdit, disableEdit } =
+  const { canEdit, isUnlockedByOther, isEditing, enableEdit, disableEdit } =
     useCommandeEdit(commandeId);
-
-  const formatTimeLeft = (ms: number) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   return (
     <div className="flex items-center justify-between">
@@ -28,13 +22,6 @@ export function CommandeEditControls({ commandeId, commandeRef }: CommandeEditCo
       </div>
 
       <div className="flex items-center gap-2">
-        {editTimer && (
-          <div className="text-muted-foreground flex items-center gap-1 text-sm">
-            <Clock className="h-4 w-4" />
-            {formatTimeLeft(editTimer)}
-          </div>
-        )}
-
         {!isEditing && !isUnlockedByOther && (
           <Button onClick={enableEdit} variant="outline">
             <Unlock className="mr-2 h-4 w-4" />

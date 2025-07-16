@@ -1,6 +1,7 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
+import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,10 +51,20 @@ export function TransferItemModal({
   const form = useForm<TransferItemForm>({
     resolver: zodResolver(transferItemSchema),
     defaultValues: {
-      targetLotId: availableLots[0]?.id || '',
-      quantity: item?.quantity || 0,
+      targetLotId: '',
+      quantity: 1,
     },
   });
+
+  // Update form values when item or availableLots change
+  useEffect(() => {
+    if (item && availableLots.length > 0) {
+      form.reset({
+        targetLotId: availableLots[0]?.id || '',
+        quantity: item.quantity, // Set to max quantity by default
+      });
+    }
+  }, [item, availableLots, form]);
 
   const handleSubmit = (data: TransferItemForm) => {
     onTransfer(data);
