@@ -17,8 +17,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Plus } from 'lucide-react';
 import { useCommandeEdit } from '../../hooks/use-commande-edit';
 import { LotCard } from './lot-card';
-import { TransferItemModal } from './transfer-item-modal';
-import { LotEditProps, TransferItemForm } from './types';
+import { TransferItemModal, TransferItemForm } from './transfer-item-modal';
+
+interface LotEditProps {
+  commandeId: string;
+}
 
 export function LotEdit({ commandeId }: LotEditProps) {
   const { commande, canEdit, refetchCommande } = useCommandeEdit(commandeId);

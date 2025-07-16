@@ -4,7 +4,7 @@ import React from 'react';
 import { CommandeEditControls } from './components/commande-edit-controls';
 import { CommandeEditForm } from './components/commande-edit-form';
 import { CommandeReadOnlyInfo } from './components/commande-read-only-info';
-import { LotEdit } from './components/lot-edit';
+import { LotEdit } from './components/lot-edit/lot-edit';
 import { useCommandeEdit } from './hooks/use-commande-edit';
 
 interface CommandeIdPageProps {

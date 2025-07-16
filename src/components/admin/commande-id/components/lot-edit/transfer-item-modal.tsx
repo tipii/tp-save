@@ -20,7 +20,24 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { transferItemSchema, TransferItemForm, TransferItemModalProps } from './types';
+import { z } from 'zod';
+import { Item } from '@/types/types';
+
+const transferItemSchema = z.object({
+  targetLotId: z.string().min(1, 'Veuillez sélectionner un lot'),
+  quantity: z.number().min(1, 'La quantité doit être supérieure à 0'),
+});
+
+export type TransferItemForm = z.infer<typeof transferItemSchema>;
+
+interface TransferItemModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  item: Item | null;
+  sourceLotId: string | null;
+  availableLots: Array<{ id: string; name: string | null }>;
+  onTransfer: (data: TransferItemForm) => void;
+}
 
 export function TransferItemModal({
   isOpen,

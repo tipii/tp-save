@@ -16,7 +16,27 @@ import {
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Plus, Package, ArrowRightLeft, Trash2, Edit, Save, X } from 'lucide-react';
-import { LotCardProps } from './types';
+import { z } from 'zod';
+
+const itemSchema = z.object({
+  name: z.string().min(1, 'Le nom est requis'),
+  quantity: z.number().min(1, 'La quantité doit être supérieure à 0'),
+});
+
+type ItemForm = z.infer<typeof itemSchema>;
+
+interface LotCardProps {
+  lot: { id: string; name: string | null; items: Item[] };
+  index: number;
+  canEdit: boolean;
+  isEditing: boolean;
+  onEdit: () => void;
+  onSave: (items: Item[]) => void;
+  onCancel: () => void;
+  onDelete: () => void;
+  onTransferItem: (item: Item) => void;
+  availableLots: Array<{ id: string; name: string | null }>;
+}
 
 export function LotCard({
   lot,
