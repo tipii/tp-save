@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTRPC } from '@/trpc/client';
 import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
+import { Priority, Status } from '@/types/enums';
+import { Item } from '@/types/types';
 
 export function useCommandeEdit(commandeId: string) {
   const [isEditing, setIsEditing] = useState(false);
@@ -77,7 +79,12 @@ export function useCommandeEdit(commandeId: string) {
     }
   };
 
-  const updateCommande = async (data: any) => {
+  const updateCommande = async (data: {
+    ref?: string;
+    priority?: Priority;
+    status?: Status;
+    originalItems?: Item[];
+  }) => {
     try {
       await updateMutation.mutateAsync({
         id: commandeId,
