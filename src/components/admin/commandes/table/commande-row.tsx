@@ -60,14 +60,14 @@ export function CommandeRow({ commande, isExpanded, onToggle }: CommandeRowProps
             </div>
           )}
         </TableCell>
-        <TableCell>{getPriorityBadge(commande.priority)}</TableCell>
-        <TableCell>{getStatusBadge(commande.status)}</TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
             <Package className="text-muted-foreground h-4 w-4" />
             <span className="font-medium">{commande.lots.length}</span>
           </div>
         </TableCell>
+        <TableCell>{commande.lots.map((lot) => getPriorityBadge(lot.priority, lot.id))}</TableCell>
+        <TableCell>{getStatusBadge(commande.status)}</TableCell>
         <TableCell>
           <div className="font-medium">{getTotalItems(commande.lots)} articles</div>
         </TableCell>
@@ -87,7 +87,7 @@ export function CommandeRow({ commande, isExpanded, onToggle }: CommandeRowProps
       </TableRow>
       {isExpanded && (
         <TableRow>
-          <TableCell colSpan={8} className="bg-muted/20 p-0">
+          <TableCell colSpan={9} className="bg-muted/20 p-0">
             <ExpandedRow commande={commande} />
           </TableCell>
         </TableRow>

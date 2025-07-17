@@ -33,9 +33,9 @@ export function CommandesTable({ commandes, filters, pagination }: CommandesTabl
               <TableHead className="w-[50px]"></TableHead>
               <TableHead>Référence</TableHead>
               <TableHead>Client</TableHead>
+              <TableHead>Lots</TableHead>
               <TableHead>Priorité</TableHead>
               <TableHead>Statut</TableHead>
-              <TableHead>Lots</TableHead>
               <TableHead>Articles totaux</TableHead>
               <TableHead>Date création</TableHead>
               <TableHead>Actions</TableHead>

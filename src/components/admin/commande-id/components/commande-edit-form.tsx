@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEffect } from 'react';
-import { Priority, Status } from '@/types/enums';
+import { Status } from '@/generated/prisma';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -29,8 +29,7 @@ import { useCommandeEdit } from '../hooks/use-commande-edit';
 
 const commandeUpdateSchema = z.object({
   ref: z.string().min(1, 'La référence est requise'),
-  priority: z.enum([Priority.URGENT, Priority.NORMAL, Priority.ILES]),
-  status: z.enum([Status.PENDING, Status.READY, Status.DELIVERING]),
+  status: z.enum(Status),
 });
 
 type CommandeUpdateForm = z.infer<typeof commandeUpdateSchema>;
@@ -46,8 +45,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
     resolver: zodResolver(commandeUpdateSchema),
     defaultValues: {
       ref: '',
-      priority: commande?.priority as Priority,
-      status: commande?.status as Status,
+      status: Status.PENDING,
     },
   });
 
@@ -56,7 +54,6 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
     if (commande) {
       form.reset({
         ref: commande.ref,
-        priority: commande.priority as Priority,
         status: commande.status as Status,
       });
     }
@@ -65,7 +62,6 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
   const handleSave = async (data: CommandeUpdateForm) => {
     await updateCommande({
       ref: data.ref,
-      priority: data.priority,
       status: data.status,
     });
   };
@@ -74,7 +70,6 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
     if (commande) {
       form.reset({
         ref: commande.ref,
-        priority: commande.priority as Priority,
         status: commande.status as Status,
       });
     }
@@ -114,53 +109,28 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Priorité</FormLabel>
-                    <Select disabled={!canEdit} onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner la priorité" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={Priority.URGENT}>Urgent</SelectItem>
-                        <SelectItem value={Priority.NORMAL}>Normal</SelectItem>
-                        <SelectItem value={Priority.ILES}>Îles</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Statut</FormLabel>
-                    <Select disabled={!canEdit} onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner le statut" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={Status.PENDING}>En attente</SelectItem>
-                        <SelectItem value={Status.READY}>Prêt</SelectItem>
-                        <SelectItem value={Status.DELIVERING}>En livraison</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Statut</FormLabel>
+                  <Select disabled={!canEdit} onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner le statut" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={Status.PENDING}>En attente</SelectItem>
+                      <SelectItem value={Status.READY}>Prêt</SelectItem>
+                      <SelectItem value={Status.DELIVERING}>En livraison</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {canEdit && (
               <div className="flex gap-2">

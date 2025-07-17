@@ -2,7 +2,6 @@ export interface ClientSeedData {
   id: string;
   code: string;
   name: string;
-  type: string;
   email?: string;
   phone?: string;
   phoneSecond?: string;
@@ -19,7 +18,6 @@ export const clientsData: ClientSeedData[] = [
     id: '1',
     code: 'CLI001',
     name: 'Tahiti Import Export',
-    type: 'entreprise',
     email: 'contact@tahiti-import.pf',
     phone: '+689 40 12 34 56',
     phoneSecond: '+689 40 12 34 57',
@@ -34,7 +32,6 @@ export const clientsData: ClientSeedData[] = [
     id: '2',
     code: 'CLI002',
     name: 'Moorea Fruits Tropicaux',
-    type: 'entreprise',
     email: 'info@moorea-fruits.pf',
     phone: '+689 56 12 34 78',
     contactPerson: 'Marie Tauotaha',
@@ -48,7 +45,6 @@ export const clientsData: ClientSeedData[] = [
     id: '3',
     code: 'CLI003',
     name: 'Bora Bora Luxury Hotels',
-    type: 'entreprise',
     email: 'procurement@borabora-luxury.pf',
     phone: '+689 67 89 12 34',
     phoneSecond: '+689 67 89 12 35',
@@ -63,7 +59,6 @@ export const clientsData: ClientSeedData[] = [
     id: '4',
     code: 'CLI004',
     name: 'Pharmacie Centrale Papeete',
-    type: 'professionnel',
     email: 'commande@pharmacie-centrale.pf',
     phone: '+689 40 23 45 67',
     contactPerson: 'Dr. Sophie Tevahitua',
@@ -77,7 +72,6 @@ export const clientsData: ClientSeedData[] = [
     id: '5',
     code: 'CLI005',
     name: 'Huahine Vanilla Coopérative',
-    type: 'entreprise',
     email: 'coop@huahine-vanilla.pf',
     phone: '+689 68 34 56 78',
     contactPerson: 'Teiva Rautureau',
@@ -91,7 +85,6 @@ export const clientsData: ClientSeedData[] = [
     id: '6',
     code: 'CLI006',
     name: 'Raiatea Construction',
-    type: 'entreprise',
     email: 'logistique@raiatea-const.pf',
     phone: '+689 66 78 90 12',
     phoneSecond: '+689 66 78 90 13',
@@ -106,7 +99,6 @@ export const clientsData: ClientSeedData[] = [
     id: '7',
     code: 'CLI007',
     name: 'Tahaa Perles Noires',
-    type: 'entreprise',
     email: 'export@tahaa-perles.pf',
     phone: '+689 65 43 21 09',
     contactPerson: 'Vaiteani Brothers',
@@ -120,7 +112,6 @@ export const clientsData: ClientSeedData[] = [
     id: '8',
     code: 'CLI008',
     name: 'Maupiti Fisheries',
-    type: 'entreprise',
     email: 'vente@maupiti-fish.pf',
     phone: '+689 67 89 01 23',
     contactPerson: 'Teiki Salmon',
@@ -134,7 +125,6 @@ export const clientsData: ClientSeedData[] = [
     id: '9',
     code: 'CLI009',
     name: 'Tikehau Coprah Trading',
-    type: 'entreprise',
     email: 'trading@tikehau-coprah.pf',
     phone: '+689 96 78 54 32',
     contactPerson: 'Heimana Tetahiotupa',
@@ -148,7 +138,6 @@ export const clientsData: ClientSeedData[] = [
     id: '10',
     code: 'CLI010',
     name: 'Fakarava Diving Center',
-    type: 'professionnel',
     email: 'equipment@fakarava-diving.pf',
     phone: '+689 98 76 54 32',
     contactPerson: 'Tematai Tehuiotua',

@@ -281,7 +281,6 @@ export default function ClientPageComponent() {
                                       <div className="space-y-1">
                                         <div className="flex items-center gap-2">
                                           <span className="font-medium">{commande.ref}</span>
-                                          {getPriorityBadge(commande.priority)}
                                           <Tooltip>
                                             <TooltipTrigger>
                                               <Link href={`/app/commandes/${commande.id}`}>

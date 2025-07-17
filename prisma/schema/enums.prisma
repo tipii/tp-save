@@ -1,0 +1,20 @@
+enum Status {
+  PENDING
+  READY
+  DELIVERING
+  DELIVERED
+  TO_RETURN
+  RETURNED
+  MIXED
+
+  @@map("status")
+}
+
+enum Priority {
+  URGENT
+  NORMAL
+  ILES
+  UNDEFINED
+
+  @@map("priority")
+}

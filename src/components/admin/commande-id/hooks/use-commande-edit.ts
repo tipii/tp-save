@@ -5,8 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTRPC } from '@/trpc/client';
 import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
-import { Priority, Status } from '@/types/enums';
-import { Item } from '@/types/types';
+import { Priority, Status } from '@/generated/prisma';
 
 export function useCommandeEdit(commandeId: string) {
   const [isEditing, setIsEditing] = useState(false);
