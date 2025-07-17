@@ -11,10 +11,20 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
-import { Inbox, LayoutDashboard, LogOut, Package, Truck, UserPlus, Users } from 'lucide-react';
+import {
+  Inbox,
+  LayoutDashboard,
+  LogOut,
+  Package,
+  RefreshCcw,
+  Truck,
+  UserPlus,
+  Users,
+} from 'lucide-react';
 import { NavUser } from './nav-user';
 import Link from 'next/link';
 import SidebarButton from './sidebar-button';
+import RefreshButton from './refresh-button';
 
 const adminItems = [
   {
@@ -88,6 +98,10 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+
+              <SidebarMenuItem>
+                <RefreshButton />
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
