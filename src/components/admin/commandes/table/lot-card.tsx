@@ -14,6 +14,7 @@ import { getStatusBadge } from './utils';
 import { getQueryParams, useCommandeFilters } from '../use-commande-filters';
 import { toast } from 'sonner';
 import { TrpcLotFromCommande } from '@/types/trpc-types';
+import { Priority } from '@/generated/prisma';
 
 export function LotCard({ lot, index }: { lot: TrpcLotFromCommande; index: number }) {
   const trpc = useTRPC();
@@ -33,7 +34,7 @@ export function LotCard({ lot, index }: { lot: TrpcLotFromCommande; index: numbe
     }),
   );
 
-  const handlePriorityChange = (priority: 'Urgent' | 'Normal' | 'Îles') => {
+  const handlePriorityChange = (priority: Priority) => {
     changePriorityMutation.mutate({ lotId: lot.id, priority });
   };
 
@@ -45,7 +46,7 @@ export function LotCard({ lot, index }: { lot: TrpcLotFromCommande; index: numbe
           <div className="flex items-center gap-2">
             {/* Priority Select */}
             <Select
-              value={lot.priority || 'Normal'}
+              value={lot.priority || Priority.UNDEFINED}
               onValueChange={handlePriorityChange}
               disabled={changePriorityMutation.isPending}
             >
@@ -53,9 +54,9 @@ export function LotCard({ lot, index }: { lot: TrpcLotFromCommande; index: numbe
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Urgent">🔴 Urgent</SelectItem>
-                <SelectItem value="Normal">⚪ Normal</SelectItem>
-                <SelectItem value="Îles">🏝️ Îles</SelectItem>
+                <SelectItem value={Priority.URGENT}>🔴 Urgent</SelectItem>
+                <SelectItem value={Priority.NORMAL}>⚪ Normal</SelectItem>
+                <SelectItem value={Priority.ILES}>🏝️ Îles</SelectItem>
               </SelectContent>
             </Select>
             {getStatusBadge(lot.status)}

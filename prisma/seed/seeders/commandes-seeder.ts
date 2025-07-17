@@ -1,3 +1,4 @@
+import { Priority, Status } from '@/generated/prisma';
 import { PrismaClient } from '../../../src/generated/prisma';
 
 const prisma = new PrismaClient();
@@ -10,7 +11,7 @@ export interface CommandeSeedData {
     name: string;
     quantity: number;
   }>;
-  priority: string;
+  status: Status;
 }
 
 /**
@@ -65,7 +66,7 @@ export async function seedCommandes(
             ref: commandeData.ref,
             clientId: commandeData.clientId,
             originalItems: commandeData.items,
-            priority: commandeData.priority,
+            status: commandeData.status as Status,
             createdAt: now,
             updatedAt: now,
           },
@@ -76,12 +77,12 @@ export async function seedCommandes(
             name: 'Lot 1',
             commandeId: commande.id,
             items: commandeData.items,
-            status: 'pending',
+            status: Status.PENDING,
           },
         });
 
         console.log(
-          `✅ Created commande: ${commandeData.ref} - Client ${commandeData.clientId} (${commandeData.priority})`,
+          `✅ Created commande: ${commandeData.ref} - Client ${commandeData.clientId} - Status: ${commandeData.status}`,
         );
         return { status: 'created', ref: commandeData.ref };
       } catch (error: unknown) {

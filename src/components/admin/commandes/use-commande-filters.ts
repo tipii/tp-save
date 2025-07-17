@@ -1,4 +1,5 @@
-import { Priority, SortBy, SortOrder, Status } from '@/types/enums';
+import { SortBy, SortOrder } from '@/types/enums';
+import { Priority, Status } from '@/generated/prisma';
 import { useQueryState, parseAsString, parseAsInteger } from 'nuqs';
 
 export interface CommandeFilters {

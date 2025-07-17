@@ -2,30 +2,31 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Clock, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { TrpcLotFromCommande } from '@/types/trpc-types';
+import { Priority } from '@/generated/prisma';
 
-export const getPriorityBadge = (priority: string) => {
+export const getPriorityBadge = (priority: Priority, key: string) => {
   switch (priority) {
-    case 'Urgent':
+    case Priority.URGENT:
       return (
-        <Badge variant="destructive" className="text-xs">
+        <Badge key={key} variant="destructive" className="text-xs">
           Urgent
         </Badge>
       );
-    case 'Normal':
+    case Priority.NORMAL:
       return (
-        <Badge variant="secondary" className="text-xs">
+        <Badge key={key} variant="secondary" className="text-xs">
           Normal
         </Badge>
       );
-    case 'Îles':
+    case Priority.ILES:
       return (
-        <Badge variant="default" className="text-xs">
+        <Badge key={key} variant="default" className="text-xs">
           Îles
         </Badge>
       );
     default:
       return (
-        <Badge variant="outline" className="text-xs">
+        <Badge key={key} variant="outline" className="text-xs">
           {priority}
         </Badge>
       );

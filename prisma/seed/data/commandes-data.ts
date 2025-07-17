@@ -1,3 +1,5 @@
+import { Priority, Status } from '@/generated/prisma';
+
 export interface CommandeSeedData {
   id: string;
   ref: string;
@@ -6,7 +8,7 @@ export interface CommandeSeedData {
     name: string;
     quantity: number;
   }>;
-  priority: string;
+  status: Status;
 }
 
 export const commandesData: CommandeSeedData[] = [
@@ -21,7 +23,7 @@ export const commandesData: CommandeSeedData[] = [
       { name: 'Nettoyant sol industriel', quantity: 6 },
       { name: 'Dégraissant cuisine alimentaire', quantity: 10 },
     ],
-    priority: 'Urgent',
+    status: Status.PENDING,
   },
   {
     id: '2',
@@ -32,7 +34,7 @@ export const commandesData: CommandeSeedData[] = [
       { name: 'Dégraissant alimentaire BIO', quantity: 8 },
       { name: 'Détergent lessive liquide', quantity: 6 },
     ],
-    priority: 'Normal',
+    status: Status.PENDING,
   },
   {
     id: '3',
@@ -46,7 +48,7 @@ export const commandesData: CommandeSeedData[] = [
       { name: 'Détergent lave-vaisselle industriel', quantity: 8 },
       { name: 'Nettoyant piscine chloré', quantity: 25 },
     ],
-    priority: 'Urgent',
+    status: Status.PENDING,
   },
   {
     id: '4',
@@ -58,7 +60,7 @@ export const commandesData: CommandeSeedData[] = [
       { name: 'Produit détartrant pharmaceutique', quantity: 6 },
       { name: 'Dégraissant laboratoire', quantity: 4 },
     ],
-    priority: 'Îles',
+    status: Status.PENDING,
   },
   {
     id: '5',
@@ -71,7 +73,7 @@ export const commandesData: CommandeSeedData[] = [
       { name: 'Nettoyant haute pression', quantity: 4 },
       { name: 'Produit rinçage alimentaire', quantity: 12 },
     ],
-    priority: 'Normal',
+    status: Status.PENDING,
   },
   {
     id: '6',
@@ -81,7 +83,7 @@ export const commandesData: CommandeSeedData[] = [
       { name: 'Nettoyant béton industriel', quantity: 25 },
       { name: 'Dégraissant moteur heavy duty', quantity: 15 },
     ],
-    priority: 'Urgent',
+    status: Status.PENDING,
   },
   {
     id: '7',
@@ -93,7 +95,7 @@ export const commandesData: CommandeSeedData[] = [
       { name: 'Produit polissage perles', quantity: 8 },
       { name: 'Nettoyant précision optique', quantity: 3 },
     ],
-    priority: 'Îles',
+    status: Status.PENDING,
   },
   {
     id: '8',
@@ -104,7 +106,7 @@ export const commandesData: CommandeSeedData[] = [
       { name: 'Nettoyant chambre froide', quantity: 12 },
       { name: 'Détergent alimentaire marine', quantity: 8 },
     ],
-    priority: 'Normal',
+    status: Status.PENDING,
   },
   {
     id: '9',
@@ -116,7 +118,7 @@ export const commandesData: CommandeSeedData[] = [
       { name: 'Détergent pressoir industriel', quantity: 8 },
       { name: 'Nettoyant réservoir alimentaire', quantity: 6 },
     ],
-    priority: 'Urgent',
+    status: Status.PENDING,
   },
   {
     id: '10',
@@ -129,7 +131,7 @@ export const commandesData: CommandeSeedData[] = [
       { name: 'Nettoyant masque tuba', quantity: 20 },
       { name: 'Dégraissant détendeur spécialisé', quantity: 5 },
     ],
-    priority: 'Normal',
+    status: Status.PENDING,
   },
 ];
 

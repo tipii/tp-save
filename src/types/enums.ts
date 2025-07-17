@@ -1,14 +1,19 @@
-export enum Priority {
-  URGENT = 'URGENT',
-  NORMAL = 'NORMAL',
-  ILES = 'ILES',
-}
+// export enum Priority {
+//   URGENT = 'URGENT',
+//   NORMAL = 'NORMAL',
+//   ILES = 'ILES',
+//   UNDEFINED = 'UNDEFINED',
+// }
 
-export enum Status {
-  PENDING = 'pending',
-  READY = 'ready',
-  DELIVERING = 'delivering',
-}
+// export enum Status {
+//   PENDING = 'PENDING',
+//   READY = 'READY',
+//   DELIVERING = 'DELIVERING',
+//   DELIVERED = 'DELIVERED',
+//   TO_RETURN = 'TO_RETURN',
+//   RETURNED = 'RETURNED',
+//   MIXED = 'MIXED',
+// }
 
 export enum SortBy {
   CREATED_AT = 'createdAt',

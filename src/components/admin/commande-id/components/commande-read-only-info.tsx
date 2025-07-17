@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from 'lucide-react';
-import { Priority, Status } from '@/types/enums';
+import { Priority, Status } from '@/generated/prisma';
 import ClientCard from '@/components/clients/client-card';
 import { useCommandeEdit } from '../hooks/use-commande-edit';
 
@@ -14,7 +14,7 @@ interface CommandeReadOnlyInfoProps {
 export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) {
   const { commande } = useCommandeEdit(commandeId);
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority: Priority) => {
     switch (priority) {
       case Priority.URGENT:
         return 'destructive';
@@ -25,7 +25,7 @@ export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) 
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: Status) => {
     switch (status) {
       case Status.READY:
         return 'default';
@@ -49,7 +49,6 @@ export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) 
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2">
-            <Badge variant={getPriorityColor(commande.priority)}>{commande.priority}</Badge>
             <Badge variant={getStatusColor(commande.status)}>{commande.status}</Badge>
           </div>
 
@@ -78,10 +77,16 @@ export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) 
           <CardContent>
             <div className="space-y-2">
               {commande.lots.map((lot) => (
-                <div key={lot.id} className="rounded border p-2">
-                  <div className="font-medium">Lot {lot.name}</div>
+                <div key={lot.id} className="rounded border p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="font-medium">{lot.name}</div>
+                    <div className="flex gap-2">
+                      <Badge variant={getPriorityColor(lot.priority)}>{lot.priority}</Badge>
+                      <Badge variant={getStatusColor(lot.status)}>{lot.status}</Badge>
+                    </div>
+                  </div>
                   {lot.chargement && (
-                    <div className="text-muted-foreground text-sm">
+                    <div className="text-muted-foreground mt-1 text-sm">
                       Chargement: {lot.chargement.name}
                     </div>
                   )}

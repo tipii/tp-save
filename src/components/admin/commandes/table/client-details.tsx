@@ -19,9 +19,6 @@ export function ClientDetails({ client }: { client: TrpcClientFromCommande }) {
           <p>
             <span className="font-medium">Code:</span> {client.code}
           </p>
-          <p>
-            <span className="font-medium">Type:</span> {client.type}
-          </p>
           {client.contactPerson && (
             <p>
               <span className="font-medium">Contact:</span> {client.contactPerson}

@@ -1,5 +1,6 @@
 import z from 'zod';
 import { createTRPCRouter, protectedProcedure } from '../init';
+import { Status } from '@/generated/prisma';
 
 export const chargementsRouter = createTRPCRouter({
   getChargements: protectedProcedure.query(async ({ ctx }) => {
@@ -60,7 +61,7 @@ export const chargementsRouter = createTRPCRouter({
         where: {
           id: { in: input.lots },
         },
-        data: { status: 'ready' },
+        data: { status: Status.PENDING },
       });
 
       //TODO : update commande

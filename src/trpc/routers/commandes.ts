@@ -1,19 +1,26 @@
 import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from '../init';
-import { Priority, SortOrder, Status } from '@/types/enums';
-import { Prisma } from '@/generated/prisma';
+import { Priority, Status, Prisma } from '@/generated/prisma';
+import { SortOrder } from '@/types/enums';
 
 export const commandesRouter = createTRPCRouter({
   getPendingCommandes: protectedProcedure.query(async ({ ctx }) => {
     const commandes = await ctx.prisma.commande.findMany({
       where: {
-        status: {
-          equals: 'pending',
+        lots: {
+          some: {
+            status: {
+              equals: Status.PENDING,
+            },
+          },
         },
       },
       include: {
         client: true,
         lots: {
+          orderBy: {
+            createdAt: 'asc',
+          },
           include: {
             chargement: true,
           },
@@ -88,7 +95,11 @@ export const commandesRouter = createTRPCRouter({
 
       // Filter by priority
       if (priority) {
-        where.priority = priority;
+        where.lots = {
+          some: {
+            priority: priority,
+          },
+        };
       }
 
       // Filter by status
@@ -112,10 +123,12 @@ export const commandesRouter = createTRPCRouter({
 
       // Build orderBy clause
       const orderBy: Prisma.CommandeOrderByWithRelationInput = {};
-      if (sortBy === 'ref' || sortBy === 'priority' || sortBy === 'status') {
+      if (sortBy === 'ref' || sortBy === 'createdAt' || sortBy === 'updatedAt') {
         orderBy[sortBy] = sortOrder;
-      } else if (sortBy === 'createdAt' || sortBy === 'updatedAt') {
-        orderBy[sortBy] = sortOrder;
+      } else if (sortBy === 'priority' || sortBy === 'status') {
+        orderBy.lots = {
+          [sortBy]: sortOrder,
+        };
       }
 
       // Get total count for pagination
@@ -126,6 +139,9 @@ export const commandesRouter = createTRPCRouter({
         where,
         include: {
           lots: {
+            orderBy: {
+              createdAt: 'asc',
+            },
             include: {
               chargement: true,
             },
@@ -162,6 +178,9 @@ export const commandesRouter = createTRPCRouter({
             },
           },
           lots: {
+            orderBy: {
+              createdAt: 'asc',
+            },
             include: {
               chargement: true,
             },

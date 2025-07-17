@@ -21,9 +21,6 @@ export default function ClientCard({ client }: { client: TrpcClient }) {
             <h3 className="text-lg font-semibold">{client.name}</h3>
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <span>Code: {client.code}</span>
-              <Badge variant="outline" className="capitalize">
-                {client.type}
-              </Badge>
             </div>
           </div>
         </div>

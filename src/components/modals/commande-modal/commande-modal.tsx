@@ -26,7 +26,8 @@ export default function CommandeModal({
         <DialogHeader>
           <DialogTitle>Commande: {commande.ref}</DialogTitle>
           <DialogDescription>
-            {commande.lots.length} lots - Priorité: {commande.priority}
+            {commande.lots.length} lots - Priorité:{' '}
+            {commande.lots.map((lot) => lot.priority).join(' / ')}
           </DialogDescription>
         </DialogHeader>
 

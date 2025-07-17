@@ -1,4 +1,5 @@
 import z from 'zod';
+import { Priority, Status } from '@/generated/prisma';
 import { createTRPCRouter, protectedProcedure } from '../init';
 
 const itemSchema = z.object({
@@ -10,7 +11,7 @@ export const lotsRouter = createTRPCRouter({
   getPendingLots: protectedProcedure.query(async ({ ctx }) => {
     const lots = await ctx.prisma.lot.findMany({
       where: {
-        status: 'pending',
+        status: Status.PENDING,
       },
       include: {
         commande: {
@@ -29,7 +30,7 @@ export const lotsRouter = createTRPCRouter({
     .input(
       z.object({
         lotId: z.string(),
-        priority: z.enum(['Urgent', 'Normal', 'Îles']),
+        priority: z.enum(Priority),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -69,7 +70,7 @@ export const lotsRouter = createTRPCRouter({
           commandeId,
           name: name || `Lot ${new Date().toLocaleDateString()}`,
           items: items,
-          status: 'pending',
+          status: Status.PENDING,
         },
       });
 

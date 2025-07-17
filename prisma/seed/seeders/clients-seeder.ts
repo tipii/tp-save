@@ -6,7 +6,6 @@ export interface ClientSeedData {
   id: string;
   code: string;
   name: string;
-  type: string;
   email?: string;
   phone?: string;
   phoneSecond?: string;
@@ -59,7 +58,6 @@ export async function seedClients(clientsToCreate: ClientSeedData[], batchSize =
           id: clientData.id,
           code: clientData.code,
           name: clientData.name,
-          type: clientData.type,
           email: clientData.email,
           phone: clientData.phone,
           phoneSecond: clientData.phoneSecond,
