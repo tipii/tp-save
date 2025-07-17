@@ -26,8 +26,11 @@ import {
   Package,
   Clock,
   AlertCircle,
+  Eye,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function ClientPageComponent() {
   const { setBreadcrumb } = useBreadcrumb();
@@ -52,19 +55,6 @@ export default function ClientPageComponent() {
     });
   };
 
-  const getClientTypeVariant = (type: string) => {
-    switch (type) {
-      case 'entreprise':
-        return 'default';
-      case 'professionnel':
-        return 'secondary';
-      case 'particulier':
-        return 'outline';
-      default:
-        return 'outline';
-    }
-  };
-
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'Urgent':
@@ -87,8 +77,8 @@ export default function ClientPageComponent() {
         );
       default:
         return (
-          <Badge variant="outline" className="text-xs">
-            {priority}
+          <Badge variant="default" className="text-xs">
+            Non défini
           </Badge>
         );
     }
@@ -135,7 +125,6 @@ export default function ClientPageComponent() {
                 <TableRow>
                   <TableHead className="w-[50px]"></TableHead>
                   <TableHead>Client</TableHead>
-                  <TableHead>Type</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Localisation</TableHead>
                   <TableHead>Commandes</TableHead>
@@ -172,9 +161,7 @@ export default function ClientPageComponent() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={getClientTypeVariant(client.type)}>{client.type}</Badge>
-                      </TableCell>
+
                       <TableCell>
                         <div className="space-y-1">
                           {client.email && (
@@ -295,6 +282,14 @@ export default function ClientPageComponent() {
                                         <div className="flex items-center gap-2">
                                           <span className="font-medium">{commande.ref}</span>
                                           {getPriorityBadge(commande.priority)}
+                                          <Tooltip>
+                                            <TooltipTrigger>
+                                              <Link href={`/app/commandes/${commande.id}`}>
+                                                <Eye className="h-4 w-4" />
+                                              </Link>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Voir la commande</TooltipContent>
+                                          </Tooltip>
                                         </div>
                                         <div className="text-muted-foreground text-sm">
                                           {commande.lots.length} lots

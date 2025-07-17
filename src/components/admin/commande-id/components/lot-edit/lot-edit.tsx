@@ -147,52 +147,50 @@ export function LotEdit({ commandeId }: LotEditProps) {
   }
 
   return (
-    <TooltipProvider>
-      <div className="mt-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Gestion des lots</h3>
-          {canEdit && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" onClick={handleCreateLot} disabled={createLotMutation.isPending}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nouveau lot
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Créer un nouveau lot vide</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          {parsedLots.map((lot, index) => (
-            <LotCard
-              key={lot.id}
-              lot={lot}
-              index={index}
-              canEdit={canEdit}
-              isEditing={editingLot === lot.id}
-              onEdit={() => setEditingLot(lot.id)}
-              onSave={(items) => handleUpdateLotItems(lot.id, items)}
-              onCancel={() => setEditingLot(null)}
-              onDelete={() => handleDeleteLot(lot.id)}
-              onTransferItem={(item) => openTransferModal(item, lot.id)}
-              availableLots={parsedLots.filter((l) => l.id !== lot.id)}
-            />
-          ))}
-        </div>
-
-        <TransferItemModal
-          isOpen={transferModal.isOpen}
-          onClose={() => setTransferModal({ isOpen: false, item: null, sourceLotId: null })}
-          item={transferModal.item}
-          sourceLotId={transferModal.sourceLotId}
-          availableLots={parsedLots.filter((l) => l.id !== transferModal.sourceLotId)}
-          onTransfer={handleTransferItem}
-        />
+    <div className="mt-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Gestion des lots</h3>
+        {canEdit && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="sm" onClick={handleCreateLot} disabled={createLotMutation.isPending}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nouveau lot
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Créer un nouveau lot vide</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
       </div>
-    </TooltipProvider>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {parsedLots.map((lot, index) => (
+          <LotCard
+            key={lot.id}
+            lot={lot}
+            index={index}
+            canEdit={canEdit}
+            isEditing={editingLot === lot.id}
+            onEdit={() => setEditingLot(lot.id)}
+            onSave={(items) => handleUpdateLotItems(lot.id, items)}
+            onCancel={() => setEditingLot(null)}
+            onDelete={() => handleDeleteLot(lot.id)}
+            onTransferItem={(item) => openTransferModal(item, lot.id)}
+            availableLots={parsedLots.filter((l) => l.id !== lot.id)}
+          />
+        ))}
+      </div>
+
+      <TransferItemModal
+        isOpen={transferModal.isOpen}
+        onClose={() => setTransferModal({ isOpen: false, item: null, sourceLotId: null })}
+        item={transferModal.item}
+        sourceLotId={transferModal.sourceLotId}
+        availableLots={parsedLots.filter((l) => l.id !== transferModal.sourceLotId)}
+        onTransfer={handleTransferItem}
+      />
+    </div>
   );
 }

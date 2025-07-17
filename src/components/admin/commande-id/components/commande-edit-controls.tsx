@@ -25,43 +25,41 @@ export function CommandeEditControls({ commandeId, commandeRef }: CommandeEditCo
   };
 
   return (
-    <TooltipProvider>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Commande {commandeRef}</h1>
-          <p className="text-muted-foreground">ID: {commandeId}</p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {!isEditing && !isUnlockedByOther && (
-            <Button onClick={enableEdit} variant="outline">
-              <Unlock className="mr-2 h-4 w-4" />
-              Déverrouiller & Modifier
-            </Button>
-          )}
-
-          {canEdit && (
-            <Button onClick={disableEdit} variant="outline">
-              <Lock className="mr-2 h-4 w-4" />
-              Verrouiller
-            </Button>
-          )}
-
-          {isUnlockedByOther && commande?.lockedUntil && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="destructive" className="cursor-help">
-                  <Clock className="mr-1 h-4 w-4" />
-                  En cours d'édition par un autre utilisateur
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Sera déverrouillé à {formatUnlockTime(commande.lockedUntil)}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-2xl font-bold">Commande {commandeRef}</h1>
+        <p className="text-muted-foreground">ID: {commandeId}</p>
       </div>
-    </TooltipProvider>
+
+      <div className="flex items-center gap-2">
+        {!isEditing && !isUnlockedByOther && (
+          <Button onClick={enableEdit} variant="outline">
+            <Unlock className="mr-2 h-4 w-4" />
+            Déverrouiller & Modifier
+          </Button>
+        )}
+
+        {canEdit && (
+          <Button onClick={disableEdit} variant="outline">
+            <Lock className="mr-2 h-4 w-4" />
+            Verrouiller
+          </Button>
+        )}
+
+        {isUnlockedByOther && commande?.lockedUntil && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="destructive" className="cursor-help">
+                <Clock className="mr-1 h-4 w-4" />
+                En cours d'édition par un autre utilisateur
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Sera déverrouillé à {formatUnlockTime(commande.lockedUntil)}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+    </div>
   );
 }
