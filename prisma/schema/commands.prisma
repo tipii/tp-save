@@ -6,8 +6,7 @@ model Commande {
   updatedAt DateTime @updatedAt
   status    Status   @default(PENDING)
 
-  livraisons    Livraison[]
-  originalItems Json
+  livraisons Livraison[]
 
   // Simple Edit Lock
   lockedBy    String? // User ID who locked it
@@ -25,6 +24,9 @@ model Commande {
   orderReceptionMode   String?
   orderReceptionDate   DateTime?
 
+  sageUniqueId                  String  @unique // Unique id from sage (numerical part of DO_Piece)
+  sageType                      String? // Type of order (1: Preparation, 2: Delivery)
+  rawSageData                   Json? // Raw data from sage
   numeroDevis                   String? // Quote number
   cfBlDuOuNumeroRq              String? // CF BL or RQ number
   numeroBonPreparationLivraison String? // Preparation and delivery slip number
@@ -38,6 +40,7 @@ model Commande {
   commercial                    String? // Sales person
   entreprises                   String? // Company
   lieu                          String? // Location
+  originalItems                 Json?
 
   commentaires String? // Comments
 
