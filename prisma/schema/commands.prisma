@@ -6,7 +6,7 @@ model Commande {
   updatedAt DateTime @updatedAt
   status    Status   @default(PENDING)
 
-  lots          Lot[]
+  livraisons    Livraison[]
   originalItems Json
 
   // Simple Edit Lock

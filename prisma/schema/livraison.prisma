@@ -1,4 +1,4 @@
-model Lot {
+model Livraison {
   id        String   @id @default(cuid())
   name      String?
   createdAt DateTime @default(now())
@@ -25,5 +25,5 @@ model Lot {
 
   @@index([commandeId])
   @@index([livreurId])
-  @@map("lot")
+  @@map("livraison")
 }

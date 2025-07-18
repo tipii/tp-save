@@ -1,12 +1,12 @@
-import { TrpcLotFromCommande } from '@/types/trpc-types';
+import { TrpcLivraisonFromCommande } from '@/types/trpc-types';
 
-export const getTotalItems = (lots: TrpcLotFromCommande[]) => {
-  return lots.reduce((total, lot) => {
-    if (Array.isArray(lot.items)) {
+export const getTotalItems = (livraisons: TrpcLivraisonFromCommande[]) => {
+  return livraisons.reduce((total, livraison) => {
+    if (Array.isArray(livraison.items)) {
       return (
         total +
-        (lot.items as { name: string; quantity: number }[]).reduce(
-          (lotTotal: number, item) => lotTotal + (item.quantity || 0),
+        (livraison.items as { name: string; quantity: number }[]).reduce(
+          (livraisonTotal: number, item) => livraisonTotal + (item.quantity || 0),
           0,
         )
       );

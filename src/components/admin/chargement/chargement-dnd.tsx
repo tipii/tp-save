@@ -15,7 +15,7 @@ import { Priority } from '@/generated/prisma';
 
 export default function ChargementDnd() {
   const trpc = useTRPC();
-  const { data: lots } = useQuery(trpc.lots.getPendingLots.queryOptions());
+  const { data: livraisons } = useQuery(trpc.livraisons.getPendingLivraisons.queryOptions());
   const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
 
   const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>({});
@@ -69,12 +69,12 @@ export default function ChargementDnd() {
     }
   }
 
-  function handleRemoveCommande(commandeId: string) {
+  function handleRemoveLivraison(livraisonId: string) {
     setDroppedItems((prev) => {
       const newDroppedItems = { ...prev };
       Object.keys(newDroppedItems).forEach((droppableId) => {
         newDroppedItems[droppableId] = newDroppedItems[droppableId].filter(
-          (id) => id !== commandeId,
+          (id) => id !== livraisonId,
         );
       });
       return newDroppedItems;
@@ -95,7 +95,7 @@ export default function ChargementDnd() {
     return <ArrowUpDown className="h-4 w-4" />;
   }
 
-  if (!lots || !livreurs) return null;
+  if (!livraisons || !livreurs) return null;
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
@@ -111,21 +111,21 @@ export default function ChargementDnd() {
                 title="Priorité"
                 priority={Priority.URGENT}
                 backgroundColor="bg-red-50 shadow-none border-red-200"
-                lots={lots}
+                livraisons={livraisons}
                 droppedItems={droppedItems}
               />
               <PriorityZone
                 title="Normal"
                 priority={Priority.NORMAL}
                 backgroundColor="bg-yellow-50 shadow-none border-yellow-300"
-                lots={lots}
+                livraisons={livraisons}
                 droppedItems={droppedItems}
               />
               <PriorityZone
                 title="Îles"
                 priority={Priority.ILES}
                 backgroundColor="bg-blue-50 shadow-none border-blue-200"
-                lots={lots}
+                livraisons={livraisons}
                 droppedItems={droppedItems}
               />
             </div>
@@ -153,8 +153,8 @@ export default function ChargementDnd() {
                   key={livreur.id}
                   livreur={livreur}
                   droppedItems={droppedItems}
-                  lots={lots}
-                  onRemoveCommande={handleRemoveCommande}
+                  livraisons={livraisons}
+                  onRemoveLivraison={handleRemoveLivraison}
                   setDroppedItems={setDroppedItems}
                 />
               ))}

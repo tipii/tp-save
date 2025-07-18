@@ -7,9 +7,9 @@ const itemSchema = z.object({
   quantity: z.number().min(0),
 });
 
-export const lotsRouter = createTRPCRouter({
-  getPendingLots: protectedProcedure.query(async ({ ctx }) => {
-    const lots = await ctx.prisma.lot.findMany({
+export const livraisonsRouter = createTRPCRouter({
+  getPendingLivraisons: protectedProcedure.query(async ({ ctx }) => {
+    const livraisons = await ctx.prisma.livraison.findMany({
       where: {
         status: Status.PENDING,
       },
@@ -17,33 +17,33 @@ export const lotsRouter = createTRPCRouter({
         commande: {
           include: {
             client: true,
-            lots: true,
+            livraisons: true,
           },
         },
       },
     });
 
-    // console.log(lots);
-    return lots;
+    // console.log(livraisons);
+    return livraisons;
   }),
   changePriority: protectedProcedure
     .input(
       z.object({
-        lotId: z.string(),
+        livraisonId: z.string(),
         priority: z.enum(Priority),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { lotId, priority } = input;
-      const lot = await ctx.prisma.lot.update({
-        where: { id: lotId },
+      const { livraisonId, priority } = input;
+      const livraison = await ctx.prisma.livraison.update({
+        where: { id: livraisonId },
         data: { priority },
       });
 
-      return lot;
+      return livraison;
     }),
 
-  createLot: protectedProcedure
+  createLivraison: protectedProcedure
     .input(
       z.object({
         commandeId: z.string(),
@@ -61,101 +61,105 @@ export const lotsRouter = createTRPCRouter({
       });
 
       if (commande?.lockedBy !== ctx.user.id) {
-        throw new Error('You must unlock the commande before creating lots');
+        throw new Error('You must unlock the commande before creating livraisons');
       }
 
-      // Create the new lot
-      const lot = await ctx.prisma.lot.create({
+      // Create the new livraison
+      const livraison = await ctx.prisma.livraison.create({
         data: {
           commandeId,
-          name: name || `Lot ${new Date().toLocaleDateString()}`,
+          name: name || `Livraison ${new Date().toLocaleDateString()}`,
           items: items,
           status: Status.PENDING,
         },
       });
 
-      return lot;
+      return livraison;
     }),
 
-  updateLotItems: protectedProcedure
+  updateLivraisonItems: protectedProcedure
     .input(
       z.object({
-        lotId: z.string(),
+        livraisonId: z.string(),
         items: z.array(itemSchema),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { lotId, items } = input;
+      const { livraisonId, items } = input;
 
       console.log(items);
 
-      // Check if user has permission to edit this lot's commande
-      const lot = await ctx.prisma.lot.findUnique({
-        where: { id: lotId },
+      // Check if user has permission to edit this livraison's commande
+      const livraison = await ctx.prisma.livraison.findUnique({
+        where: { id: livraisonId },
         include: { commande: { select: { lockedBy: true } } },
       });
 
-      if (lot?.commande?.lockedBy !== ctx.user.id) {
-        throw new Error('You must unlock the commande before editing lots');
+      if (livraison?.commande?.lockedBy !== ctx.user.id) {
+        throw new Error('You must unlock the commande before editing livraisons');
       }
 
-      // Update the lot items
-      const updatedLot = await ctx.prisma.lot.update({
-        where: { id: lotId },
+      // Update the livraison items
+      const updatedLivraison = await ctx.prisma.livraison.update({
+        where: { id: livraisonId },
         data: {
           items: items,
           updatedAt: new Date(),
         },
       });
 
-      return updatedLot;
+      return updatedLivraison;
     }),
 
   transferItems: protectedProcedure
     .input(
       z.object({
-        sourceLotId: z.string(),
-        targetLotId: z.string(),
+        sourceLivraisonId: z.string(),
+        targetLivraisonId: z.string(),
         items: z.array(itemSchema),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { sourceLotId, targetLotId, items } = input;
+      const { sourceLivraisonId, targetLivraisonId, items } = input;
 
-      // Get both lots with their commande data
-      const [sourceLot, targetLot] = await Promise.all([
-        ctx.prisma.lot.findUnique({
-          where: { id: sourceLotId },
+      // Get both livraisons with their commande data
+      const [sourceLivraison, targetLivraison] = await Promise.all([
+        ctx.prisma.livraison.findUnique({
+          where: { id: sourceLivraisonId },
           include: { commande: { select: { lockedBy: true } } },
         }),
-        ctx.prisma.lot.findUnique({
-          where: { id: targetLotId },
+        ctx.prisma.livraison.findUnique({
+          where: { id: targetLivraisonId },
           include: { commande: { select: { lockedBy: true } } },
         }),
       ]);
 
-      if (!sourceLot || !targetLot) {
-        throw new Error('One or both lots not found');
+      if (!sourceLivraison || !targetLivraison) {
+        throw new Error('One or both livraisons not found');
       }
 
-      // Check permissions for both lots
+      // Check permissions for both livraisons
       if (
-        sourceLot.commande?.lockedBy !== ctx.user.id ||
-        targetLot.commande?.lockedBy !== ctx.user.id
+        sourceLivraison.commande?.lockedBy !== ctx.user.id ||
+        targetLivraison.commande?.lockedBy !== ctx.user.id
       ) {
         throw new Error('You must unlock the commande before transferring items');
       }
 
       // Parse current items
       const sourceItems = (
-        typeof sourceLot.items === 'string' ? JSON.parse(sourceLot.items) : sourceLot.items
+        typeof sourceLivraison.items === 'string'
+          ? JSON.parse(sourceLivraison.items)
+          : sourceLivraison.items
       ) as Array<{
         name: string;
         quantity: number;
       }>;
 
       const targetItems = (
-        typeof targetLot.items === 'string' ? JSON.parse(targetLot.items) : targetLot.items
+        typeof targetLivraison.items === 'string'
+          ? JSON.parse(targetLivraison.items)
+          : targetLivraison.items
       ) as Array<{
         name: string;
         quantity: number;
@@ -194,14 +198,14 @@ export const lotsRouter = createTRPCRouter({
         }
       }
 
-      // Update both lots
+      // Update both livraisons
       await Promise.all([
-        ctx.prisma.lot.update({
-          where: { id: sourceLotId },
+        ctx.prisma.livraison.update({
+          where: { id: sourceLivraisonId },
           data: { items: updatedSourceItems },
         }),
-        ctx.prisma.lot.update({
-          where: { id: targetLotId },
+        ctx.prisma.livraison.update({
+          where: { id: targetLivraisonId },
           data: { items: updatedTargetItems },
         }),
       ]);
@@ -212,49 +216,53 @@ export const lotsRouter = createTRPCRouter({
   transferSingleItem: protectedProcedure
     .input(
       z.object({
-        sourceLotId: z.string(),
-        targetLotId: z.string(),
+        sourceLivraisonId: z.string(),
+        targetLivraisonId: z.string(),
         itemName: z.string(),
         quantity: z.number().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { sourceLotId, targetLotId, itemName, quantity } = input;
+      const { sourceLivraisonId, targetLivraisonId, itemName, quantity } = input;
 
-      // Get both lots with their commande data
-      const [sourceLot, targetLot] = await Promise.all([
-        ctx.prisma.lot.findUnique({
-          where: { id: sourceLotId },
+      // Get both livraisons with their commande data
+      const [sourceLivraison, targetLivraison] = await Promise.all([
+        ctx.prisma.livraison.findUnique({
+          where: { id: sourceLivraisonId },
           include: { commande: { select: { lockedBy: true } } },
         }),
-        ctx.prisma.lot.findUnique({
-          where: { id: targetLotId },
+        ctx.prisma.livraison.findUnique({
+          where: { id: targetLivraisonId },
           include: { commande: { select: { lockedBy: true } } },
         }),
       ]);
 
-      if (!sourceLot || !targetLot) {
-        throw new Error('One or both lots not found');
+      if (!sourceLivraison || !targetLivraison) {
+        throw new Error('One or both livraisons not found');
       }
 
-      // Check permissions for both lots
+      // Check permissions for both livraisons
       if (
-        sourceLot.commande?.lockedBy !== ctx.user.id ||
-        targetLot.commande?.lockedBy !== ctx.user.id
+        sourceLivraison.commande?.lockedBy !== ctx.user.id ||
+        targetLivraison.commande?.lockedBy !== ctx.user.id
       ) {
         throw new Error('You must unlock the commande before transferring items');
       }
 
       // Parse current items
       const sourceItems = (
-        typeof sourceLot.items === 'string' ? JSON.parse(sourceLot.items) : sourceLot.items
+        typeof sourceLivraison.items === 'string'
+          ? JSON.parse(sourceLivraison.items)
+          : sourceLivraison.items
       ) as Array<{
         name: string;
         quantity: number;
       }>;
 
       const targetItems = (
-        typeof targetLot.items === 'string' ? JSON.parse(targetLot.items) : targetLot.items
+        typeof targetLivraison.items === 'string'
+          ? JSON.parse(targetLivraison.items)
+          : targetLivraison.items
       ) as Array<{
         name: string;
         quantity: number;
@@ -263,7 +271,7 @@ export const lotsRouter = createTRPCRouter({
       // Find the source item
       const sourceItemIndex = sourceItems.findIndex((item) => item.name === itemName);
       if (sourceItemIndex === -1) {
-        throw new Error(`Item "${itemName}" not found in source lot`);
+        throw new Error(`Item "${itemName}" not found in source livraison`);
       }
 
       const sourceItem = sourceItems[sourceItemIndex];
@@ -290,14 +298,14 @@ export const lotsRouter = createTRPCRouter({
         updatedTargetItems[targetItemIndex].quantity += quantity;
       }
 
-      // Update both lots
+      // Update both livraisons
       await Promise.all([
-        ctx.prisma.lot.update({
-          where: { id: sourceLotId },
+        ctx.prisma.livraison.update({
+          where: { id: sourceLivraisonId },
           data: { items: updatedSourceItems },
         }),
-        ctx.prisma.lot.update({
-          where: { id: targetLotId },
+        ctx.prisma.livraison.update({
+          where: { id: targetLivraisonId },
           data: { items: updatedTargetItems },
         }),
       ]);
@@ -305,24 +313,24 @@ export const lotsRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  deleteLot: protectedProcedure
-    .input(z.object({ lotId: z.string() }))
+  deleteLivraison: protectedProcedure
+    .input(z.object({ livraisonId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { lotId } = input;
+      const { livraisonId } = input;
 
-      // Check if user has permission to delete this lot
-      const lot = await ctx.prisma.lot.findUnique({
-        where: { id: lotId },
+      // Check if user has permission to delete this livraison
+      const livraison = await ctx.prisma.livraison.findUnique({
+        where: { id: livraisonId },
         include: { commande: { select: { lockedBy: true } } },
       });
 
-      if (lot?.commande?.lockedBy !== ctx.user.id) {
-        throw new Error('You must unlock the commande before deleting lots');
+      if (livraison?.commande?.lockedBy !== ctx.user.id) {
+        throw new Error('You must unlock the commande before deleting livraisons');
       }
 
-      // Delete the lot
-      await ctx.prisma.lot.delete({
-        where: { id: lotId },
+      // Delete the livraison
+      await ctx.prisma.livraison.delete({
+        where: { id: livraisonId },
       });
 
       return { success: true };

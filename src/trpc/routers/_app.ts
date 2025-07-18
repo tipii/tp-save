@@ -3,7 +3,7 @@ import { livreursRouter } from './livreurs';
 import { commandesRouter } from './commandes';
 import { clientsRouter } from './clients';
 import { chargementsRouter } from './chargements';
-import { lotsRouter } from './lots';
+import { livraisonsRouter } from './livraisons';
 import { soapServiceRouter } from './soap-service';
 
 export const appRouter = createTRPCRouter({
@@ -11,7 +11,7 @@ export const appRouter = createTRPCRouter({
   commandes: commandesRouter,
   clients: clientsRouter,
   chargements: chargementsRouter,
-  lots: lotsRouter,
+  livraisons: livraisonsRouter,
   soapService: soapServiceRouter,
 });
 // export type definition of API

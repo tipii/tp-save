@@ -44,7 +44,7 @@ model User {
   ordersTransmitted Commande[] @relation("OrderTransmittedBy")
 
   // Delivery relations
-  lotsDelivered Lot[] @relation("Livreur")
+  livraisonsDelivered Livraison[] @relation("Livreur")
 
   @@unique([email])
   @@unique([username])

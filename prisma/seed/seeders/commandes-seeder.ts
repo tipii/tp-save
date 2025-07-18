@@ -72,7 +72,7 @@ export async function seedCommandes(
           },
         });
 
-        const lot = await prisma.lot.create({
+        const livraison = await prisma.livraison.create({
           data: {
             name: 'Lot 1',
             commandeId: commande.id,

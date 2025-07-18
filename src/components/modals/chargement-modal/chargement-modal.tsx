@@ -38,13 +38,16 @@ export default function ChargementModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          <h2 className="text-lg font-bold">Livraison{chargement.lots.length > 1 ? 's' : ''}</h2>
+          <h2 className="text-lg font-bold">
+            Livraison{chargement.livraisons.length > 1 ? 's' : ''}
+          </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {chargement.lots.map((lot) => (
-              <div className="flex items-center justify-between" key={lot.id}>
-                <p>Commande: {lot.commande.ref}</p>
+            {chargement.livraisons.map((livraison) => (
+              <div className="flex items-center justify-between" key={livraison.id}>
+                <p>Commande: {livraison.commande.ref}</p>
                 <p>
-                  {lot.commande.lots.length} lot{lot.commande.lots.length > 1 ? 's' : ''}
+                  {livraison.commande.livraisons.length} livraison
+                  {livraison.commande.livraisons.length > 1 ? 's' : ''}
                 </p>
               </div>
             ))}

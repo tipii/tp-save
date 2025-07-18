@@ -8,7 +8,7 @@ export const commandesRouter = createTRPCRouter({
   getPendingCommandes: protectedProcedure.query(async ({ ctx }) => {
     const commandes = await ctx.prisma.commande.findMany({
       where: {
-        lots: {
+        livraisons: {
           some: {
             status: {
               equals: Status.PENDING,
@@ -18,7 +18,7 @@ export const commandesRouter = createTRPCRouter({
       },
       include: {
         client: true,
-        lots: {
+        livraisons: {
           orderBy: {
             createdAt: 'asc',
           },
@@ -96,7 +96,7 @@ export const commandesRouter = createTRPCRouter({
 
       // Filter by priority
       if (priority) {
-        where.lots = {
+        where.livraisons = {
           some: {
             priority: priority,
           },
@@ -127,7 +127,7 @@ export const commandesRouter = createTRPCRouter({
       if (sortBy === 'ref' || sortBy === 'createdAt' || sortBy === 'updatedAt') {
         orderBy[sortBy] = sortOrder;
       } else if (sortBy === 'priority' || sortBy === 'status') {
-        orderBy.lots = {
+        orderBy.livraisons = {
           [sortBy]: sortOrder,
         };
       }
@@ -140,7 +140,7 @@ export const commandesRouter = createTRPCRouter({
         const commandes = await ctx.prisma.commande.findMany({
           where,
           include: {
-            lots: {
+            livraisons: {
               orderBy: {
                 createdAt: 'asc',
               },
@@ -186,7 +186,7 @@ export const commandesRouter = createTRPCRouter({
               user: true,
             },
           },
-          lots: {
+          livraisons: {
             orderBy: {
               createdAt: 'asc',
             },
@@ -273,7 +273,7 @@ export const commandesRouter = createTRPCRouter({
         where: { id },
         include: {
           client: true,
-          lots: {
+          livraisons: {
             include: {
               chargement: true,
             },
@@ -290,7 +290,7 @@ export const commandesRouter = createTRPCRouter({
         },
         include: {
           client: true,
-          lots: {
+          livraisons: {
             include: {
               chargement: true,
             },

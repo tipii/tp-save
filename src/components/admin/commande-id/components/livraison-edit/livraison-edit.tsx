@@ -16,47 +16,49 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Plus } from 'lucide-react';
 import { useCommandeEdit } from '../../hooks/use-commande-edit';
-import { EditableLotCard } from './editable-lot-card';
+import { EditableLotCard } from './editable-livraison-card';
 import { TransferItemModal, TransferItemForm } from './transfer-item-modal';
 
-interface LotEditProps {
+interface LivraisonEditProps {
   commandeId: string;
 }
 
-export function LotEdit({ commandeId }: LotEditProps) {
+export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
   const { commande, canEdit, refetchCommande } = useCommandeEdit(commandeId);
   const [editingLot, setEditingLot] = useState<string | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [transferModal, setTransferModal] = useState<{
     isOpen: boolean;
     item: Item | null;
-    sourceLotId: string | null;
+    sourceLivraisonId: string | null;
   }>({
     isOpen: false,
     item: null,
-    sourceLotId: null,
+    sourceLivraisonId: null,
   });
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const createLotMutation = useMutation(trpc.lots.createLot.mutationOptions());
-  const updateLotMutation = useMutation(trpc.lots.updateLotItems.mutationOptions());
-  const transferItemMutation = useMutation(trpc.lots.transferSingleItem.mutationOptions());
-  const deleteLotMutation = useMutation(trpc.lots.deleteLot.mutationOptions());
+  const createLotMutation = useMutation(trpc.livraisons.createLivraison.mutationOptions());
+  const updateLotMutation = useMutation(trpc.livraisons.updateLivraisonItems.mutationOptions());
+  const transferItemMutation = useMutation(trpc.livraisons.transferSingleItem.mutationOptions());
+  const deleteLotMutation = useMutation(trpc.livraisons.deleteLivraison.mutationOptions());
 
-  const lots = commande?.lots || [];
-  const parsedLots = lots.map((lot) => ({
-    ...lot,
+  const livraisons = commande?.livraisons || [];
+  const parsedLivraisons = livraisons.map((livraison) => ({
+    ...livraison,
     items:
-      typeof lot.items === 'string' ? (JSON.parse(lot.items) as Item[]) : (lot.items as Item[]),
+      typeof livraison.items === 'string'
+        ? (JSON.parse(livraison.items) as Item[])
+        : (livraison.items as Item[]),
   }));
 
   const handleCreateLot = async () => {
     try {
       await createLotMutation.mutateAsync({
         commandeId,
-        name: `Livraison ${lots.length + 1}`,
+        name: `Livraison ${livraisons.length + 1}`,
         items: [],
       });
       refetchCommande();
@@ -71,10 +73,10 @@ export function LotEdit({ commandeId }: LotEditProps) {
     }
   };
 
-  const handleUpdateLotItems = async (lotId: string, items: Item[]) => {
+  const handleUpdateLotItems = async (livraisonId: string, items: Item[]) => {
     try {
       await updateLotMutation.mutateAsync({
-        lotId,
+        livraisonId,
         items,
       });
       refetchCommande();
@@ -91,17 +93,17 @@ export function LotEdit({ commandeId }: LotEditProps) {
   };
 
   const handleTransferItem = async (data: TransferItemForm) => {
-    if (!transferModal.item || !transferModal.sourceLotId) return;
+    if (!transferModal.item || !transferModal.sourceLivraisonId) return;
 
     try {
       await transferItemMutation.mutateAsync({
-        sourceLotId: transferModal.sourceLotId,
-        targetLotId: data.targetLotId,
+        sourceLivraisonId: transferModal.sourceLivraisonId,
+        targetLivraisonId: data.targetLivraisonId,
         itemName: transferModal.item.name,
         quantity: data.quantity,
       });
       refetchCommande();
-      setTransferModal({ isOpen: false, item: null, sourceLotId: null });
+      setTransferModal({ isOpen: false, item: null, sourceLivraisonId: null });
       toast.success('Élément transféré', {
         description: "L'élément a été transféré avec succès.",
       });
@@ -112,9 +114,9 @@ export function LotEdit({ commandeId }: LotEditProps) {
     }
   };
 
-  const handleDeleteLot = async (lotId: string) => {
-    const lot = parsedLots.find((l) => l.id === lotId);
-    if (lot && lot.items.length > 0) {
+  const handleDeleteLot = async (livraisonId: string) => {
+    const livraison = parsedLivraisons.find((l) => l.id === livraisonId);
+    if (livraison && livraison.items.length > 0) {
       toast.error('Impossible de supprimer', {
         description:
           "Le lot contient des éléments. Veuillez les transférer ou les supprimer d'abord.",
@@ -123,7 +125,7 @@ export function LotEdit({ commandeId }: LotEditProps) {
     }
 
     try {
-      await deleteLotMutation.mutateAsync({ lotId });
+      await deleteLotMutation.mutateAsync({ livraisonId });
       refetchCommande();
       toast.success('Livraison supprimée', {
         description: 'La livraison a été supprimée avec succès.',
@@ -136,11 +138,11 @@ export function LotEdit({ commandeId }: LotEditProps) {
     }
   };
 
-  const openTransferModal = (item: Item, sourceLotId: string) => {
+  const openTransferModal = (item: Item, sourceLivraisonId: string) => {
     setTransferModal({
       isOpen: true,
       item,
-      sourceLotId,
+      sourceLivraisonId,
     });
   };
 
@@ -168,29 +170,31 @@ export function LotEdit({ commandeId }: LotEditProps) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {parsedLots.map((lot, index) => (
+        {parsedLivraisons.map((livraison, index) => (
           <EditableLotCard
-            key={lot.id}
-            lot={lot}
+            key={livraison.id}
+            lot={livraison}
             index={index}
             canEdit={canEdit}
-            isEditing={editingLot === lot.id}
-            onEdit={() => setEditingLot(lot.id)}
-            onSave={(items) => handleUpdateLotItems(lot.id, items)}
+            isEditing={editingLot === livraison.id}
+            onEdit={() => setEditingLot(livraison.id)}
+            onSave={(items) => handleUpdateLotItems(livraison.id, items)}
             onCancel={() => setEditingLot(null)}
-            onDelete={() => handleDeleteLot(lot.id)}
-            onTransferItem={(item) => openTransferModal(item, lot.id)}
-            availableLots={parsedLots.filter((l) => l.id !== lot.id)}
+            onDelete={() => handleDeleteLot(livraison.id)}
+            onTransferItem={(item) => openTransferModal(item, livraison.id)}
+            availableLots={parsedLivraisons.filter((l) => l.id !== livraison.id)}
           />
         ))}
       </div>
 
       <TransferItemModal
         isOpen={transferModal.isOpen}
-        onClose={() => setTransferModal({ isOpen: false, item: null, sourceLotId: null })}
+        onClose={() => setTransferModal({ isOpen: false, item: null, sourceLivraisonId: null })}
         item={transferModal.item}
-        sourceLotId={transferModal.sourceLotId}
-        availableLots={parsedLots.filter((l) => l.id !== transferModal.sourceLotId)}
+        sourceLivraisonId={transferModal.sourceLivraisonId}
+        availableLivraisons={parsedLivraisons.filter(
+          (l) => l.id !== transferModal.sourceLivraisonId,
+        )}
         onTransfer={handleTransferItem}
       />
     </div>

@@ -9,7 +9,7 @@ export const livreursRouter = createTRPCRouter({
       include: {
         chargements: {
           include: {
-            lots: {
+            livraisons: {
               include: {
                 commande: true,
               },

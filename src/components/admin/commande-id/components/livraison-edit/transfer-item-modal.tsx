@@ -25,7 +25,7 @@ import { z } from 'zod';
 import { Item } from '@/types/types';
 
 const transferItemSchema = z.object({
-  targetLotId: z.string().min(1, 'Veuillez sélectionner un lot'),
+  targetLivraisonId: z.string().min(1, 'Veuillez sélectionner un lot'),
   quantity: z.number().min(1, 'La quantité doit être supérieure à 0'),
 });
 
@@ -35,8 +35,8 @@ interface TransferItemModalProps {
   isOpen: boolean;
   onClose: () => void;
   item: Item | null;
-  sourceLotId: string | null;
-  availableLots: Array<{ id: string; name: string | null }>;
+  sourceLivraisonId: string | null;
+  availableLivraisons: Array<{ id: string; name: string | null }>;
   onTransfer: (data: TransferItemForm) => void;
 }
 
@@ -44,34 +44,34 @@ export function TransferItemModal({
   isOpen,
   onClose,
   item,
-  sourceLotId,
-  availableLots,
+  sourceLivraisonId,
+  availableLivraisons,
   onTransfer,
 }: TransferItemModalProps) {
   const form = useForm<TransferItemForm>({
     resolver: zodResolver(transferItemSchema),
     defaultValues: {
-      targetLotId: '',
+      targetLivraisonId: '',
       quantity: 1,
     },
   });
 
   // Update form values when item or availableLots change
   useEffect(() => {
-    if (item && availableLots.length > 0) {
+    if (item && availableLivraisons.length > 0) {
       form.reset({
-        targetLotId: availableLots[0]?.id || '',
+        targetLivraisonId: availableLivraisons[0]?.id || '',
         quantity: item.quantity, // Set to max quantity by default
       });
     }
-  }, [item, availableLots, form]);
+  }, [item, availableLivraisons, form]);
 
   const handleSubmit = (data: TransferItemForm) => {
     onTransfer(data);
     form.reset();
   };
 
-  if (!item || !sourceLotId) return null;
+  if (!item || !sourceLivraisonId) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -92,7 +92,7 @@ export function TransferItemModal({
 
             <FormField
               control={form.control}
-              name="targetLotId"
+              name="targetLivraisonId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Lot de destination</FormLabel>
@@ -103,9 +103,9 @@ export function TransferItemModal({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {availableLots.map((lot) => (
-                        <SelectItem key={lot.id} value={lot.id}>
-                          {lot.name || `Lot ${lot.id}`}
+                      {availableLivraisons.map((livraison) => (
+                        <SelectItem key={livraison.id} value={livraison.id}>
+                          {livraison.name || `Livraison ${livraison.id}`}
                         </SelectItem>
                       ))}
                     </SelectContent>

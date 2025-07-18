@@ -1,18 +1,18 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Priority } from '@/generated/prisma';
-import { TrpcLot } from '@/types/trpc-types';
+import { TrpcLivraison } from '@/types/trpc-types';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import React from 'react';
 import { priorityToBadge } from '@/lib/enum-to-ui';
 
-export default function DraggableLot({ lot }: { lot: TrpcLot }) {
+export default function DraggableLot({ livraison }: { livraison: TrpcLivraison }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: `draggable-${lot.id}`,
+    id: `draggable-${livraison.id}`,
   });
 
-  const items = lot.items as { name: string; quantity: number }[];
+  const items = livraison.items as { name: string; quantity: number }[];
 
   return (
     <div
@@ -23,25 +23,27 @@ export default function DraggableLot({ lot }: { lot: TrpcLot }) {
       }}
       {...listeners}
       {...attributes}
-      id={`draggable-${lot.id}`}
+      id={`draggable-${livraison.id}`}
       className={cn(
         'z-50 flex w-full flex-col gap-1 rounded-sm border bg-white px-2 py-1',
-        lot.priority === Priority.URGENT && 'border-red-200',
-        lot.priority === Priority.NORMAL && 'border-yellow-300',
-        lot.priority === Priority.ILES && 'border-blue-200',
+        livraison.priority === Priority.URGENT && 'border-red-200',
+        livraison.priority === Priority.NORMAL && 'border-yellow-300',
+        livraison.priority === Priority.ILES && 'border-blue-200',
         isDragging ? 'z-100 max-w-sm' : 'w-full',
       )}
     >
       <div className="flex items-center justify-between">
-        <div className="text-sm font-bold">{lot.name} </div>
+        <div className="text-sm font-bold">{livraison.name} </div>
         <div className="text-sm font-bold">
-          {lot.commande.ref} (1/{lot.commande.lots.length} lot
-          {lot.commande.lots.length > 1 ? 's' : ''})
+          {livraison.commande.ref} (1/{livraison.commande.livraisons.length} lot
+          {livraison.commande.livraisons.length > 1 ? 's' : ''})
         </div>
-        {priorityToBadge(lot.priority)}
+        {priorityToBadge(livraison.priority)}
       </div>
       <div className="flex items-center justify-between">
-        <div className="text-sm font-medium">{lot.commande.client?.name || 'Sans client'}</div>
+        <div className="text-sm font-medium">
+          {livraison.commande.client?.name || 'Sans client'}
+        </div>
         <div className="text-sm font-medium">{items.length} items</div>
       </div>
     </div>

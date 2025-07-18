@@ -118,7 +118,10 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
   };
 
   const getTotalLots = (livreur: TrpcLivreur) => {
-    return livreur.chargements.reduce((total, chargement) => total + chargement.lots.length, 0);
+    return livreur.chargements.reduce(
+      (total, chargement) => total + chargement.livraisons.length,
+      0,
+    );
   };
 
   if (!livreurs || livreurs.length === 0) {
@@ -309,27 +312,29 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
                                     </div>
 
                                     {/* Lots in chargement */}
-                                    {chargement.lots.length > 0 && (
+                                    {chargement.livraisons.length > 0 && (
                                       <div className="space-y-2">
                                         <h6 className="text-muted-foreground text-sm font-medium">
-                                          Lots ({chargement.lots.length}):
+                                          Lots ({chargement.livraisons.length}):
                                         </h6>
                                         <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-                                          {chargement.lots.map((lot) => (
+                                          {chargement.livraisons.map((livraison) => (
                                             <div
-                                              key={lot.id}
+                                              key={livraison.id}
                                               className="bg-muted/50 flex items-center justify-between rounded p-2"
                                             >
                                               <div className="space-y-1">
                                                 <div className="flex items-center gap-2">
                                                   <span className="text-sm font-medium">
-                                                    {lot.name || `Lot ${lot.id.slice(-4)}`}
+                                                    {livraison.name ||
+                                                      `Livraison ${livraison.id.slice(-4)}`}
                                                   </span>
-                                                  {lot.priority && priorityToBadge(lot.priority)}
+                                                  {livraison.priority &&
+                                                    priorityToBadge(livraison.priority)}
                                                 </div>
-                                                {lot.commande && (
+                                                {livraison.commande && (
                                                   <div className="text-muted-foreground text-xs">
-                                                    Commande: {lot.commande.ref}
+                                                    Commande: {livraison.commande.ref}
                                                   </div>
                                                 )}
                                               </div>

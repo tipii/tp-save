@@ -27,10 +27,11 @@ export default function CommandeModal({
         <DialogHeader>
           <DialogTitle>Commande: {commande.ref}</DialogTitle>
           <DialogDescription>
-            {commande.lots.length} lots - Priorité:{' '}
+            {commande.livraisons.length} livraison{commande.livraisons.length > 1 ? 's' : ''} -
+            Priorité:{' '}
             <span className="space-x-1">
-              {commande.lots.map((lot, index) => (
-                <span key={lot.id}>{priorityToBadge(lot.priority)}</span>
+              {commande.livraisons.map((livraison, index) => (
+                <span key={livraison.id}>{priorityToBadge(livraison.priority)}</span>
               ))}
             </span>
           </DialogDescription>

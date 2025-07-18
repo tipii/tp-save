@@ -291,7 +291,7 @@ export default function ClientPageComponent() {
                                           </Tooltip>
                                         </div>
                                         <div className="text-muted-foreground text-sm">
-                                          {commande.lots.length} lots
+                                          {commande.livraisons.length} livraisons
                                         </div>
                                       </div>
                                       <div className="text-muted-foreground text-sm">

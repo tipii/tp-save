@@ -6,7 +6,7 @@ export const clientsRouter = createTRPCRouter({
       include: {
         commandes: {
           include: {
-            lots: {
+            livraisons: {
               include: {
                 chargement: true,
               },

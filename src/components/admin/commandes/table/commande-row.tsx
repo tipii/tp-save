@@ -64,19 +64,19 @@ export function CommandeRow({ commande, isExpanded, onToggle }: CommandeRowProps
         <TableCell>
           <div className="flex items-center gap-2">
             <Package className="text-muted-foreground h-4 w-4" />
-            <span className="font-medium">{commande.lots.length}</span>
+            <span className="font-medium">{commande.livraisons.length}</span>
           </div>
         </TableCell>
         <TableCell>
-          {commande.lots.map((lot) => (
-            <span key={lot.id} className="mr-1">
-              {priorityToBadge(lot.priority)}
+          {commande.livraisons.map((livraison) => (
+            <span key={livraison.id} className="mr-1">
+              {priorityToBadge(livraison.priority)}
             </span>
           ))}
         </TableCell>
         <TableCell>{statusToBadge(commande.status)}</TableCell>
         <TableCell>
-          <div className="font-medium">{getTotalItems(commande.lots)} articles</div>
+          <div className="font-medium">{getTotalItems(commande.livraisons)} articles</div>
         </TableCell>
         <TableCell>
           <div className="text-muted-foreground flex items-center gap-2 text-sm">

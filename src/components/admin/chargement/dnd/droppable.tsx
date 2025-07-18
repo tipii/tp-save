@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { TrpcCommande, TrpcLivreur, TrpcLot } from '@/types/trpc-types';
+import { TrpcCommande, TrpcLivraison, TrpcLivreur } from '@/types/trpc-types';
 import { useDroppable } from '@dnd-kit/core';
 import DraggableCommande from './draggable';
 import { Check, CircleQuestionMark, Eye, EyeClosed, Truck, Warehouse, X } from 'lucide-react';
@@ -16,30 +16,30 @@ import DraggableLot from './draggable';
 export const DroppableLivreur = ({
   livreur,
   droppedItems,
-  lots,
-  onRemoveCommande,
+  livraisons,
+  onRemoveLivraison,
   setDroppedItems,
 }: {
   livreur: TrpcLivreur;
   droppedItems: Record<string, string[]>;
-  lots: TrpcLot[];
-  onRemoveCommande: (commandeId: string) => void;
+  livraisons: TrpcLivraison[];
+  onRemoveLivraison: (livraisonId: string) => void;
   setDroppedItems: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
 }) => {
   const trpc = useTRPC();
   const { refetch } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
-  const { refetch: refetchLots } = useQuery(trpc.lots.getPendingLots.queryOptions());
+  const { refetch: refetchLots } = useQuery(trpc.livraisons.getPendingLivraisons.queryOptions());
 
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-${livreur.id}`,
   });
 
-  const droppedLots = useMemo(() => {
+  const droppedLivraisons = useMemo(() => {
     const droppedLotIds = droppedItems[`droppable-${livreur.id}`] || [];
     return droppedLotIds
-      .map((lotId) => lots.find((c) => c.id === lotId))
-      .filter((lot): lot is TrpcLot => lot !== undefined);
-  }, [droppedItems, livreur.id, lots]);
+      .map((lotId) => livraisons.find((c) => c.id === lotId))
+      .filter((lot): lot is TrpcLivraison => lot !== undefined);
+  }, [droppedItems, livreur.id, livraisons]);
 
   const livreurInitials = livreur.name
     .split(' ')
@@ -70,7 +70,7 @@ export const DroppableLivreur = ({
   );
   const handleCreateChargement = (lotIds: string[], livreurId: string) => {
     mutate({
-      lots: lotIds,
+      livraisons: lotIds,
       livreurId,
     });
   };
@@ -122,11 +122,11 @@ export const DroppableLivreur = ({
       >
         <h3 className="mb-1 text-sm font-medium text-slate-900">Chargement</h3>
         <div className="flex flex-col items-center justify-center gap-1 pb-4">
-          {droppedLots.map((lot) => (
-            <div key={lot.id} className="flex w-full items-center">
-              <DraggableLot key={lot.id} lot={lot} />
+          {droppedLivraisons.map((livraison) => (
+            <div key={livraison.id} className="flex w-full items-center">
+              <DraggableLot key={livraison.id} livraison={livraison} />
               <div className="">
-                <CommandeModal commande={lot.commande as TrpcCommande}>
+                <CommandeModal commande={livraison.commande as TrpcCommande}>
                   <Button variant="ghost" className="h-5 w-5">
                     <Eye size={16} />
                   </Button>
@@ -134,14 +134,14 @@ export const DroppableLivreur = ({
                 <Button
                   variant="ghost"
                   className="h-5 w-5"
-                  onClick={() => onRemoveCommande(lot.id)}
+                  onClick={() => onRemoveLivraison(livraison.id)}
                 >
                   <X size={16} />
                 </Button>
               </div>
             </div>
           ))}
-          {droppedLots.length === 0 && (
+          {droppedLivraisons.length === 0 && (
             <div className="text-xs text-slate-500">Déposer les commandes ici</div>
           )}
         </div>
@@ -150,7 +150,7 @@ export const DroppableLivreur = ({
           variant="outline"
           className="w-full bg-transparent"
           onClick={() => {
-            const commandeIds = droppedLots.map((lot) => lot.id);
+            const commandeIds = droppedLivraisons.map((livraison) => livraison.id);
 
             handleCreateChargement(commandeIds, livreur.id);
             console.log(

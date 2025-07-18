@@ -3,14 +3,14 @@ import { useMemo } from 'react';
 import CommandeModal from '@/components/modals/commande-modal/commande-modal';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
-import { TrpcCommande, TrpcLot } from '@/types/trpc-types';
+import { TrpcCommande, TrpcLivraison } from '@/types/trpc-types';
 import DraggableLot from './draggable';
 
 interface PriorityZoneProps {
   title: string;
   priority: string;
   backgroundColor: string;
-  lots: TrpcLot[];
+  livraisons: TrpcLivraison[];
   droppedItems: Record<string, string[]>;
 }
 
@@ -18,16 +18,16 @@ export const PriorityZone = ({
   title,
   priority,
   backgroundColor,
-  lots,
+  livraisons,
   droppedItems,
 }: PriorityZoneProps) => {
   const availableLots = useMemo(() => {
-    return lots.filter((lot) => {
+    return livraisons.filter((livraison) => {
       // Check if this command is already dropped in any livreur zone
-      const isDropped = Object.values(droppedItems).some((items) => items.includes(lot.id));
-      return !isDropped && lot.priority === priority;
+      const isDropped = Object.values(droppedItems).some((items) => items.includes(livraison.id));
+      return !isDropped && livraison.priority === priority;
     });
-  }, [lots, droppedItems, priority]);
+  }, [livraisons, droppedItems, priority]);
 
   return (
     <div className={`flex-1 rounded-lg border ${backgroundColor} p-4 text-2xl font-bold`}>
@@ -37,10 +37,10 @@ export const PriorityZone = ({
       </div>
       {availableLots.length > 0 ? (
         <div className={`flex flex-col gap-1 ${backgroundColor}`}>
-          {availableLots.map((lot) => (
-            <div key={lot.id} className="flex items-center gap-2">
-              <DraggableLot key={lot.id} lot={lot} />
-              <CommandeModal commande={lot.commande as TrpcCommande}>
+          {availableLots.map((livraison) => (
+            <div key={livraison.id} className="flex items-center gap-2">
+              <DraggableLot key={livraison.id} livraison={livraison} />
+              <CommandeModal commande={livraison.commande as TrpcCommande}>
                 <Button variant="ghost" className="h-5 w-5">
                   <Eye size={16} />
                 </Button>

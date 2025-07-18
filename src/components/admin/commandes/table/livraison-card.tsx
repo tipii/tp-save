@@ -14,11 +14,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { priorityToText, statusToBadge } from '@/lib/enum-to-ui';
 import { getQueryParams, useCommandeFilters } from '../use-commande-filters';
 import { toast } from 'sonner';
-import { TrpcLotFromCommande } from '@/types/trpc-types';
+import { TrpcLivraisonFromCommande } from '@/types/trpc-types';
 import { Priority } from '@/generated/prisma';
 import { Label } from '@/components/ui/label';
 
-export function LotCard({ lot, index }: { lot: TrpcLotFromCommande; index: number }) {
+export function LivraisonCard({
+  livraison,
+  index,
+}: {
+  livraison: TrpcLivraisonFromCommande;
+  index: number;
+}) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -27,7 +33,7 @@ export function LotCard({ lot, index }: { lot: TrpcLotFromCommande; index: numbe
 
   // Mutation for changing lot priority
   const changePriorityMutation = useMutation(
-    trpc.lots.changePriority.mutationOptions({
+    trpc.livraisons.changePriority.mutationOptions({
       onSuccess: () => {
         // Invalidate the commandes query to refresh the data
         refetch();
@@ -37,20 +43,20 @@ export function LotCard({ lot, index }: { lot: TrpcLotFromCommande; index: numbe
   );
 
   const handlePriorityChange = (priority: Priority) => {
-    changePriorityMutation.mutate({ lotId: lot.id, priority });
+    changePriorityMutation.mutate({ livraisonId: livraison.id, priority });
   };
 
   return (
     <div className="bg-background rounded-md border p-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <div className="font-medium">{lot.name || `Lot ${index + 1}`}</div>
+          <div className="font-medium">{livraison.name || `Livraison ${index + 1}`}</div>
           <div className="flex items-center gap-8 rounded-md bg-blue-50 p-2">
             {/* Priority Select */}
             <div className="flex items-center gap-2">
               <Label htmlFor="priority">Priorité</Label>
               <Select
-                value={lot.priority || Priority.UNDEFINED}
+                value={livraison.priority || Priority.UNDEFINED}
                 onValueChange={handlePriorityChange}
                 disabled={changePriorityMutation.isPending}
               >
@@ -73,21 +79,21 @@ export function LotCard({ lot, index }: { lot: TrpcLotFromCommande; index: numbe
             </div>
             <div className="flex items-center gap-2">
               <Label htmlFor="status">Statut</Label>
-              {statusToBadge(lot.status)}
+              {statusToBadge(livraison.status)}
             </div>
           </div>
         </div>
         <div className="text-muted-foreground text-sm">
-          {new Date(lot.createdAt).toLocaleDateString('fr-FR')}
+          {new Date(livraison.createdAt).toLocaleDateString('fr-FR')}
         </div>
       </div>
 
-      {/* Lot Items */}
-      {Array.isArray(lot.items) && lot.items.length > 0 ? (
+      {/* LivraisonItems */}
+      {Array.isArray(livraison.items) && livraison.items.length > 0 ? (
         <div className="space-y-2">
           <h5 className="text-muted-foreground text-sm font-medium">Articles du lot:</h5>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-            {(lot.items as { name: string; quantity: number }[]).map((item, index) => (
+            {(livraison.items as { name: string; quantity: number }[]).map((item, index) => (
               <div
                 key={index}
                 className="bg-muted/50 flex items-center justify-between rounded p-2"
