@@ -12,6 +12,7 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar';
 import {
+  Building,
   Inbox,
   LayoutDashboard,
   LogOut,
@@ -46,19 +47,24 @@ const items = [
     icon: Inbox,
   },
   {
+    title: 'Livraisons',
+    url: '/app/livraisons',
+    icon: Package,
+  },
+  {
     title: 'Chargements',
     url: '/app/chargements',
-    icon: Package,
+    icon: Truck,
   },
   {
     title: 'Livreurs',
     url: '/app/livreurs',
-    icon: Truck,
+    icon: Users,
   },
   {
     title: 'Clients',
     url: '/app/clients',
-    icon: Users,
+    icon: Building,
   },
 ];
 

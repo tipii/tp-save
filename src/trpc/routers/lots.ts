@@ -23,7 +23,7 @@ export const lotsRouter = createTRPCRouter({
       },
     });
 
-    console.log(lots);
+    // console.log(lots);
     return lots;
   }),
   changePriority: protectedProcedure

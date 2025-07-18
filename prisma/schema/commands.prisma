@@ -17,6 +17,30 @@ model Commande {
   client  Client?           @relation(fields: [clientId], references: [id])
   history CommandeHistory[]
 
+  // Non Functional Data
+  orderReceivedById    String?
+  orderReceivedBy      User?     @relation("OrderReceivedBy", fields: [orderReceivedById], references: [id])
+  orderTransmittedById String?
+  orderTransmittedBy   User?     @relation("OrderTransmittedBy", fields: [orderTransmittedById], references: [id])
+  orderReceptionMode   String?
+  orderReceptionDate   DateTime?
+
+  numeroDevis                   String? // Quote number
+  cfBlDuOuNumeroRq              String? // CF BL or RQ number
+  numeroBonPreparationLivraison String? // Preparation and delivery slip number
+  numeroBonLivraison            String? // Delivery slip number
+  numeroBonCommandeBpa          String? // Purchase order / BPA number
+  numeroFacture                 String? // Invoice number
+  bonPrepaGesco                 String? // Gesco preparation slip
+  docGesco                      String? // Gesco document
+  docGescoImp                   String? // Gesco printed document
+  receptionBlFactSignee         String? // Reception BL or signed invoice
+  commercial                    String? // Sales person
+  entreprises                   String? // Company
+  lieu                          String? // Location
+
+  commentaires String? // Comments
+
   @@index([clientId])
   @@map("commande")
 }

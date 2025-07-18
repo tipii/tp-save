@@ -38,7 +38,7 @@ export default function ChargementModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          <h2 className="text-lg font-bold">Lots</h2>
+          <h2 className="text-lg font-bold">Livraison{chargement.lots.length > 1 ? 's' : ''}</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {chargement.lots.map((lot) => (
               <div className="flex items-center justify-between" key={lot.id}>

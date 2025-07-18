@@ -5,16 +5,18 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
 import { useTRPC } from '@/trpc/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getStatusBadge } from './utils';
+import { priorityToText, statusToBadge } from '@/lib/enum-to-ui';
 import { getQueryParams, useCommandeFilters } from '../use-commande-filters';
 import { toast } from 'sonner';
 import { TrpcLotFromCommande } from '@/types/trpc-types';
 import { Priority } from '@/generated/prisma';
+import { Label } from '@/components/ui/label';
 
 export function LotCard({ lot, index }: { lot: TrpcLotFromCommande; index: number }) {
   const trpc = useTRPC();
@@ -41,25 +43,38 @@ export function LotCard({ lot, index }: { lot: TrpcLotFromCommande; index: numbe
   return (
     <div className="bg-background rounded-md border p-4">
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-8">
           <div className="font-medium">{lot.name || `Lot ${index + 1}`}</div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-8 rounded-md bg-blue-50 p-2">
             {/* Priority Select */}
-            <Select
-              value={lot.priority || Priority.UNDEFINED}
-              onValueChange={handlePriorityChange}
-              disabled={changePriorityMutation.isPending}
-            >
-              <SelectTrigger className="h-7 w-auto text-xs" onClick={(e) => e.stopPropagation()}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={Priority.URGENT}>🔴 Urgent</SelectItem>
-                <SelectItem value={Priority.NORMAL}>⚪ Normal</SelectItem>
-                <SelectItem value={Priority.ILES}>🏝️ Îles</SelectItem>
-              </SelectContent>
-            </Select>
-            {getStatusBadge(lot.status)}
+            <div className="flex items-center gap-2">
+              <Label htmlFor="priority">Priorité</Label>
+              <Select
+                value={lot.priority || Priority.UNDEFINED}
+                onValueChange={handlePriorityChange}
+                disabled={changePriorityMutation.isPending}
+              >
+                <SelectTrigger
+                  className="h-7 w-auto text-xs"
+                  onClick={(e) => e.stopPropagation()}
+                  id={'priority'}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={Priority.UNDEFINED}>
+                    {priorityToText(Priority.UNDEFINED)}
+                  </SelectItem>
+                  <SelectItem value={Priority.URGENT}>{priorityToText(Priority.URGENT)}</SelectItem>
+                  <SelectItem value={Priority.NORMAL}>{priorityToText(Priority.NORMAL)}</SelectItem>
+                  <SelectItem value={Priority.ILES}>{priorityToText(Priority.ILES)}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="status">Statut</Label>
+              {statusToBadge(lot.status)}
+            </div>
           </div>
         </div>
         <div className="text-muted-foreground text-sm">

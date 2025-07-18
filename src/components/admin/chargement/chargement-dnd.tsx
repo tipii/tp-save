@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { DroppableLivreur } from './dnd/droppable';
 import { PriorityZone } from './dnd/priority-zone';
+import { Priority } from '@/generated/prisma';
 
 export default function ChargementDnd() {
   const trpc = useTRPC();
@@ -108,21 +109,21 @@ export default function ChargementDnd() {
             <div className="m-0 flex h-full min-h-64 gap-x-4">
               <PriorityZone
                 title="Priorité"
-                priority="Urgent"
+                priority={Priority.URGENT}
                 backgroundColor="bg-red-50 shadow-none border-red-200"
                 lots={lots}
                 droppedItems={droppedItems}
               />
               <PriorityZone
                 title="Normal"
-                priority="Normal"
+                priority={Priority.NORMAL}
                 backgroundColor="bg-yellow-50 shadow-none border-yellow-300"
                 lots={lots}
                 droppedItems={droppedItems}
               />
               <PriorityZone
                 title="Îles"
-                priority="Îles"
+                priority={Priority.ILES}
                 backgroundColor="bg-blue-50 shadow-none border-blue-200"
                 lots={lots}
                 droppedItems={droppedItems}

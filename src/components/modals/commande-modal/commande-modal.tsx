@@ -11,6 +11,7 @@ import { Building } from 'lucide-react';
 import React from 'react';
 import { TrpcClient, TrpcCommande } from '@/types/trpc-types';
 import ClientCard from '@/components/clients/client-card';
+import { priorityToBadge } from '@/lib/enum-to-ui';
 
 export default function CommandeModal({
   children,
@@ -27,7 +28,11 @@ export default function CommandeModal({
           <DialogTitle>Commande: {commande.ref}</DialogTitle>
           <DialogDescription>
             {commande.lots.length} lots - Priorité:{' '}
-            {commande.lots.map((lot) => lot.priority).join(' / ')}
+            <span className="space-x-1">
+              {commande.lots.map((lot, index) => (
+                <span key={lot.id}>{priorityToBadge(lot.priority)}</span>
+              ))}
+            </span>
           </DialogDescription>
         </DialogHeader>
 

@@ -15,5 +15,15 @@ model Lot {
   chargementId String?
   chargement   Chargement? @relation(fields: [chargementId], references: [id])
 
+  livreurId String?
+  livreur   User?   @relation("Livreur", fields: [livreurId], references: [id])
+
+  expectedDeliveryDate DateTime?
+  deliveryDate         DateTime?
+  deliveryMode         String?
+  bonLivraison         String?
+
+  @@index([commandeId])
+  @@index([livreurId])
   @@map("lot")
 }

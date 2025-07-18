@@ -7,7 +7,7 @@ import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 import { FileText } from 'lucide-react';
 import { useCommandeFilters, getQueryParams } from './use-commande-filters';
 import { CommandeFilters } from './commande-filters';
-import { CommandesTable } from './table';
+import { CommandesTable } from './table/commandes-table';
 
 export default function CommandePage() {
   const { setBreadcrumb } = useBreadcrumb();

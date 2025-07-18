@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TrpcLivreur } from '@/types/trpc-types';
+import { priorityToBadge } from '@/lib/enum-to-ui';
 
 interface LivreursTableProps {
   livreurs: TrpcLivreur[];
@@ -324,7 +325,7 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
                                                   <span className="text-sm font-medium">
                                                     {lot.name || `Lot ${lot.id.slice(-4)}`}
                                                   </span>
-                                                  {lot.priority && getPriorityBadge(lot.priority)}
+                                                  {lot.priority && priorityToBadge(lot.priority)}
                                                 </div>
                                                 {lot.commande && (
                                                   <div className="text-muted-foreground text-xs">

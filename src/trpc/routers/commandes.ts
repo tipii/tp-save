@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from '../init';
 import { Priority, Status, Prisma } from '@/generated/prisma';
 import { SortOrder } from '@/types/enums';
+import { TRPCError } from '@trpc/server';
 
 export const commandesRouter = createTRPCRouter({
   getPendingCommandes: protectedProcedure.query(async ({ ctx }) => {
@@ -134,35 +135,43 @@ export const commandesRouter = createTRPCRouter({
       // Get total count for pagination
       const totalCount = await ctx.prisma.commande.count({ where });
 
-      // Get commandes with filters and pagination
-      const commandes = await ctx.prisma.commande.findMany({
-        where,
-        include: {
-          lots: {
-            orderBy: {
-              createdAt: 'asc',
+      try {
+        // Get commandes with filters and pagination
+        const commandes = await ctx.prisma.commande.findMany({
+          where,
+          include: {
+            lots: {
+              orderBy: {
+                createdAt: 'asc',
+              },
+              include: {
+                chargement: true,
+              },
             },
-            include: {
-              chargement: true,
-            },
+            client: true,
           },
-          client: true,
-        },
-        orderBy,
-        take: limit,
-        skip: offset,
-      });
+          orderBy,
+          take: limit,
+          skip: offset,
+        });
 
-      return {
-        commandes,
-        pagination: {
-          totalCount,
-          totalPages: Math.ceil(totalCount / limit),
-          currentPage: Math.floor(offset / limit) + 1,
-          hasNextPage: offset + limit < totalCount,
-          hasPrevPage: offset > 0,
-        },
-      };
+        return {
+          commandes,
+          pagination: {
+            totalCount,
+            totalPages: Math.ceil(totalCount / limit),
+            currentPage: Math.floor(offset / limit) + 1,
+            hasNextPage: offset + limit < totalCount,
+            hasPrevPage: offset > 0,
+          },
+        };
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to fetch commandes',
+        });
+      }
     }),
   getCommandeById: protectedProcedure
     .input(z.object({ id: z.string() }))

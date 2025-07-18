@@ -13,9 +13,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type CommandeRowProps } from './types';
-import { getPriorityBadge, getStatusBadge, getTotalItems } from './utils';
+import { getTotalItems } from './utils';
 import { ExpandedRow } from './expanded-row';
 import Link from 'next/link';
+import { statusToBadge, priorityToBadge } from '@/lib/enum-to-ui';
 
 export function CommandeRow({ commande, isExpanded, onToggle }: CommandeRowProps) {
   return (
@@ -66,8 +67,14 @@ export function CommandeRow({ commande, isExpanded, onToggle }: CommandeRowProps
             <span className="font-medium">{commande.lots.length}</span>
           </div>
         </TableCell>
-        <TableCell>{commande.lots.map((lot) => getPriorityBadge(lot.priority, lot.id))}</TableCell>
-        <TableCell>{getStatusBadge(commande.status)}</TableCell>
+        <TableCell>
+          {commande.lots.map((lot) => (
+            <span key={lot.id} className="mr-1">
+              {priorityToBadge(lot.priority)}
+            </span>
+          ))}
+        </TableCell>
+        <TableCell>{statusToBadge(commande.status)}</TableCell>
         <TableCell>
           <div className="font-medium">{getTotalItems(commande.lots)} articles</div>
         </TableCell>

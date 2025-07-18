@@ -6,6 +6,7 @@ import { Calendar } from 'lucide-react';
 import { Priority, Status } from '@/generated/prisma';
 import ClientCard from '@/components/clients/client-card';
 import { useCommandeEdit } from '../hooks/use-commande-edit';
+import { statusToBadge, priorityToBadge } from '@/lib/enum-to-ui';
 
 interface CommandeReadOnlyInfoProps {
   commandeId: string;
@@ -13,28 +14,6 @@ interface CommandeReadOnlyInfoProps {
 
 export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) {
   const { commande } = useCommandeEdit(commandeId);
-
-  const getPriorityColor = (priority: Priority) => {
-    switch (priority) {
-      case Priority.URGENT:
-        return 'destructive';
-      case Priority.ILES:
-        return 'secondary';
-      default:
-        return 'default';
-    }
-  };
-
-  const getStatusColor = (status: Status) => {
-    switch (status) {
-      case Status.READY:
-        return 'default';
-      case Status.DELIVERING:
-        return 'secondary';
-      default:
-        return 'outline';
-    }
-  };
 
   if (!commande) {
     return <div>Chargement...</div>;
@@ -48,9 +27,7 @@ export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) 
           <CardTitle>Informations système</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Badge variant={getStatusColor(commande.status)}>{commande.status}</Badge>
-          </div>
+          <div className="flex items-center gap-2">{statusToBadge(commande.status)}</div>
 
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
@@ -81,8 +58,8 @@ export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) 
                   <div className="flex items-center justify-between">
                     <div className="font-medium">{lot.name}</div>
                     <div className="flex gap-2">
-                      <Badge variant={getPriorityColor(lot.priority)}>{lot.priority}</Badge>
-                      <Badge variant={getStatusColor(lot.status)}>{lot.status}</Badge>
+                      {priorityToBadge(lot.priority)}
+                      {statusToBadge(lot.status)}
                     </div>
                   </div>
                   {lot.chargement && (

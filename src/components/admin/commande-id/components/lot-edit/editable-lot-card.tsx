@@ -25,7 +25,7 @@ const itemSchema = z.object({
 
 type ItemForm = z.infer<typeof itemSchema>;
 
-interface LotCardProps {
+interface EditableLotCardProps {
   lot: { id: string; name: string | null; items: Item[] };
   index: number;
   canEdit: boolean;
@@ -38,7 +38,7 @@ interface LotCardProps {
   availableLots: Array<{ id: string; name: string | null }>;
 }
 
-export function LotCard({
+export function EditableLotCard({
   lot,
   index,
   canEdit,
@@ -49,7 +49,7 @@ export function LotCard({
   onDelete,
   onTransferItem,
   availableLots,
-}: LotCardProps) {
+}: EditableLotCardProps) {
   const [items, setItems] = useState<Item[]>(lot.items);
 
   const addItem = () => {
