@@ -27,12 +27,13 @@ import {
   Clock,
   AlertCircle,
   Eye,
+  Pencil,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-export default function ClientPageComponent() {
+export default function ClientsPageComponent() {
   const { setBreadcrumb } = useBreadcrumb();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
@@ -53,35 +54,6 @@ export default function ClientPageComponent() {
       }
       return newSet;
     });
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'Urgent':
-        return (
-          <Badge variant="destructive" className="text-xs">
-            Urgent
-          </Badge>
-        );
-      case 'Normal':
-        return (
-          <Badge variant="secondary" className="text-xs">
-            Normal
-          </Badge>
-        );
-      case 'Îles':
-        return (
-          <Badge variant="default" className="text-xs">
-            Îles
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="default" className="text-xs">
-            Non défini
-          </Badge>
-        );
-    }
   };
 
   if (isPending) {
@@ -129,6 +101,7 @@ export default function ClientPageComponent() {
                   <TableHead>Localisation</TableHead>
                   <TableHead>Commandes</TableHead>
                   <TableHead>Dernière activité</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -164,31 +137,29 @@ export default function ClientPageComponent() {
 
                       <TableCell>
                         <div className="space-y-1">
-                          {client.email && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Mail className="text-muted-foreground h-3 w-3" />
-                              <span className="truncate">{client.email}</span>
-                            </div>
-                          )}
-                          {client.phone && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Phone className="text-muted-foreground h-3 w-3" />
-                              <span>{client.phone}</span>
-                            </div>
-                          )}
-                          {client.contactPerson && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <User className="text-muted-foreground h-3 w-3" />
-                              <span className="truncate">{client.contactPerson}</span>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="text-muted-foreground h-3 w-3" />
+                            <span className="truncate">{client.email ?? 'Non renseigné'}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-sm">
+                            <Phone className="text-muted-foreground h-3 w-3" />
+                            <span className="truncate">{client.phone ?? 'Non renseigné'}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-sm">
+                            <User className="text-muted-foreground h-3 w-3" />
+                            <span className="truncate">
+                              {client.contactPerson ?? 'Non renseigné'}
+                            </span>
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2 text-sm">
                           <MapPin className="text-muted-foreground h-3 w-3" />
                           <span className="truncate">
-                            {client.city}, {client.postalCode}
+                            {client.city ?? 'Non renseigné'}, {client.postalCode ?? 'Non renseigné'}
                           </span>
                         </div>
                       </TableCell>
@@ -203,6 +174,13 @@ export default function ClientPageComponent() {
                           <Clock className="h-3 w-3" />
                           <span>{new Date(client.updatedAt).toLocaleDateString('fr-FR')}</span>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Link href={`/app/clients/${client.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </Link>
                       </TableCell>
                     </TableRow>
                     {expandedRows.has(client.id) && (
@@ -242,13 +220,19 @@ export default function ClientPageComponent() {
                                   <MapPin className="h-4 w-4" />
                                   Adresse
                                 </h4>
-                                <div className="text-sm">
-                                  <p>{client.address}</p>
-                                  <p>
-                                    {client.city}, {client.postalCode}
-                                  </p>
-                                  <p>{client.country}</p>
-                                </div>
+                                {client.address ? (
+                                  <div className="text-sm">
+                                    <p>{client.address}</p>
+                                    <p>
+                                      {client.city}, {client.postalCode}
+                                    </p>
+                                    <p>{client.country}</p>
+                                  </div>
+                                ) : (
+                                  <div className="text-muted-foreground text-sm">
+                                    <p>Non renseigné</p>
+                                  </div>
+                                )}
                               </div>
                             </div>
 
@@ -283,7 +267,10 @@ export default function ClientPageComponent() {
                                           <span className="font-medium">{commande.ref}</span>
                                           <Tooltip>
                                             <TooltipTrigger>
-                                              <Link href={`/app/commandes/${commande.id}`}>
+                                              <Link
+                                                href={`/app/commandes/${commande.id}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
                                                 <Eye className="h-4 w-4" />
                                               </Link>
                                             </TooltipTrigger>

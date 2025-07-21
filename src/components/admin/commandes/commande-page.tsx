@@ -32,7 +32,7 @@ export default function CommandePage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Filters Section */}
-      <CommandeFilters filters={filters} pagination={pagination} />
+      <CommandeFilters pagination={pagination} />
 
       {/* Results Section */}
       <div className="bg-background border shadow-sm">

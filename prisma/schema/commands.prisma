@@ -1,7 +1,6 @@
 model Commande {
   id        String   @id @default(cuid())
   ref       String
-  clientId  String? // Foreign key to Client model
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   status    Status   @default(PENDING)
@@ -13,8 +12,9 @@ model Commande {
   lockedUntil DateTime? // Auto-unlock after timeout (e.g., 15 minutes)
 
   // Relations
-  client  Client?           @relation(fields: [clientId], references: [id])
-  history CommandeHistory[]
+  clientId String? // Foreign key to Client model
+  client   Client?           @relation(fields: [clientId], references: [id])
+  history  CommandeHistory[]
 
   // Non Functional Data
   orderReceivedById    String?
@@ -24,9 +24,9 @@ model Commande {
   orderReceptionMode   String?
   orderReceptionDate   DateTime?
 
-  sageUniqueId                  String  @unique // Unique id from sage (numerical part of DO_Piece)
-  sageType                      String? // Type of order (1: Preparation, 2: Delivery)
-  rawSageData                   Json? // Raw data from sage
+  bc_number String  @unique // Bon Commande
+  bl_number String? @unique // Bon de livraison
+
   numeroDevis                   String? // Quote number
   cfBlDuOuNumeroRq              String? // CF BL or RQ number
   numeroBonPreparationLivraison String? // Preparation and delivery slip number

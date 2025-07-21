@@ -125,6 +125,11 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
                       <SelectItem value={Status.PENDING}>En attente</SelectItem>
                       <SelectItem value={Status.READY}>Prêt</SelectItem>
                       <SelectItem value={Status.DELIVERING}>En livraison</SelectItem>
+                      <SelectItem value={Status.DELIVERED}>Livrée</SelectItem>
+                      <SelectItem value={Status.CANCELLED}>Annulée</SelectItem>
+                      <SelectItem value={Status.MIXED}>Mixte</SelectItem>
+                      <SelectItem value={Status.TO_RETURN}>À retourner</SelectItem>
+                      <SelectItem value={Status.RETURNED}>Retournée</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

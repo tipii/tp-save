@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Phone, Mail, User, Building, FileText } from 'lucide-react';
+import { MapPin, Phone, Mail, User, Building, FileText, Pencil } from 'lucide-react';
 import React from 'react';
 import { TrpcClient } from '@/types/trpc-types';
 
@@ -9,9 +9,19 @@ export default function ClientCard({ client }: { client: TrpcClient }) {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Building className="h-5 w-5" />
-          Informations Client
+        <CardTitle className="flex gap-2 text-lg">
+          <div className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
+            Informations Client
+          </div>
+          <a
+            href={`/app/clients/${client.id}`}
+            className="ml-auto flex items-center gap-2 text-sm text-blue-600 hover:underline"
+            title="Edit client"
+          >
+            <Pencil className="h-4 w-4" />
+            Modifier
+          </a>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -34,45 +44,50 @@ export default function ClientCard({ client }: { client: TrpcClient }) {
               Contact
             </h4>
 
-            {client.contactPerson && (
-              <div className="flex items-center gap-2">
-                <User className="text-muted-foreground h-4 w-4" />
-                <span className="text-sm">{client.contactPerson}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <User className="text-muted-foreground h-4 w-4" />
+              <span className="text-sm">{client.contactPerson ?? 'Non renseigné'}</span>
+            </div>
 
-            {client.email && (
-              <div className="flex items-center gap-2">
-                <Mail className="text-muted-foreground h-4 w-4" />
+            <div className="flex items-center gap-2">
+              <Mail className="text-muted-foreground h-4 w-4" />
+
+              {client.email ? (
                 <a
                   href={`mailto:${client.email}`}
                   className="text-sm text-blue-600 hover:underline"
                 >
                   {client.email}
                 </a>
-              </div>
-            )}
+              ) : (
+                <span className="text-muted-foreground text-sm">Non renseigné</span>
+              )}
+            </div>
 
-            {client.phone && (
-              <div className="flex items-center gap-2">
-                <Phone className="text-muted-foreground h-4 w-4" />
+            <div className="flex items-center gap-2">
+              <Phone className="text-muted-foreground h-4 w-4" />
+              {client.phone ? (
                 <a href={`tel:${client.phone}`} className="text-sm text-blue-600 hover:underline">
                   {client.phone}
                 </a>
-              </div>
-            )}
+              ) : (
+                <span className="text-muted-foreground text-sm">Non renseigné</span>
+              )}
+            </div>
 
-            {client.phoneSecond && (
-              <div className="flex items-center gap-2">
-                <Phone className="text-muted-foreground h-4 w-4" />
+            <div className="flex items-center gap-2">
+              <Phone className="text-muted-foreground h-4 w-4" />
+              {client.phoneSecond ? (
                 <a
                   href={`tel:${client.phoneSecond}`}
                   className="text-sm text-blue-600 hover:underline"
                 >
                   {client.phoneSecond} (2e)
                 </a>
-              </div>
-            )}
+              ) : (
+                <span className="text-muted-foreground text-sm">Non renseigné</span>
+              )}
+            </div>
           </div>
 
           {/* Address Information */}
@@ -82,13 +97,17 @@ export default function ClientCard({ client }: { client: TrpcClient }) {
             </h4>
             <div className="flex items-start gap-2">
               <MapPin className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0" />
-              <div className="text-sm">
-                <div>{client.address}</div>
-                <div>
-                  {client.postalCode} {client.city}
+              {client.address ? (
+                <div className="text-sm">
+                  <div>{client.address}</div>
+                  <div>
+                    {client.postalCode} {client.city}
+                  </div>
+                  <div className="text-muted-foreground">{client.country}</div>
                 </div>
-                <div className="text-muted-foreground">{client.country}</div>
-              </div>
+              ) : (
+                <div className="text-muted-foreground text-sm">Non renseigné</div>
+              )}
             </div>
           </div>
         </div>

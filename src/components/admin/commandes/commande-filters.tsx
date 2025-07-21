@@ -17,7 +17,6 @@ import { Priority, Status } from '@/generated/prisma';
 import { priorityToText, statusToText } from '@/lib/enum-to-ui';
 
 interface CommandeFiltersProps {
-  filters: ReturnType<typeof useCommandeFilters>;
   pagination?: {
     totalCount: number;
     currentPage: number;
@@ -25,9 +24,9 @@ interface CommandeFiltersProps {
   };
 }
 
-export function CommandeFilters({ filters, pagination }: CommandeFiltersProps) {
+export function CommandeFilters({ pagination }: CommandeFiltersProps) {
   const trpc = useTRPC();
-
+  const filters = useCommandeFilters();
   // Local state for search input
   const [searchInput, setSearchInput] = useState(filters.search);
 

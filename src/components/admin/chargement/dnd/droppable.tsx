@@ -29,6 +29,7 @@ export const DroppableLivreur = ({
   const trpc = useTRPC();
   const { refetch } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
   const { refetch: refetchLots } = useQuery(trpc.livraisons.getPendingLivraisons.queryOptions());
+	
 
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-${livreur.id}`,
