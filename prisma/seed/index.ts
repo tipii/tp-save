@@ -21,10 +21,10 @@ interface SeedConfig {
 
 // Default configuration - can be overridden via environment variables
 const defaultConfig: SeedConfig = {
-  clearDatabase: true,
+  clearDatabase: true, // false prevent delete real data
   users: true,
-  clients: true,
-  commandes: true,
+  clients: false, // replace by true data
+  commandes: false, // replace by true data
 };
 
 // Parse environment variables for seeding configuration

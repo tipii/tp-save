@@ -61,7 +61,7 @@ export function TransferItemModal({
     if (item && availableLivraisons.length > 0) {
       form.reset({
         targetLivraisonId: availableLivraisons[0]?.id || '',
-        quantity: item.quantity, // Set to max quantity by default
+        quantity: Number(item.DL_QTEBL), // Set to max quantity by default
       });
     }
   }, [item, availableLivraisons, form]);
@@ -83,10 +83,10 @@ export function TransferItemModal({
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <div className="space-y-2">
               <p className="text-sm">
-                <strong>Élément:</strong> {item.name}
+                <strong>Élément:</strong> {item.DL_Design}
               </p>
               <p className="text-sm">
-                <strong>Quantité disponible:</strong> {item.quantity}
+                <strong>Quantité disponible:</strong> {item.DL_QTEBL}
               </p>
             </div>
 
@@ -105,7 +105,7 @@ export function TransferItemModal({
                     <SelectContent>
                       {availableLivraisons.map((livraison) => (
                         <SelectItem key={livraison.id} value={livraison.id}>
-                          {livraison.name || `Livraison ${livraison.id}`}
+                          {livraison.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -127,7 +127,7 @@ export function TransferItemModal({
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                       min={1}
-                      max={item.quantity}
+                      max={Number(item.DL_QTEBL)}
                     />
                   </FormControl>
                   <FormMessage />

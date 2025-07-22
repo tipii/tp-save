@@ -8,6 +8,7 @@ import { FileText } from 'lucide-react';
 import { useCommandeFilters, getQueryParams } from './use-commande-filters';
 import { CommandeFilters } from './commande-filters';
 import { CommandesTable } from './table/commandes-table';
+import { Pagination } from './table/pagination';
 
 export default function CommandePage() {
   const { setBreadcrumb } = useBreadcrumb();
@@ -41,9 +42,12 @@ export default function CommandePage() {
             <FileText className="h-5 w-5" />
             Commandes trouvées
             {pagination && (
-              <span className="text-muted-foreground text-sm font-normal">
-                (Page {pagination.currentPage} sur {pagination.totalPages})
-              </span>
+              <div className="flex flex-1 items-center justify-between gap-2">
+                <span className="text-muted-foreground text-sm font-normal">
+                  (Page {pagination.currentPage} sur {pagination.totalPages})
+                </span>
+                <Pagination pagination={pagination} filters={filters} />
+              </div>
             )}
           </h2>
         </div>

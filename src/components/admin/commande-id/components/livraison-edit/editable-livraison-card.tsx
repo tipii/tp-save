@@ -53,10 +53,25 @@ export function EditableLotCard({
   const [items, setItems] = useState<Item[]>(lot.items);
 
   const addItem = () => {
-    setItems([...items, { name: '', quantity: 1 }]);
+    setItems([
+      ...items,
+      {
+        AR_REF: '',
+        DL_LIGNE: '',
+        DL_QTEBL: '',
+        DO_Piece: '',
+        DL_Design: '',
+        Famille_ART: '',
+        Commentaires: '',
+        DL_MontantHT: '',
+        Commentaires2: '',
+        QTE_DIFF_CMDE: '',
+        DL_PrixUnitaire: '',
+      },
+    ]);
   };
 
-  const updateItem = (index: number, field: keyof Item, value: string | number) => {
+  const updateItem = (index: number, field: keyof Item, value: string) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     setItems(newItems);
@@ -67,7 +82,7 @@ export function EditableLotCard({
   };
 
   const handleSave = () => {
-    const validItems = items.filter((item) => item.name && item.quantity > 0);
+    const validItems = items.filter((item) => item.DL_Design && Number(item.DL_QTEBL) > 0);
     onSave(validItems);
   };
 
@@ -141,15 +156,15 @@ export function EditableLotCard({
               <div key={idx} className="flex gap-2">
                 <Input
                   placeholder="Nom de l'article"
-                  value={item.name}
-                  onChange={(e) => updateItem(idx, 'name', e.target.value)}
+                  value={item.DL_Design}
+                  onChange={(e) => updateItem(idx, 'DL_Design', e.target.value)}
                   className="flex-1"
                 />
                 <Input
                   type="number"
                   placeholder="Qté"
-                  value={item.quantity}
-                  onChange={(e) => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)}
+                  value={item.DL_QTEBL}
+                  onChange={(e) => updateItem(idx, 'DL_QTEBL', e.target.value || '0')}
                   className="w-20"
                 />
                 <Tooltip>
@@ -194,9 +209,9 @@ export function EditableLotCard({
                 <TableBody>
                   {lot.items.map((item, idx) => (
                     <TableRow key={idx}>
-                      <TableCell className="font-medium">{item.name}</TableCell>
+                      <TableCell className="font-medium">{item.DL_Design}</TableCell>
                       <TableCell className="text-center">
-                        <Badge variant="secondary">{item.quantity}</Badge>
+                        <Badge variant="secondary">{item.DL_QTEBL}</Badge>
                       </TableCell>
                       {canEdit && availableLots.length > 0 && (
                         <TableCell className="text-center">

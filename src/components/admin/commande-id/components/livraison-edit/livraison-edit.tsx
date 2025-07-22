@@ -99,7 +99,7 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
       await transferItemMutation.mutateAsync({
         sourceLivraisonId: transferModal.sourceLivraisonId,
         targetLivraisonId: data.targetLivraisonId,
-        itemName: transferModal.item.name,
+        itemName: transferModal.item.DL_Design,
         quantity: data.quantity,
       });
       refetchCommande();

@@ -252,6 +252,10 @@ export const commandesRouter = createTRPCRouter({
         ref: z.string().optional(),
         priority: z.enum(Priority).optional(),
         status: z.enum(Status).optional(),
+        orderReceivedById: z.string().optional(),
+        orderTransmittedById: z.string().optional(),
+        orderReceptionMode: z.string().optional(),
+        orderReceptionDate: z.date().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

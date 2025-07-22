@@ -87,7 +87,15 @@ export function useCommandeEdit(commandeId: string) {
     );
   };
 
-  const updateCommande = async (data: { ref?: string; priority?: Priority; status?: Status }) => {
+  const updateCommande = async (data: {
+    ref?: string;
+    priority?: Priority;
+    status?: Status;
+    orderReceivedById?: string;
+    orderTransmittedById?: string;
+    orderReceptionMode?: string;
+    orderReceptionDate?: Date;
+  }) => {
     await updateMutation.mutateAsync(
       {
         id: commandeId,

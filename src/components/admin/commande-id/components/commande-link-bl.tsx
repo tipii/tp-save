@@ -26,8 +26,21 @@ export default function CommandeLinkBl({ commandeId }: { commandeId: string }) {
     }),
   );
 
+  const { mutate: mutateUnlinkBL, isPending: isPendingUnlinkBL } = useMutation(
+    trpc.rawSageData.unlinkBL.mutationOptions({
+      onSuccess: () => {
+        toast.success('BL déliée avec succès');
+        refetchCommande();
+      },
+    }),
+  );
+
   const handleLinkBL = () => {
     mutate({ blNumber, commandeId });
+  };
+
+  const handleUnlinkBL = () => {
+    mutateUnlinkBL({ commandeId });
   };
 
   if (commande?.bl_number) {
@@ -36,8 +49,11 @@ export default function CommandeLinkBl({ commandeId }: { commandeId: string }) {
         <CardHeader>
           <CardTitle>BL liée</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex items-center gap-2">
           <p>{commande.bl_number}</p>
+          <Button onClick={handleUnlinkBL} disabled={isPendingUnlinkBL}>
+            {isPendingUnlinkBL ? 'Chargement...' : 'Délier'}
+          </Button>
         </CardContent>
       </Card>
     );

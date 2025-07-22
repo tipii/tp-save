@@ -3,8 +3,14 @@ import { Priority, Status } from '@/generated/prisma';
 import { createTRPCRouter, protectedProcedure } from '../init';
 
 const itemSchema = z.object({
-  name: z.string(),
-  quantity: z.number().min(0),
+  AR_REF: z.string(),
+  DL_LIGNE: z.string(),
+  DL_QTEBL: z.string(),
+  DO_Piece: z.string(),
+  DL_Design: z.string(),
+  Famille_ART: z.string(),
+  Commentaires: z.string(),
+  DL_MontantHT: z.string(),
 });
 
 export const livraisonsRouter = createTRPCRouter({
@@ -151,19 +157,13 @@ export const livraisonsRouter = createTRPCRouter({
         typeof sourceLivraison.items === 'string'
           ? JSON.parse(sourceLivraison.items)
           : sourceLivraison.items
-      ) as Array<{
-        name: string;
-        quantity: number;
-      }>;
+      ) as z.infer<typeof itemSchema>[];
 
       const targetItems = (
         typeof targetLivraison.items === 'string'
           ? JSON.parse(targetLivraison.items)
           : targetLivraison.items
-      ) as Array<{
-        name: string;
-        quantity: number;
-      }>;
+      ) as z.infer<typeof itemSchema>[];
 
       // Process transfer for each item
       const updatedSourceItems = [...sourceItems];
@@ -172,29 +172,33 @@ export const livraisonsRouter = createTRPCRouter({
       for (const transferItem of items) {
         // Find and update source item
         const sourceItemIndex = updatedSourceItems.findIndex(
-          (item) => item.name === transferItem.name,
+          (item) => item.DL_Design === transferItem.DL_Design,
         );
         if (
           sourceItemIndex === -1 ||
-          updatedSourceItems[sourceItemIndex].quantity < transferItem.quantity
+          updatedSourceItems[sourceItemIndex].DL_QTEBL < transferItem.DL_QTEBL
         ) {
-          throw new Error(`Insufficient quantity for item: ${transferItem.name}`);
+          throw new Error(`Insufficient quantity for item: ${transferItem.DL_Design}`);
         }
 
         // Reduce quantity from source
-        updatedSourceItems[sourceItemIndex].quantity -= transferItem.quantity;
-        if (updatedSourceItems[sourceItemIndex].quantity === 0) {
+        updatedSourceItems[sourceItemIndex].DL_QTEBL = (
+          Number(updatedSourceItems[sourceItemIndex].DL_QTEBL) - Number(transferItem.DL_QTEBL)
+        ).toString();
+        if (Number(updatedSourceItems[sourceItemIndex].DL_QTEBL) === 0) {
           updatedSourceItems.splice(sourceItemIndex, 1);
         }
 
         // Add to target
         const targetItemIndex = updatedTargetItems.findIndex(
-          (item) => item.name === transferItem.name,
+          (item) => item.DL_Design === transferItem.DL_Design,
         );
         if (targetItemIndex === -1) {
           updatedTargetItems.push(transferItem);
         } else {
-          updatedTargetItems[targetItemIndex].quantity += transferItem.quantity;
+          updatedTargetItems[targetItemIndex].DL_QTEBL = (
+            Number(updatedTargetItems[targetItemIndex].DL_QTEBL) + Number(transferItem.DL_QTEBL)
+          ).toString();
         }
       }
 
@@ -254,48 +258,55 @@ export const livraisonsRouter = createTRPCRouter({
         typeof sourceLivraison.items === 'string'
           ? JSON.parse(sourceLivraison.items)
           : sourceLivraison.items
-      ) as Array<{
-        name: string;
-        quantity: number;
-      }>;
+      ) as z.infer<typeof itemSchema>[];
 
       const targetItems = (
         typeof targetLivraison.items === 'string'
           ? JSON.parse(targetLivraison.items)
           : targetLivraison.items
-      ) as Array<{
-        name: string;
-        quantity: number;
-      }>;
+      ) as z.infer<typeof itemSchema>[];
 
       // Find the source item
-      const sourceItemIndex = sourceItems.findIndex((item) => item.name === itemName);
+      const sourceItemIndex = sourceItems.findIndex((item) => item.DL_Design === itemName);
       if (sourceItemIndex === -1) {
         throw new Error(`Item "${itemName}" not found in source livraison`);
       }
 
       const sourceItem = sourceItems[sourceItemIndex];
-      if (sourceItem.quantity < quantity) {
+      if (Number(sourceItem.DL_QTEBL) < quantity) {
         throw new Error(`Insufficient quantity for item: ${itemName}`);
       }
 
       // Update source items
       const updatedSourceItems = [...sourceItems];
-      updatedSourceItems[sourceItemIndex].quantity -= quantity;
+      updatedSourceItems[sourceItemIndex].DL_QTEBL = (
+        Number(updatedSourceItems[sourceItemIndex].DL_QTEBL) - quantity
+      ).toString();
 
       // Remove item if quantity becomes 0
-      if (updatedSourceItems[sourceItemIndex].quantity === 0) {
+      if (Number(updatedSourceItems[sourceItemIndex].DL_QTEBL) === 0) {
         updatedSourceItems.splice(sourceItemIndex, 1);
       }
 
       // Update target items
       const updatedTargetItems = [...targetItems];
-      const targetItemIndex = updatedTargetItems.findIndex((item) => item.name === itemName);
+      const targetItemIndex = updatedTargetItems.findIndex((item) => item.DL_Design === itemName);
 
       if (targetItemIndex === -1) {
-        updatedTargetItems.push({ name: itemName, quantity });
+        updatedTargetItems.push({
+          DL_Design: itemName,
+          DL_QTEBL: quantity.toString(),
+          AR_REF: '',
+          DL_LIGNE: '',
+          DO_Piece: '',
+          Famille_ART: '',
+          Commentaires: '',
+          DL_MontantHT: '',
+        });
       } else {
-        updatedTargetItems[targetItemIndex].quantity += quantity;
+        updatedTargetItems[targetItemIndex].DL_QTEBL = (
+          Number(updatedTargetItems[targetItemIndex].DL_QTEBL) + quantity
+        ).toString();
       }
 
       // Update both livraisons
