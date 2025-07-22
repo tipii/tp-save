@@ -39,7 +39,7 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
   // Update the URL search parameter when debounced value changes
   useEffect(() => {
     filters.setSearch(debouncedSearch);
-  }, [filters, debouncedSearch, filters.setSearch]);
+  }, [debouncedSearch]);
 
   // Update local state when URL search parameter changes (e.g., from clearFilters)
   useEffect(() => {

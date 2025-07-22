@@ -41,6 +41,7 @@ export function useCommandeFilters(): CommandeFilters & CommandeFiltersActions {
   const [sortBy, setSortBy] = useQueryState('sortBy', parseAsString.withDefault('createdAt'));
   const [sortOrder, setSortOrder] = useQueryState('sortOrder', parseAsString.withDefault('desc'));
   const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
+
   const [limit, setLimit] = useQueryState('limit', parseAsInteger.withDefault(20));
 
   // Wrapper functions that reset page to 1 when filters change
@@ -149,6 +150,6 @@ export function getQueryParams(filters: CommandeFilters) {
     sortBy: filters.sortBy as SortBy,
     sortOrder: filters.sortOrder as SortOrder,
     limit: filters.limit,
-    offset: (filters.page - 1) * filters.limit,
+    page: filters.page,
   };
 }

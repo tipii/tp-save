@@ -92,6 +92,7 @@ export interface PaginationProps {
     page: number;
     limit: number;
     setPage: (page: number) => void;
+    setLimit?: (limit: number) => void;
   };
 }
 

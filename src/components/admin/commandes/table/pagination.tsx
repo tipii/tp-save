@@ -2,14 +2,11 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { type PaginationProps } from './types';
-import { useCommandeFilters } from '../use-commande-filters';
 
-export function Pagination({ pagination }: PaginationProps) {
+export function Pagination({ pagination, filters }: PaginationProps) {
   if (pagination.totalPages <= 1) {
     return null;
   }
-
-  const filters = useCommandeFilters();
 
   return (
     <div className="flex items-center justify-between gap-2">

@@ -43,7 +43,7 @@ export const commandesRouter = createTRPCRouter({
 
         // Pagination
         limit: z.number().min(1).max(100).default(20),
-        offset: z.number().min(0).default(0),
+        page: z.number().min(1).default(1),
 
         // Sorting
         sortBy: z
@@ -61,7 +61,7 @@ export const commandesRouter = createTRPCRouter({
         dateFrom,
         dateTo,
         limit,
-        offset,
+        page,
         sortBy,
         sortOrder,
       } = input;
@@ -152,7 +152,7 @@ export const commandesRouter = createTRPCRouter({
           },
           orderBy,
           take: limit,
-          skip: offset,
+          skip: (page - 1) * limit,
         });
 
         return {
@@ -160,9 +160,9 @@ export const commandesRouter = createTRPCRouter({
           pagination: {
             totalCount,
             totalPages: Math.ceil(totalCount / limit),
-            currentPage: Math.floor(offset / limit) + 1,
-            hasNextPage: offset + limit < totalCount,
-            hasPrevPage: offset > 0,
+            currentPage: page,
+            hasNextPage: page * limit < totalCount,
+            hasPrevPage: page > 1,
           },
         };
       } catch (error) {
