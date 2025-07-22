@@ -141,7 +141,9 @@ export function EditableLotCard({
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>
-                    {canDeleteLot ? 'Supprimer le lot' : 'Le lot doit être vide pour être supprimé'}
+                    {canDeleteLot
+                      ? 'Supprimer la livraison'
+                      : 'La livraison doit être vide pour être supprimée'}
                   </p>
                 </TooltipContent>
               </Tooltip>

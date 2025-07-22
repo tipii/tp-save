@@ -40,10 +40,12 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const createLotMutation = useMutation(trpc.livraisons.createLivraison.mutationOptions());
-  const updateLotMutation = useMutation(trpc.livraisons.updateLivraisonItems.mutationOptions());
+  const createLivraisonMutation = useMutation(trpc.livraisons.createLivraison.mutationOptions());
+  const updateLivraisonMutation = useMutation(
+    trpc.livraisons.updateLivraisonItems.mutationOptions(),
+  );
   const transferItemMutation = useMutation(trpc.livraisons.transferSingleItem.mutationOptions());
-  const deleteLotMutation = useMutation(trpc.livraisons.deleteLivraison.mutationOptions());
+  const deleteLivraisonMutation = useMutation(trpc.livraisons.deleteLivraison.mutationOptions());
 
   const livraisons = commande?.livraisons || [];
   const parsedLivraisons = livraisons.map((livraison) => ({
@@ -54,9 +56,9 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
         : (livraison.items as Item[]),
   }));
 
-  const handleCreateLot = async () => {
+  const handleCreateLivraison = async () => {
     try {
-      await createLotMutation.mutateAsync({
+      await createLivraisonMutation.mutateAsync({
         commandeId,
         name: `Livraison ${livraisons.length + 1}`,
         items: [],
@@ -73,9 +75,9 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
     }
   };
 
-  const handleUpdateLotItems = async (livraisonId: string, items: Item[]) => {
+  const handleUpdateLivraisonItems = async (livraisonId: string, items: Item[]) => {
     try {
-      await updateLotMutation.mutateAsync({
+      await updateLivraisonMutation.mutateAsync({
         livraisonId,
         items,
       });
@@ -114,18 +116,18 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
     }
   };
 
-  const handleDeleteLot = async (livraisonId: string) => {
+  const handleDeleteLivraison = async (livraisonId: string) => {
     const livraison = parsedLivraisons.find((l) => l.id === livraisonId);
     if (livraison && livraison.items.length > 0) {
       toast.error('Impossible de supprimer', {
         description:
-          "Le lot contient des éléments. Veuillez les transférer ou les supprimer d'abord.",
+          "La livraison contient des éléments. Veuillez les transférer ou les supprimer d'abord.",
       });
       return;
     }
 
     try {
-      await deleteLotMutation.mutateAsync({ livraisonId });
+      await deleteLivraisonMutation.mutateAsync({ livraisonId });
       refetchCommande();
       toast.success('Livraison supprimée', {
         description: 'La livraison a été supprimée avec succès.',
@@ -157,7 +159,11 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
         {canEdit && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size="sm" onClick={handleCreateLot} disabled={createLotMutation.isPending}>
+              <Button
+                size="sm"
+                onClick={handleCreateLivraison}
+                disabled={createLivraisonMutation.isPending}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Nouvelle livraison
               </Button>
@@ -178,9 +184,9 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
             canEdit={canEdit}
             isEditing={editingLot === livraison.id}
             onEdit={() => setEditingLot(livraison.id)}
-            onSave={(items) => handleUpdateLotItems(livraison.id, items)}
+            onSave={(items) => handleUpdateLivraisonItems(livraison.id, items)}
             onCancel={() => setEditingLot(null)}
-            onDelete={() => handleDeleteLot(livraison.id)}
+            onDelete={() => handleDeleteLivraison(livraison.id)}
             onTransferItem={(item) => openTransferModal(item, livraison.id)}
             availableLots={parsedLivraisons.filter((l) => l.id !== livraison.id)}
           />

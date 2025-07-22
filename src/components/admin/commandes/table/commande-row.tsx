@@ -40,9 +40,19 @@ export function CommandeRow({ commande, isExpanded, onToggle }: CommandeRowProps
               <FileText className="text-primary h-5 w-5" />
             </div>
             <div>
-              <div className="font-medium">{commande.ref}</div>
+              <div className="font-medium">{commande.name ?? 'Non défini'}</div>
               <div className="text-muted-foreground text-sm">ID: {commande.id.slice(0, 8)}...</div>
             </div>
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{commande.bp_number ?? 'Non défini'}</span>
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{commande.bl_number ?? 'Non défini'}</span>
           </div>
         </TableCell>
         <TableCell>
@@ -68,11 +78,15 @@ export function CommandeRow({ commande, isExpanded, onToggle }: CommandeRowProps
           </div>
         </TableCell>
         <TableCell>
-          {commande.livraisons.map((livraison) => (
-            <span key={livraison.id} className="mr-1">
-              {priorityToBadge(livraison.priority)}
-            </span>
-          ))}
+          {commande.livraisons.length > 0 ? (
+            commande.livraisons.map((livraison) => (
+              <span key={livraison.id} className="mr-1">
+                {priorityToBadge(livraison.priority)}
+              </span>
+            ))
+          ) : (
+            <span className="text-muted-foreground">Non défini</span>
+          )}
         </TableCell>
         <TableCell>{statusToBadge(commande.status)}</TableCell>
         <TableCell>

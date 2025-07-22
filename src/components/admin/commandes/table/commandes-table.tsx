@@ -31,9 +31,11 @@ export function CommandesTable({ commandes, filters, pagination }: CommandesTabl
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]"></TableHead>
-              <TableHead>Référence</TableHead>
+              <TableHead>Nom</TableHead>
+              <TableHead>Bon Préparation</TableHead>
+              <TableHead>Bon Livraison</TableHead>
               <TableHead>Client</TableHead>
-              <TableHead>Lots</TableHead>
+              <TableHead>Livraison(s)</TableHead>
               <TableHead>Priorité</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Articles totaux</TableHead>

@@ -1,6 +1,7 @@
 model Commande {
   id        String   @id @default(cuid())
   ref       String
+  name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   status    Status   @default(PENDING)
@@ -24,23 +25,21 @@ model Commande {
   orderReceptionMode   String?
   orderReceptionDate   DateTime?
 
-  bc_number String  @unique // Bon Commande
-  bl_number String? @unique // Bon de livraison
+  quote_number       String? // Quote number
+  bc_number          String? @unique // Bon Commande / bpa
+  bp_number          String? @unique // Bon de préparation
+  bl_number          String? @unique // Bon de livraison
+  cf_bl_ou_rq_number String? // CF BL or RQ number
+  facture_number     String? // Facture number
 
-  numeroDevis                   String? // Quote number
-  cfBlDuOuNumeroRq              String? // CF BL or RQ number
-  numeroBonPreparationLivraison String? // Preparation and delivery slip number
-  numeroBonLivraison            String? // Delivery slip number
-  numeroBonCommandeBpa          String? // Purchase order / BPA number
-  numeroFacture                 String? // Invoice number
-  bonPrepaGesco                 String? // Gesco preparation slip
-  docGesco                      String? // Gesco document
-  docGescoImp                   String? // Gesco printed document
-  receptionBlFactSignee         String? // Reception BL or signed invoice
-  commercial                    String? // Sales person
-  entreprises                   String? // Company
-  lieu                          String? // Location
-  originalItems                 Json?
+  bonPrepaGesco         String? // Gesco preparation slip
+  docGesco              String? // Gesco document
+  docGescoImp           String? // Gesco printed document
+  receptionBlFactSignee String? // Reception BL or signed invoice
+  commercial            String? // Sales person
+  entreprises           String? // Company
+  lieu                  String? // Location
+  originalItems         Json?
 
   commentaires String? // Comments
 

@@ -8,7 +8,7 @@ export const firstScheduledTask = schedules.task({
   id: 'tallin-pi-sync-commandes',
 
   // Every hour
-  cron: '0 * * * *',
+  cron: '* * * * *',
 
   // Set an optional maxDuration to prevent tasks from running indefinitely
   maxDuration: 300, // Stop executing after 300 secs (5 mins) of compute
@@ -96,7 +96,7 @@ export const firstScheduledTask = schedules.task({
           // create a new commande with the bon data
           const existingCommande = await prisma.commande.findUnique({
             where: {
-              bc_number: bon.DO_Piece,
+              bp_number: bon.DO_Piece,
             },
           });
 
@@ -110,10 +110,15 @@ export const firstScheduledTask = schedules.task({
             if (client) {
               const newCommande = await prisma.commande.create({
                 data: {
-                  bc_number: bon.DO_Piece,
+                  bp_number: bon.DO_Piece,
                   ref: bon.DO_Piece,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
+                  name:
+                    'CMD ' +
+                    bon.DO_Piece +
+                    ' - ' +
+                    client.name +
+                    ' - ' +
+                    formatDate(bon.DO_DateLiv),
                   status: 'PENDING',
                   clientId: client.id,
                 },
@@ -135,3 +140,10 @@ export const firstScheduledTask = schedules.task({
     }
   },
 });
+
+function formatDate(input: string): string {
+  const year = input.slice(0, 4);
+  const month = input.slice(4, 6);
+  const day = input.slice(6, 8);
+  return `${day}/${month}/${year}`;
+}
