@@ -1,0 +1,29 @@
+model Livraison {
+  id        String   @id @default(cuid())
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items     Json
+
+  commandeId String
+  commande   Commande @relation(fields: [commandeId], references: [id], onDelete: Cascade)
+
+  // livraison data
+  priority Priority @default(UNDEFINED)
+  status   Status   @default(PENDING)
+
+  chargementId String?
+  chargement   Chargement? @relation(fields: [chargementId], references: [id])
+
+  livreurId String?
+  livreur   User?   @relation("Livreur", fields: [livreurId], references: [id])
+
+  expectedDeliveryDate DateTime?
+  deliveryDate         DateTime?
+  deliveryMode         String?
+  bonLivraison         String?
+
+  @@index([commandeId])
+  @@index([livreurId])
+  @@map("livraison")
+}

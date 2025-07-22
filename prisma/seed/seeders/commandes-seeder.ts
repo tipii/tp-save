@@ -60,26 +60,26 @@ export async function seedCommandes(
         // Create commande
         const now = new Date();
 
-        const commande = await prisma.commande.create({
-          data: {
-            id: commandeData.id,
-            ref: commandeData.ref,
-            clientId: commandeData.clientId,
-            originalItems: commandeData.items,
-            status: commandeData.status as Status,
-            createdAt: now,
-            updatedAt: now,
-          },
-        });
+        // const commande = await prisma.commande.create({
+        //   data: {
+        //     id: commandeData.id,
+        //     ref: commandeData.ref,
+        //     clientId: commandeData.clientId,
+        //     originalItems: commandeData.items,
+        //     status: commandeData.status as Status,
+        //     createdAt: now,
+        //     updatedAt: now,
+        //   },
+        // });
 
-        const lot = await prisma.lot.create({
-          data: {
-            name: 'Lot 1',
-            commandeId: commande.id,
-            items: commandeData.items,
-            status: Status.PENDING,
-          },
-        });
+        // const livraison = await prisma.livraison.create({
+        //   data: {
+        //     name: 'Lot 1',
+        //     commandeId: commande.id,
+        //     items: commandeData.items,
+        //     status: Status.PENDING,
+        //   },
+        // });
 
         console.log(
           `✅ Created commande: ${commandeData.ref} - Client ${commandeData.clientId} - Status: ${commandeData.status}`,

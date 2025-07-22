@@ -4,15 +4,16 @@ import React from 'react';
 import { CommandeEditControls } from './components/commande-edit-controls';
 import { CommandeEditForm } from './components/commande-edit-form';
 import { CommandeReadOnlyInfo } from './components/commande-read-only-info';
-import { LotEdit } from './components/lot-edit/lot-edit';
+import { LivraisonEdit } from './components/livraison-edit/livraison-edit';
 import { useCommandeEdit } from './hooks/use-commande-edit';
+import CommandeLinkBl from './components/commande-link-bl';
 
 interface CommandeIdPageProps {
   id: string;
 }
 
 export default function CommandeIdPage({ id }: CommandeIdPageProps) {
-  const { commande, isLoading } = useCommandeEdit(id);
+  const { commande, isLoading, refetchCommande } = useCommandeEdit(id);
 
   if (isLoading || !commande) {
     return <div className="p-6">Chargement...</div>;
@@ -28,11 +29,12 @@ export default function CommandeIdPage({ id }: CommandeIdPageProps) {
         {/* Editable Form */}
         <div className="lg:col-span-2">
           <CommandeEditForm commandeId={id} />
-          <LotEdit commandeId={id} />
+          <LivraisonEdit commandeId={id} />
         </div>
 
         {/* Read-only Information */}
         <div>
+          <CommandeLinkBl commandeId={id} />
           <CommandeReadOnlyInfo commandeId={id} />
         </div>
       </div>

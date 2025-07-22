@@ -39,10 +39,12 @@ model User {
   chargements       Chargement[]
   chargementHistory ChargementHistory[]
 
-  // commandeReceptionnePar DeliveryOrder[]        @relation("commandeReceptionnePar")
-  // commandeTransmissePar  DeliveryOrder[]        @relation("commandeTransmissePar")
-  // deliveryOrder          DeliveryOrder[]
-  // deliveryOrderHistory   DeliveryOrderHistory[]
+  // Order relations
+  ordersReceived    Commande[] @relation("OrderReceivedBy")
+  ordersTransmitted Commande[] @relation("OrderTransmittedBy")
+
+  // Delivery relations
+  livraisonsDelivered Livraison[] @relation("Livreur")
 
   @@unique([email])
   @@unique([username])

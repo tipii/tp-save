@@ -6,6 +6,7 @@ enum Status {
   TO_RETURN
   RETURNED
   MIXED
+  CANCELLED
 
   @@map("status")
 }

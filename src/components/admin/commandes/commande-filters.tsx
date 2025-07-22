@@ -13,9 +13,10 @@ import {
 } from '@/components/ui/select';
 import { Search, Filter, X, Calendar, SortAsc } from 'lucide-react';
 import { useCommandeFilters, type CommandeFiltersActions } from './use-commande-filters';
+import { Priority, Status } from '@/generated/prisma';
+import { priorityToText, statusToText } from '@/lib/enum-to-ui';
 
 interface CommandeFiltersProps {
-  filters: ReturnType<typeof useCommandeFilters>;
   pagination?: {
     totalCount: number;
     currentPage: number;
@@ -23,9 +24,9 @@ interface CommandeFiltersProps {
   };
 }
 
-export function CommandeFilters({ filters, pagination }: CommandeFiltersProps) {
+export function CommandeFilters({ pagination }: CommandeFiltersProps) {
   const trpc = useTRPC();
-
+  const filters = useCommandeFilters();
   // Local state for search input
   const [searchInput, setSearchInput] = useState(filters.search);
 
@@ -38,7 +39,7 @@ export function CommandeFilters({ filters, pagination }: CommandeFiltersProps) {
   // Update the URL search parameter when debounced value changes
   useEffect(() => {
     filters.setSearch(debouncedSearch);
-  }, [filters, debouncedSearch, filters.setSearch]);
+  }, [debouncedSearch]);
 
   // Update local state when URL search parameter changes (e.g., from clearFilters)
   useEffect(() => {
@@ -99,7 +100,7 @@ export function CommandeFilters({ filters, pagination }: CommandeFiltersProps) {
                     <SelectItem value="createdAt">Date de création</SelectItem>
                     <SelectItem value="updatedAt">Dernière mise à jour</SelectItem>
                     <SelectItem value="ref">Référence</SelectItem>
-                    <SelectItem value="priority">Priorité</SelectItem>
+                    <SelectItem value="priority">Priorité livraison(s)</SelectItem>
                     <SelectItem value="status">Statut</SelectItem>
                   </SelectContent>
                 </Select>
@@ -157,9 +158,16 @@ export function CommandeFilters({ filters, pagination }: CommandeFiltersProps) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Toutes les priorités</SelectItem>
-                      <SelectItem value="Urgent">Urgent</SelectItem>
-                      <SelectItem value="Normal">Normal</SelectItem>
-                      <SelectItem value="Îles">Îles</SelectItem>
+                      <SelectItem value={Priority.UNDEFINED}>
+                        {priorityToText(Priority.UNDEFINED)}
+                      </SelectItem>
+                      <SelectItem value={Priority.URGENT}>
+                        {priorityToText(Priority.URGENT)}
+                      </SelectItem>
+                      <SelectItem value={Priority.NORMAL}>
+                        {priorityToText(Priority.NORMAL)}
+                      </SelectItem>
+                      <SelectItem value={Priority.ILES}>{priorityToText(Priority.ILES)}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -173,11 +181,24 @@ export function CommandeFilters({ filters, pagination }: CommandeFiltersProps) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Tous les statuts</SelectItem>
-                      <SelectItem value="pending">En attente</SelectItem>
-                      <SelectItem value="ready">Prêt</SelectItem>
-                      <SelectItem value="delivering">En livraison</SelectItem>
-                      <SelectItem value="delivered">Livré</SelectItem>
-                      <SelectItem value="cancelled">Annulé</SelectItem>
+                      <SelectItem value={Status.PENDING}>{statusToText(Status.PENDING)}</SelectItem>
+                      <SelectItem value={Status.READY}>{statusToText(Status.READY)}</SelectItem>
+                      <SelectItem value={Status.DELIVERING}>
+                        {statusToText(Status.DELIVERING)}
+                      </SelectItem>
+                      <SelectItem value={Status.DELIVERED}>
+                        {statusToText(Status.DELIVERED)}
+                      </SelectItem>
+                      <SelectItem value={Status.TO_RETURN}>
+                        {statusToText(Status.TO_RETURN)}
+                      </SelectItem>
+                      <SelectItem value={Status.RETURNED}>
+                        {statusToText(Status.RETURNED)}
+                      </SelectItem>
+                      <SelectItem value={Status.CANCELLED}>
+                        {statusToText(Status.CANCELLED)}
+                      </SelectItem>
+                      <SelectItem value={Status.MIXED}>{statusToText(Status.MIXED)}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

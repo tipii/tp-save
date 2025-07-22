@@ -1,7 +1,7 @@
 model Chargement {
-  id   String @id @default(uuid())
-  name String
-  lots Lot[]
+  id         String      @id @default(uuid())
+  name       String
+  livraisons Livraison[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

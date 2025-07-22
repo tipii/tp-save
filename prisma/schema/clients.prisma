@@ -1,7 +1,7 @@
 model Client {
-  id   String @id @default(cuid())
-  code String @unique // Client reference code (e.g., "CLI001")
-  name String // Client name or company name
+  id   String  @id @default(cuid())
+  code String  @unique // Client reference code (e.g., "CLI001")
+  name String? // Client name or company name
 
   // Contact Information
   email         String?
@@ -10,10 +10,10 @@ model Client {
   contactPerson String? // Main contact person name
 
   // Address Information
-  address    String
-  city       String
-  postalCode String
-  country    String @default("France")
+  address    String?
+  city       String?
+  postalCode String?
+  country    String?
 
   notes String? // Internal notes about the client
 

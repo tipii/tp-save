@@ -2,12 +2,13 @@ import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from '../init';
 import { Priority, Status, Prisma } from '@/generated/prisma';
 import { SortOrder } from '@/types/enums';
+import { TRPCError } from '@trpc/server';
 
 export const commandesRouter = createTRPCRouter({
   getPendingCommandes: protectedProcedure.query(async ({ ctx }) => {
     const commandes = await ctx.prisma.commande.findMany({
       where: {
-        lots: {
+        livraisons: {
           some: {
             status: {
               equals: Status.PENDING,
@@ -17,7 +18,7 @@ export const commandesRouter = createTRPCRouter({
       },
       include: {
         client: true,
-        lots: {
+        livraisons: {
           orderBy: {
             createdAt: 'asc',
           },
@@ -42,7 +43,7 @@ export const commandesRouter = createTRPCRouter({
 
         // Pagination
         limit: z.number().min(1).max(100).default(20),
-        offset: z.number().min(0).default(0),
+        page: z.number().min(1).default(1),
 
         // Sorting
         sortBy: z
@@ -60,7 +61,7 @@ export const commandesRouter = createTRPCRouter({
         dateFrom,
         dateTo,
         limit,
-        offset,
+        page,
         sortBy,
         sortOrder,
       } = input;
@@ -95,7 +96,7 @@ export const commandesRouter = createTRPCRouter({
 
       // Filter by priority
       if (priority) {
-        where.lots = {
+        where.livraisons = {
           some: {
             priority: priority,
           },
@@ -126,7 +127,7 @@ export const commandesRouter = createTRPCRouter({
       if (sortBy === 'ref' || sortBy === 'createdAt' || sortBy === 'updatedAt') {
         orderBy[sortBy] = sortOrder;
       } else if (sortBy === 'priority' || sortBy === 'status') {
-        orderBy.lots = {
+        orderBy.livraisons = {
           [sortBy]: sortOrder,
         };
       }
@@ -134,35 +135,43 @@ export const commandesRouter = createTRPCRouter({
       // Get total count for pagination
       const totalCount = await ctx.prisma.commande.count({ where });
 
-      // Get commandes with filters and pagination
-      const commandes = await ctx.prisma.commande.findMany({
-        where,
-        include: {
-          lots: {
-            orderBy: {
-              createdAt: 'asc',
+      try {
+        // Get commandes with filters and pagination
+        const commandes = await ctx.prisma.commande.findMany({
+          where,
+          include: {
+            livraisons: {
+              orderBy: {
+                createdAt: 'asc',
+              },
+              include: {
+                chargement: true,
+              },
             },
-            include: {
-              chargement: true,
-            },
+            client: true,
           },
-          client: true,
-        },
-        orderBy,
-        take: limit,
-        skip: offset,
-      });
+          orderBy,
+          take: limit,
+          skip: (page - 1) * limit,
+        });
 
-      return {
-        commandes,
-        pagination: {
-          totalCount,
-          totalPages: Math.ceil(totalCount / limit),
-          currentPage: Math.floor(offset / limit) + 1,
-          hasNextPage: offset + limit < totalCount,
-          hasPrevPage: offset > 0,
-        },
-      };
+        return {
+          commandes,
+          pagination: {
+            totalCount,
+            totalPages: Math.ceil(totalCount / limit),
+            currentPage: page,
+            hasNextPage: page * limit < totalCount,
+            hasPrevPage: page > 1,
+          },
+        };
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to fetch commandes',
+        });
+      }
     }),
   getCommandeById: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -177,7 +186,7 @@ export const commandesRouter = createTRPCRouter({
               user: true,
             },
           },
-          lots: {
+          livraisons: {
             orderBy: {
               createdAt: 'asc',
             },
@@ -243,6 +252,10 @@ export const commandesRouter = createTRPCRouter({
         ref: z.string().optional(),
         priority: z.enum(Priority).optional(),
         status: z.enum(Status).optional(),
+        orderReceivedById: z.string().optional(),
+        orderTransmittedById: z.string().optional(),
+        orderReceptionMode: z.string().optional(),
+        orderReceptionDate: z.date().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -264,7 +277,7 @@ export const commandesRouter = createTRPCRouter({
         where: { id },
         include: {
           client: true,
-          lots: {
+          livraisons: {
             include: {
               chargement: true,
             },
@@ -281,7 +294,7 @@ export const commandesRouter = createTRPCRouter({
         },
         include: {
           client: true,
-          lots: {
+          livraisons: {
             include: {
               chargement: true,
             },

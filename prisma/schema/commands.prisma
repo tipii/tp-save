@@ -1,21 +1,48 @@
 model Commande {
   id        String   @id @default(cuid())
   ref       String
-  clientId  String? // Foreign key to Client model
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   status    Status   @default(PENDING)
 
-  lots          Lot[]
-  originalItems Json
+  livraisons Livraison[]
 
   // Simple Edit Lock
   lockedBy    String? // User ID who locked it
   lockedUntil DateTime? // Auto-unlock after timeout (e.g., 15 minutes)
 
   // Relations
-  client  Client?           @relation(fields: [clientId], references: [id])
-  history CommandeHistory[]
+  clientId String? // Foreign key to Client model
+  client   Client?           @relation(fields: [clientId], references: [id])
+  history  CommandeHistory[]
+
+  // Non Functional Data
+  orderReceivedById    String?
+  orderReceivedBy      User?     @relation("OrderReceivedBy", fields: [orderReceivedById], references: [id])
+  orderTransmittedById String?
+  orderTransmittedBy   User?     @relation("OrderTransmittedBy", fields: [orderTransmittedById], references: [id])
+  orderReceptionMode   String?
+  orderReceptionDate   DateTime?
+
+  bc_number String  @unique // Bon Commande
+  bl_number String? @unique // Bon de livraison
+
+  numeroDevis                   String? // Quote number
+  cfBlDuOuNumeroRq              String? // CF BL or RQ number
+  numeroBonPreparationLivraison String? // Preparation and delivery slip number
+  numeroBonLivraison            String? // Delivery slip number
+  numeroBonCommandeBpa          String? // Purchase order / BPA number
+  numeroFacture                 String? // Invoice number
+  bonPrepaGesco                 String? // Gesco preparation slip
+  docGesco                      String? // Gesco document
+  docGescoImp                   String? // Gesco printed document
+  receptionBlFactSignee         String? // Reception BL or signed invoice
+  commercial                    String? // Sales person
+  entreprises                   String? // Company
+  lieu                          String? // Location
+  originalItems                 Json?
+
+  commentaires String? // Comments
 
   @@index([clientId])
   @@map("commande")

@@ -1,5 +1,5 @@
 import { type CommandeFiltersActions } from '../use-commande-filters';
-import { type TrpcCommande } from '@/types/trpc-types';
+import { type TrpcCommande, type TrpcLivraisonFromCommande } from '@/types/trpc-types';
 
 export interface Commande {
   id: string;
@@ -12,20 +12,20 @@ export interface Commande {
   status: 'pending' | 'ready' | 'delivering' | 'delivered' | 'cancelled';
   createdAt: Date;
   updatedAt: Date;
-  lots: Lot[];
+  lots: Livraison[];
 }
 
-export interface Lot {
+export interface Livraison {
   id: string;
   ref: string;
   priority: 'URGENT' | 'NORMAL' | 'ILES';
   status: 'pending' | 'ready' | 'delivering' | 'delivered' | 'cancelled';
-  items: LotItem[];
+  items: Livraisontem[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface LotItem {
+export interface Livraisontem {
   id: string;
   productName: string;
   quantity: number;
@@ -92,6 +92,7 @@ export interface PaginationProps {
     page: number;
     limit: number;
     setPage: (page: number) => void;
+    setLimit?: (limit: number) => void;
   };
 }
 

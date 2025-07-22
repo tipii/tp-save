@@ -15,7 +15,8 @@
     "prisma:migrate:deploy": "pnpx prisma migrate deploy",
     "prisma:migrate:reset": "pnpx prisma migrate reset",
     "prisma:seed": "pnpx tsx prisma/seed/index.ts",
-    "betterauth:generate": "pnpx @better-auth/cli generate --config src/external-services/better-auth/auth.ts --output prisma/schema/schema.prisma -y"
+    "betterauth:generate": "pnpx @better-auth/cli generate --config src/external-services/better-auth/auth.ts --output prisma/schema/schema.prisma -y",
+    "wsdl:generate": "wsdl-tsclient ./public/WebServ_EasyTablet.wsdl -o ./src/external-services/soap-service/generated"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -36,6 +37,7 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-query-devtools": "^5.83.0",
+    "@trigger.dev/sdk": "^3.3.17",
     "@trpc/client": "^11.4.3",
     "@trpc/server": "^11.4.3",
     "@trpc/tanstack-react-query": "^11.4.3",
@@ -53,15 +55,18 @@
     "react-day-picker": "^9.8.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.60.0",
+    "soap": "^1.1.12",
     "sonner": "^2.0.6",
     "superjson": "^2.2.2",
     "tailwind-merge": "^3.3.1",
     "tslog": "^4.9.3",
+    "wsdl-tsclient": "^1.7.1",
     "zod": "^4.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@trigger.dev/build": "^3.3.17",
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",

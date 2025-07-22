@@ -11,10 +11,21 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
-import { Inbox, LayoutDashboard, LogOut, Package, Truck, UserPlus, Users } from 'lucide-react';
+import {
+  Building,
+  Inbox,
+  LayoutDashboard,
+  LogOut,
+  Package,
+  RefreshCcw,
+  Truck,
+  UserPlus,
+  Users,
+} from 'lucide-react';
 import { NavUser } from './nav-user';
 import Link from 'next/link';
 import SidebarButton from './sidebar-button';
+import RefreshButton from './refresh-button';
 
 const adminItems = [
   {
@@ -36,19 +47,24 @@ const items = [
     icon: Inbox,
   },
   {
+    title: 'Livraisons',
+    url: '/app/livraisons',
+    icon: Package,
+  },
+  {
     title: 'Chargements',
     url: '/app/chargements',
-    icon: Package,
+    icon: Truck,
   },
   {
     title: 'Livreurs',
     url: '/app/livreurs',
-    icon: Truck,
+    icon: Users,
   },
   {
     title: 'Clients',
     url: '/app/clients',
-    icon: Users,
+    icon: Building,
   },
 ];
 
@@ -88,6 +104,10 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+
+              <SidebarMenuItem>
+                <RefreshButton />
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

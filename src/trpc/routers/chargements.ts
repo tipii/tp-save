@@ -6,7 +6,7 @@ export const chargementsRouter = createTRPCRouter({
   getChargements: protectedProcedure.query(async ({ ctx }) => {
     const chargements = await ctx.prisma.chargement.findMany({
       include: {
-        lots: {
+        livraisons: {
           include: {
             commande: true,
           },
@@ -23,12 +23,12 @@ export const chargementsRouter = createTRPCRouter({
         where: { id: input.id },
         include: {
           livreur: true,
-          lots: {
+          livraisons: {
             include: {
               commande: {
                 include: {
                   client: true,
-                  lots: true,
+                  livraisons: true,
                 },
               },
             },
@@ -42,7 +42,7 @@ export const chargementsRouter = createTRPCRouter({
       z.object({
         name: z.string().optional(),
         livreurId: z.string(),
-        lots: z.array(z.string()),
+        livraisons: z.array(z.string()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -51,19 +51,20 @@ export const chargementsRouter = createTRPCRouter({
           name: input.name || 'Chargement ' + new Date().toLocaleDateString(),
           livreurId: input.livreurId,
           status: 'ready',
-          lots: {
-            connect: input.lots.map((lotId) => ({ id: lotId })),
+          livraisons: {
+            connect: input.livraisons.map((livraisonId) => ({ id: livraisonId })),
           },
         },
       });
 
-      const updatedLots = await ctx.prisma.lot.updateMany({
+      const updatedLivraisons = await ctx.prisma.livraison.updateMany({
         where: {
-          id: { in: input.lots },
+          id: { in: input.livraisons },
         },
-        data: { status: Status.PENDING },
+        data: { status: Status.READY },
       });
 
+      console.log(updatedLivraisons);
       //TODO : update commande
 
       if (!chargement) {

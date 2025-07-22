@@ -41,7 +41,54 @@ export function useCommandeFilters(): CommandeFilters & CommandeFiltersActions {
   const [sortBy, setSortBy] = useQueryState('sortBy', parseAsString.withDefault('createdAt'));
   const [sortOrder, setSortOrder] = useQueryState('sortOrder', parseAsString.withDefault('desc'));
   const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
+
   const [limit, setLimit] = useQueryState('limit', parseAsInteger.withDefault(20));
+
+  // Wrapper functions that reset page to 1 when filters change
+  const setSearchWithPageReset = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const setClientIdWithPageReset = (value: string) => {
+    setClientId(value);
+    setPage(1);
+  };
+
+  const setPriorityWithPageReset = (value: string) => {
+    setPriority(value);
+    setPage(1);
+  };
+
+  const setStatusWithPageReset = (value: string) => {
+    setStatus(value);
+    setPage(1);
+  };
+
+  const setDateFromWithPageReset = (value: string) => {
+    setDateFrom(value);
+    setPage(1);
+  };
+
+  const setDateToWithPageReset = (value: string) => {
+    setDateTo(value);
+    setPage(1);
+  };
+
+  const setSortByWithPageReset = (value: string) => {
+    setSortBy(value);
+    setPage(1);
+  };
+
+  const setSortOrderWithPageReset = (value: string) => {
+    setSortOrder(value);
+    setPage(1);
+  };
+
+  const setLimitWithPageReset = (value: number) => {
+    setLimit(value);
+    setPage(1);
+  };
 
   const clearFilters = () => {
     setSearch('');
@@ -76,16 +123,16 @@ export function useCommandeFilters(): CommandeFilters & CommandeFiltersActions {
     page,
     limit,
     // Filter actions
-    setSearch,
-    setClientId,
-    setPriority,
-    setStatus,
-    setDateFrom,
-    setDateTo,
-    setSortBy,
-    setSortOrder,
+    setSearch: setSearchWithPageReset,
+    setClientId: setClientIdWithPageReset,
+    setPriority: setPriorityWithPageReset,
+    setStatus: setStatusWithPageReset,
+    setDateFrom: setDateFromWithPageReset,
+    setDateTo: setDateToWithPageReset,
+    setSortBy: setSortByWithPageReset,
+    setSortOrder: setSortOrderWithPageReset,
     setPage,
-    setLimit,
+    setLimit: setLimitWithPageReset,
     clearFilters,
     hasActiveFilters,
   };
@@ -103,6 +150,6 @@ export function getQueryParams(filters: CommandeFilters) {
     sortBy: filters.sortBy as SortBy,
     sortOrder: filters.sortOrder as SortOrder,
     limit: filters.limit,
-    offset: (filters.page - 1) * filters.limit,
+    page: filters.page,
   };
 }
