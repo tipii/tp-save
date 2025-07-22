@@ -7,8 +7,8 @@ import { wsdl } from './wsdl';
 export const firstScheduledTask = schedules.task({
   id: 'tallin-pi-sync-commandes',
 
-  // Every minute
-  cron: '* * * * *',
+  // Every hour
+  cron: '0 * * * *',
 
   // Set an optional maxDuration to prevent tasks from running indefinitely
   maxDuration: 300, // Stop executing after 300 secs (5 mins) of compute
