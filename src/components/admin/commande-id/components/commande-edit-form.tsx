@@ -271,10 +271,8 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
               />
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2"></div>
-
             {canEdit && (
-              <div className="flex gap-2">
+              <div className="flex flex-1 justify-end gap-2 pt-4">
                 <Button type="submit" disabled={mutations.update.isPending}>
                   <Save className="mr-2 h-4 w-4" />
                   Enregistrer les modifications

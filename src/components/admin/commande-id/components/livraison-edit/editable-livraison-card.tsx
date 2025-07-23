@@ -17,6 +17,15 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Plus, Package, ArrowRightLeft, Trash2, Edit, Save, X } from 'lucide-react';
 import { z } from 'zod';
+import { Livraison, Priority } from '@/generated/prisma';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { priorityToText } from '@/lib/enum-to-ui';
 
 const itemSchema = z.object({
   name: z.string().min(1, 'Le nom est requis'),
@@ -25,8 +34,8 @@ const itemSchema = z.object({
 
 type ItemForm = z.infer<typeof itemSchema>;
 
-interface EditableLotCardProps {
-  lot: { id: string; name: string | null; items: Item[] };
+interface EditableLivraisonCardProps {
+  livraison: Livraison & { items: Item[] };
   index: number;
   canEdit: boolean;
   isEditing: boolean;
@@ -36,10 +45,11 @@ interface EditableLotCardProps {
   onDelete: () => void;
   onTransferItem: (item: Item) => void;
   availableLots: Array<{ id: string; name: string | null }>;
+  onPriorityChange: (priority: Priority) => void;
 }
 
-export function EditableLotCard({
-  lot,
+export function EditableLivraisonCard({
+  livraison,
   index,
   canEdit,
   isEditing,
@@ -49,8 +59,9 @@ export function EditableLotCard({
   onDelete,
   onTransferItem,
   availableLots,
-}: EditableLotCardProps) {
-  const [items, setItems] = useState<Item[]>(lot.items);
+  onPriorityChange,
+}: EditableLivraisonCardProps) {
+  const [items, setItems] = useState<Item[]>(livraison.items);
 
   const addItem = () => {
     setItems([
@@ -86,7 +97,7 @@ export function EditableLotCard({
     onSave(validItems);
   };
 
-  const canDeleteLot = lot.items.length === 0;
+  const canDeleteLivraison = livraison.items.length === 0;
 
   return (
     <Card>
@@ -94,7 +105,19 @@ export function EditableLotCard({
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <Package className="h-4 w-4" />
-            {lot.name || `Lot ${index + 1}`}
+            {livraison.name || `Livraison ${index + 1}`}
+            <Select onValueChange={onPriorityChange} value={livraison.priority}>
+              <SelectTrigger>
+                <SelectValue placeholder="Priorité" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(Priority).map((priority) => (
+                  <SelectItem key={priority} value={priority}>
+                    {priorityToText(priority)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </CardTitle>
           {canEdit && (
             <div className="flex gap-1">
@@ -135,13 +158,18 @@ export function EditableLotCard({
               )}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button size="sm" variant="outline" onClick={onDelete} disabled={!canDeleteLot}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={onDelete}
+                    disabled={!canDeleteLivraison}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>
-                    {canDeleteLot
+                    {canDeleteLivraison
                       ? 'Supprimer la livraison'
                       : 'La livraison doit être vide pour être supprimée'}
                   </p>
@@ -195,7 +223,7 @@ export function EditableLotCard({
           </div>
         ) : (
           <div className="space-y-2">
-            {lot.items.length === 0 ? (
+            {livraison.items.length === 0 ? (
               <p className="text-muted-foreground text-sm">Aucun article</p>
             ) : (
               <Table>
@@ -209,7 +237,7 @@ export function EditableLotCard({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {lot.items.map((item, idx) => (
+                  {livraison.items.map((item, idx) => (
                     <TableRow key={idx}>
                       <TableCell className="font-medium">{item.DL_Design}</TableCell>
                       <TableCell className="text-center">

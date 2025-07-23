@@ -108,7 +108,8 @@ export function useCommandeEdit(commandeId: string) {
               error instanceof Error ? error.message : 'Impossible de mettre à jour la commande',
           });
         },
-        onSuccess: () => {
+        onSuccess: async () => {
+          await disableEdit();
           refetchCommande();
           toast.success('Commande mise à jour', {
             description: 'Les modifications ont été enregistrées avec succès.',

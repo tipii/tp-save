@@ -16,8 +16,9 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Plus } from 'lucide-react';
 import { useCommandeEdit } from '../../hooks/use-commande-edit';
-import { EditableLotCard } from './editable-livraison-card';
+import { EditableLivraisonCard } from './editable-livraison-card';
 import { TransferItemModal, TransferItemForm } from './transfer-item-modal';
+import { Priority } from '@/generated/prisma';
 
 interface LivraisonEditProps {
   commandeId: string;
@@ -46,6 +47,7 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
   );
   const transferItemMutation = useMutation(trpc.livraisons.transferSingleItem.mutationOptions());
   const deleteLivraisonMutation = useMutation(trpc.livraisons.deleteLivraison.mutationOptions());
+  const changePriorityMutation = useMutation(trpc.livraisons.changePriority.mutationOptions());
 
   const livraisons = commande?.livraisons || [];
   const parsedLivraisons = livraisons.map((livraison) => ({
@@ -148,6 +150,25 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
     });
   };
 
+  const handleChangePriority = async (livraisonId: string, priority: Priority) => {
+    await changePriorityMutation.mutateAsync(
+      { livraisonId, priority },
+      {
+        onSuccess: () => {
+          toast.success('Priorité mise à jour', {
+            description: 'La priorité de la livraison a été mise à jour avec succès.',
+          });
+          refetchCommande();
+        },
+        onError: () => {
+          toast.error('Erreur', {
+            description: 'Impossible de mettre à jour la priorité de la livraison',
+          });
+        },
+      },
+    );
+  };
+
   if (!commande) {
     return <div>Chargement...</div>;
   }
@@ -177,9 +198,9 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
 
       <div className="grid gap-4 md:grid-cols-2">
         {parsedLivraisons.map((livraison, index) => (
-          <EditableLotCard
+          <EditableLivraisonCard
             key={livraison.id}
-            lot={livraison}
+            livraison={livraison}
             index={index}
             canEdit={canEdit}
             isEditing={editingLot === livraison.id}
@@ -189,6 +210,7 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
             onDelete={() => handleDeleteLivraison(livraison.id)}
             onTransferItem={(item) => openTransferModal(item, livraison.id)}
             availableLots={parsedLivraisons.filter((l) => l.id !== livraison.id)}
+            onPriorityChange={(priority) => handleChangePriority(livraison.id, priority)}
           />
         ))}
       </div>

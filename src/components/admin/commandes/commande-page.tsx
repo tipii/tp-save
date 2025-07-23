@@ -45,9 +45,11 @@ export default function CommandePage() {
               <FileText className="h-4 w-4 text-blue-600" />
             </div>
             <h3 className="text-lg font-semibold text-slate-800">Commandes trouvées</h3>
-            <Badge variant="secondary" className="bg-slate-200 text-slate-700">
-              Page 1 sur 2
-            </Badge>
+            {pagination?.totalPages && (
+              <Badge variant="secondary" className="bg-slate-200 text-slate-700">
+                Page {pagination.currentPage} sur {pagination.totalPages}
+              </Badge>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-0">
