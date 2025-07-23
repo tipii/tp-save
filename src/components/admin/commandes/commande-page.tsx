@@ -9,6 +9,8 @@ import { useCommandeFilters, getQueryParams } from './use-commande-filters';
 import { CommandeFilters } from './commande-filters';
 import { CommandesTable } from './table/commandes-table';
 import { Pagination } from './table/pagination';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 export default function CommandePage() {
   const { setBreadcrumb } = useBreadcrumb();
@@ -31,27 +33,24 @@ export default function CommandePage() {
   const pagination = commandesData?.pagination;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       {/* Filters Section */}
       <CommandeFilters pagination={pagination} />
 
       {/* Results Section */}
-      <div className="bg-background border shadow-sm">
-        <div className="bg-muted/30 border-b px-6 py-4">
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <FileText className="h-5 w-5" />
-            Commandes trouvées
-            {pagination && (
-              <div className="flex flex-1 items-center justify-between gap-2">
-                <span className="text-muted-foreground text-sm font-normal">
-                  (Page {pagination.currentPage} sur {pagination.totalPages})
-                </span>
-                <Pagination pagination={pagination} filters={filters} />
-              </div>
-            )}
-          </h2>
-        </div>
-        <div className="p-6">
+      <Card className="m-4 gap-0 rounded-sm">
+        <CardHeader className="bg-muted/30 border-b">
+          <div className="flex items-center space-x-3">
+            <div className="rounded-lg bg-blue-100 p-2">
+              <FileText className="h-4 w-4 text-blue-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-800">Commandes trouvées</h3>
+            <Badge variant="secondary" className="bg-slate-200 text-slate-700">
+              Page 1 sur 2
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
           {isPending ? (
             <div className="flex h-64 items-center justify-center">
               <div className="text-center">
@@ -62,8 +61,8 @@ export default function CommandePage() {
           ) : (
             <CommandesTable commandes={commandes} filters={filters} pagination={pagination} />
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

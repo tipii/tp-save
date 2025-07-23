@@ -66,12 +66,6 @@ export interface CommandesTableProps {
   };
 }
 
-export interface CommandeRowProps {
-  commande: TrpcCommande;
-  isExpanded: boolean;
-  onToggle: (commandeId: string) => void;
-}
-
 export interface ExpandedRowProps {
   commande: TrpcCommande;
 }

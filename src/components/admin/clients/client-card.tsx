@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Phone, Mail, User, Building, FileText, Pencil } from 'lucide-react';
+import { MapPin, Phone, Mail, User, Building, FileText, Pencil, SquarePen } from 'lucide-react';
 import React from 'react';
 import { TrpcClient } from '@/types/trpc-types';
 
@@ -16,10 +16,10 @@ export default function ClientCard({ client }: { client: TrpcClient }) {
           </div>
           <a
             href={`/app/clients/${client.id}`}
-            className="ml-auto flex items-center gap-2 text-sm text-blue-600 hover:underline"
+            className="ml-auto flex items-center gap-2 text-sm hover:underline"
             title="Edit client"
           >
-            <Pencil className="h-4 w-4" />
+            <SquarePen className="h-4 w-4" />
             Modifier
           </a>
         </CardTitle>

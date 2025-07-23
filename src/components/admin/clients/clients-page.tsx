@@ -38,7 +38,7 @@ export default function ClientsPageComponent() {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    setBreadcrumb([{ label: 'Tallin Pi Livraison', href: '/app' }], 'Clients');
+    setBreadcrumb([], 'Clients');
   }, [setBreadcrumb]);
 
   const trpc = useTRPC();

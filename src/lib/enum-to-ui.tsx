@@ -44,11 +44,7 @@ export const statusToBadge = (status: Status) => {
       );
     case Status.DELIVERED:
       return (
-        <Badge
-          variant="default"
-          className="bg-green-100 text-green-800 hover:bg-green-200"
-          id={'status'}
-        >
+        <Badge variant="green" id={'status'}>
           {statusToText(status)}
         </Badge>
       );

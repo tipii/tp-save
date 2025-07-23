@@ -15,6 +15,8 @@ import { Search, Filter, X, Calendar, SortAsc } from 'lucide-react';
 import { useCommandeFilters, type CommandeFiltersActions } from './use-commande-filters';
 import { Priority, Status } from '@/generated/prisma';
 import { priorityToText, statusToText } from '@/lib/enum-to-ui';
+import { Combobox } from '@/components/ui/combobox';
+import { Card, CardHeader } from '@/components/ui/card';
 
 interface CommandeFiltersProps {
   pagination?: {
@@ -47,8 +49,8 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
   }, [filters.search]);
 
   return (
-    <div className="bg-background border shadow-sm">
-      <div className="bg-muted/30 border-b px-6 py-4">
+    <Card className="bg-background m-4 rounded-sm">
+      <CardHeader>
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
             <Filter className="h-5 w-5" />
@@ -61,11 +63,11 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
             </Button>
           )}
         </div>
-      </div>
+      </CardHeader>
 
       <div className="space-y-4 p-4">
         {/* Search and Sort Section */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
+        <div className="flex flex-col gap-4 lg:flex-row">
           {/* Search */}
           <div className="flex-1 space-y-2">
             <h3 className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
@@ -85,10 +87,6 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
 
           {/* Sorting Options */}
           <div className="space-y-2">
-            <h3 className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
-              <SortAsc className="h-4 w-4" />
-              Tri
-            </h3>
             <div className="flex gap-3">
               <div className="space-y-1">
                 <label className="text-muted-foreground text-xs">Trier par</label>
@@ -123,30 +121,28 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
 
         {/* Quick Filters and Date Range Section */}
         <div className="flex flex-col gap-4">
-          <div className="flex gap-4">
+          <div className="flex justify-between gap-4">
             {/* Quick Filters */}
             <div className="space-y-2">
-              <h3 className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
+              <h3 className="flex items-center gap-2 text-sm font-medium">
                 <Filter className="h-4 w-4" />
-                Filtres rapides
+                Filtres
               </h3>
               <div className="flex gap-4">
                 {/* Client Filter */}
-                <div className="space-y-2">
+                <div className="flex flex-col justify-end">
                   <label className="text-muted-foreground text-xs">Client</label>
-                  <Select value={filters.clientId} onValueChange={filters.setClientId}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Tous les clients" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous les clients</SelectItem>
-                      {clients?.map((client) => (
-                        <SelectItem key={client.id} value={client.id}>
-                          {client.name} ({client.code})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Combobox
+                    options={[
+                      { label: 'Tout les clients', value: 'all' },
+                      ...(clients?.map((client) => ({
+                        label: client.name ?? 'Non défini',
+                        value: client.id,
+                      })) ?? []),
+                    ]}
+                    value={filters.clientId}
+                    onChange={filters.setClientId}
+                  />
                 </div>
 
                 {/* Priority Filter */}
@@ -207,10 +203,6 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
 
             {/* Date Range */}
             <div className="space-y-2">
-              <h3 className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
-                <Calendar className="h-4 w-4" />
-                Période
-              </h3>
               <div className="flex gap-3">
                 <div className="space-y-1">
                   <label className="text-muted-foreground text-xs">Date de début</label>
@@ -265,6 +257,6 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

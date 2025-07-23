@@ -2,7 +2,7 @@
 
 import { useTRPC } from '@/trpc/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -33,6 +33,7 @@ import {
   Building,
   Calendar,
 } from 'lucide-react';
+import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 
 // Form validation schema
 const clientFormSchema = z.object({
@@ -52,14 +53,17 @@ type ClientFormData = z.infer<typeof clientFormSchema>;
 
 export default function ClientPageComponent({ id }: { id: string }) {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-
   const {
     data: client,
     isPending,
     refetch,
   } = useQuery(trpc.clients.getClientById.queryOptions(id));
+
+  const { setBreadcrumb } = useBreadcrumb();
+  useEffect(() => {
+    setBreadcrumb([{ label: 'Clients', href: '/app/clients' }], client?.name ?? 'Client');
+  }, [setBreadcrumb, client]);
 
   const updateClientMutation = useMutation(trpc.clients.updateClient.mutationOptions());
 
@@ -136,9 +140,9 @@ export default function ClientPageComponent({ id }: { id: string }) {
   }
 
   return (
-    <div className="">
+    <Card className="m-4 gap-0 rounded-sm">
       {/* Header */}
-      <div className="flex items-center justify-between p-4">
+      <CardHeader className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{client.name}</h1>
           <div className="mt-2 flex items-center gap-2">
@@ -173,271 +177,264 @@ export default function ClientPageComponent({ id }: { id: string }) {
             </>
           )}
         </Button>
-      </div>
+      </CardHeader>
 
       {/* Client Form */}
-      <Card className="rounded-none">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building className="h-5 w-5" />
-            Informations du client
-          </CardTitle>
-          <CardDescription>
-            {isEditing
-              ? 'Modifiez les informations du client ci-dessous'
-              : 'Informations détaillées du client'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Basic Information */}
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Nom de l'entreprise
-                      </FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Nom de l'entreprise" disabled={!isEditing} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
-                <FormField
-                  control={form.control}
-                  name="contactPerson"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Contact principal
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Nom du contact principal"
-                          disabled={!isEditing}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+      <CardContent className="p-4">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="rounded-lg bg-blue-100 p-2">
+            <Building className="h-5 w-5 text-blue-600" />
+          </div>
+          <h3 className="text-lg font-semibold">Informations du client</h3>
+        </div>
 
-              {/* Contact Information */}
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        Email
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="email"
-                          placeholder="email@exemple.com"
-                          disabled={!isEditing}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        Téléphone principal
-                      </FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="+689 40 12 34 56" disabled={!isEditing} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Basic Information */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Nom de l'entreprise
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Nom de l'entreprise" disabled={!isEditing} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
-                name="phoneSecond"
+                name="contactPerson"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Contact principal
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Nom du contact principal"
+                        disabled={!isEditing}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Contact Information */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      Email
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="email"
+                        placeholder="email@exemple.com"
+                        disabled={!isEditing}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
                       <Phone className="h-4 w-4" />
-                      Téléphone secondaire
+                      Téléphone principal
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="+689 40 12 34 57" disabled={!isEditing} />
+                      <Input {...field} placeholder="+689 40 12 34 56" disabled={!isEditing} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="phoneSecond"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    Téléphone secondaire
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="+689 40 12 34 57" disabled={!isEditing} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Address Information */}
+            <div className="space-y-4">
+              <div className="mb-4 flex items-center gap-2">
+                <div className="rounded-lg bg-blue-100 p-2">
+                  <MapPin className="h-5 w-5 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold">Adresse</h3>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Adresse</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Rue, numéro, complément"
+                        disabled={!isEditing}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Address Information */}
-              <div className="space-y-4">
-                <h3 className="flex items-center gap-2 text-lg font-semibold">
-                  <MapPin className="h-5 w-5" />
-                  Adresse
-                </h3>
-
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <FormField
                   control={form.control}
-                  name="address"
+                  name="city"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Adresse</FormLabel>
+                      <FormLabel>Ville</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Rue, numéro, complément"
-                          disabled={!isEditing}
-                        />
+                        <Input {...field} placeholder="Papeete" disabled={!isEditing} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ville</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Papeete" disabled={!isEditing} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="postalCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Code postal</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="98713" disabled={!isEditing} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="postalCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Code postal</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="98713" disabled={!isEditing} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Pays</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Polynésie française"
-                            disabled={!isEditing}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pays</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Polynésie française" disabled={!isEditing} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
+            </div>
 
-              {/* Notes */}
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Notes
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        placeholder="Notes internes sur le client..."
-                        className="min-h-[100px]"
-                        disabled={!isEditing}
-                      />
-                    </FormControl>
-                    <FormDescription>Informations complémentaires sur le client</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Timestamps */}
-              <div className="space-y-2 border-t pt-4">
-                <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    Créé le :{' '}
-                    {new Date(client.createdAt).toLocaleString('fr-FR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                    })}
-                  </span>
-                </div>
-                <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    Mise à jour le :{' '}
-                    {new Date(client.updatedAt).toLocaleString('fr-FR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                    })}
-                  </span>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              {isEditing && (
-                <div className="flex justify-end gap-4 border-t pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-                    <X className="mr-2 h-4 w-4" />
-                    Annuler
-                  </Button>
-                  <Button type="submit" disabled={updateClientMutation.isPending}>
-                    <Save className="mr-2 h-4 w-4" />
-                    {updateClientMutation.isPending ? 'Sauvegarde...' : 'Sauvegarder'}
-                  </Button>
-                </div>
+            {/* Notes */}
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Notes
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Notes internes sur le client..."
+                      className="min-h-[100px]"
+                      disabled={!isEditing}
+                    />
+                  </FormControl>
+                  <FormDescription>Informations complémentaires sur le client</FormDescription>
+                  <FormMessage />
+                </FormItem>
               )}
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+            />
+
+            {/* Timestamps */}
+            <div className="space-y-2 border-t pt-4">
+              <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  Créé le :{' '}
+                  {new Date(client.createdAt).toLocaleString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                  })}
+                </span>
+              </div>
+              <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  Mise à jour le :{' '}
+                  {new Date(client.updatedAt).toLocaleString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                  })}
+                </span>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            {isEditing && (
+              <div className="flex justify-end gap-4 border-t pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                  <X className="mr-2 h-4 w-4" />
+                  Annuler
+                </Button>
+                <Button type="submit" disabled={updateClientMutation.isPending}>
+                  <Save className="mr-2 h-4 w-4" />
+                  {updateClientMutation.isPending ? 'Sauvegarde...' : 'Sauvegarder'}
+                </Button>
+              </div>
+            )}
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }

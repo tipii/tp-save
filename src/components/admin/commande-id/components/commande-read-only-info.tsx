@@ -22,6 +22,10 @@ export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) 
   return (
     <div className="space-y-6">
       {/* System Information */}
+
+      {/* Client Information */}
+      {commande.client && <ClientCard client={{ ...commande.client, commandes: [] }} />}
+
       <Card>
         <CardHeader>
           <CardTitle>Informations système</CardTitle>
@@ -61,38 +65,6 @@ export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) 
           </div>
         </CardContent>
       </Card>
-
-      {/* Client Information */}
-      {commande.client && <ClientCard client={{ ...commande.client, commandes: [] }} />}
-
-      {/* Lots Information */}
-      {commande.livraisons && commande.livraisons.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Livraisons ({commande.livraisons.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {commande.livraisons.map((livraison) => (
-                <div key={livraison.id} className="rounded border p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="font-medium">{livraison.name}</div>
-                    <div className="flex gap-2">
-                      {priorityToBadge(livraison.priority)}
-                      {statusToBadge(livraison.status)}
-                    </div>
-                  </div>
-                  {livraison.chargement && (
-                    <div className="text-muted-foreground mt-1 text-sm">
-                      Chargement: {livraison.chargement.name}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
