@@ -28,6 +28,7 @@ import {
 import { cn } from '@/lib/utils';
 import { TrpcLivreur } from '@/types/trpc-types';
 import { priorityToBadge } from '@/components/ui/enum-to-ui';
+import { Status } from '@/generated/prisma';
 
 interface LivreursTableProps {
   livreurs: TrpcLivreur[];
@@ -114,7 +115,12 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
   };
 
   const getActiveChargements = (livreur: TrpcLivreur) => {
-    return livreur.chargements.filter((c) => c.status !== 'completed' && c.status !== 'cancelled');
+    return livreur.chargements.filter(
+      (c) =>
+        c.status !== Status.CANCELLED &&
+        c.status !== Status.DELIVERED &&
+        c.status !== Status.RETURNED,
+    );
   };
 
   const getTotalLots = (livreur: TrpcLivreur) => {
