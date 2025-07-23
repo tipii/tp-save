@@ -24,11 +24,12 @@ export function CommandeEditControls({ commandeId, commandeRef }: CommandeEditCo
     });
   };
 
+  if (!commande) return null;
+
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-2xl font-bold">Commande {commandeRef}</h1>
-        <p className="text-muted-foreground">ID: {commandeId}</p>
+        <h1 className="text-2xl font-bold">Commande {commande.name}</h1>
       </div>
 
       <div className="flex items-center gap-2">

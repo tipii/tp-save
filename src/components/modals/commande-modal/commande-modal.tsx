@@ -11,7 +11,7 @@ import { Building } from 'lucide-react';
 import React from 'react';
 import { TrpcClient, TrpcCommande } from '@/types/trpc-types';
 import ClientCard from '@/components/admin/clients/client-card';
-import { priorityToBadge } from '@/lib/enum-to-ui';
+import { priorityToBadge } from '@/components/ui/enum-to-ui';
 
 export default function CommandeModal({
   children,

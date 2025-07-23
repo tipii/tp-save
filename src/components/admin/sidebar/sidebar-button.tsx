@@ -23,10 +23,8 @@ export default function SidebarButton({
       <SidebarMenuButton asChild>
         <Link
           href={url}
-          className={`w-full justify-start gap-3 py-2 ${
-            isActive
-              ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+          className={`w-full justify-start rounded-lg px-4 py-6 font-bold text-slate-600 ${
+            isActive && 'bg-blue-600 text-white'
           }`}
         >
           {icon}

@@ -8,7 +8,7 @@ model Chargement {
 
   livreurId String?
   livreur   User?   @relation(fields: [livreurId], references: [id])
-  status    String  @default("pending")
+  status    Status  @default(PENDING)
 
   history ChargementHistory[]
 

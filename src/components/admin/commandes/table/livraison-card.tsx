@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select';
 import { useTRPC } from '@/trpc/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { priorityToText, statusToBadge } from '@/lib/enum-to-ui';
+import { priorityToText, statusToBadge } from '@/components/ui/enum-to-ui';
 import { getQueryParams, useCommandeFilters } from '../use-commande-filters';
 import { toast } from 'sonner';
 import { TrpcLivraisonFromCommande } from '@/types/trpc-types';

@@ -3,7 +3,7 @@
 import { DateNavigationComponent } from '@/components/admin/shared/date-navigation-example';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { useTRPC } from '@/trpc/client';
 import { useQuery } from '@tanstack/react-query';
@@ -12,11 +12,17 @@ import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { DroppableLivreur } from './dnd/droppable';
 import { PriorityZone } from './dnd/priority-zone';
 import { Priority } from '@/generated/prisma';
+import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 
 export default function ChargementDnd() {
   const trpc = useTRPC();
   const { data: livraisons } = useQuery(trpc.livraisons.getPendingLivraisons.queryOptions());
   const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
+
+  const { setBreadcrumb } = useBreadcrumb();
+  useEffect(() => {
+    setBreadcrumb([], 'Chargement');
+  }, [setBreadcrumb]);
 
   const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>({});
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'none'>('none');

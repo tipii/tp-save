@@ -12,93 +12,104 @@ import {
   Pencil,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { type CommandeRowProps } from './types';
 import { getTotalItems } from './utils';
-import { ExpandedRow } from './expanded-row';
 import Link from 'next/link';
-import { statusToBadge, priorityToBadge } from '@/lib/enum-to-ui';
+import { statusToBadge, priorityToBadge } from '@/components/ui/enum-to-ui';
+import { useRouter } from 'next/navigation';
+import { TrpcCommande } from '@/types/trpc-types';
+import { Badge } from '@/components/ui/badge';
 
-export function CommandeRow({ commande, isExpanded, onToggle }: CommandeRowProps) {
+export interface CommandeRowProps {
+  commande: TrpcCommande;
+}
+
+export function CommandeRow({ commande }: CommandeRowProps) {
+  const router = useRouter();
   return (
-    <>
-      <TableRow
-        className={cn('hover:bg-muted/50 cursor-pointer', isExpanded && 'bg-muted/30')}
-        onClick={() => onToggle(commande.id)}
-      >
-        <TableCell>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            {isExpanded ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-          </Button>
-        </TableCell>
-        <TableCell>
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
-              <FileText className="text-primary h-5 w-5" />
+    <TableRow
+      className={cn('hover:bg-muted/50 cursor-pointer p-4 py-12')}
+      onClick={() => router.push(`/app/commandes/${commande.id}`)}
+    >
+      <TableCell>
+        <div className="flex items-center space-x-3">
+          <div className="rounded-lg bg-blue-100 p-1.5">
+            <FileText className="h-4 w-4 text-blue-600" />
+          </div>
+          <div>
+            <div className="text-sm leading-tight font-semibold text-slate-900">
+              {commande.name}
+            </div>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        {commande.client ? (
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-orange-100 p-1.5">
+              <Building className="h-4 w-4 text-orange-600" />
             </div>
             <div>
-              <div className="font-medium">{commande.ref}</div>
-              <div className="text-muted-foreground text-sm">ID: {commande.id.slice(0, 8)}...</div>
+              <div className="font-medium">{commande.client.name}</div>
             </div>
           </div>
-        </TableCell>
-        <TableCell>
-          {commande.client ? (
-            <div className="flex items-center gap-2">
-              <Building className="text-muted-foreground h-4 w-4" />
-              <div>
-                <div className="font-medium">{commande.client.name}</div>
-                <div className="text-muted-foreground text-sm">{commande.client.code}</div>
-              </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-red-100 p-1.5">
+              <AlertCircle className="h-4 w-4 text-red-600" />
             </div>
+            <span className="text-muted-foreground">Client non assigné</span>
+          </div>
+        )}
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          {commande.bp_number ? (
+            <Badge variant="green">{commande.bp_number}</Badge>
           ) : (
-            <div className="text-muted-foreground flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" />
-              <span>Client non assigné</span>
+            <span className="text-muted-foreground">Non défini</span>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          {commande.bl_number ? (
+            <Badge variant="purple">{commande.bl_number}</Badge>
+          ) : (
+            <span className="text-muted-foreground">Non défini</span>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <Package className="text-muted-foreground h-4 w-4" />
+          <span className="font-medium">{commande.livraisons.length}</span>
+          {commande.livraisons.length > 0 && (
+            <div className="grid grid-cols-3 gap-1">
+              <div className="flex flex-col items-end justify-evenly gap-0 text-xs">
+                <span className="text-muted-foreground">Priorités :</span>
+                <span className="text-muted-foreground">Statuts :</span>
+              </div>
+              {commande.livraisons.map((livraison) => (
+                <div className="flex flex-col items-center gap-0" key={livraison.id}>
+                  {priorityToBadge(livraison.priority)}
+                  {statusToBadge(livraison.status)}
+                </div>
+              ))}
             </div>
           )}
-        </TableCell>
-        <TableCell>
-          <div className="flex items-center gap-2">
-            <Package className="text-muted-foreground h-4 w-4" />
-            <span className="font-medium">{commande.livraisons.length}</span>
-          </div>
-        </TableCell>
-        <TableCell>
-          {commande.livraisons.map((livraison) => (
-            <span key={livraison.id} className="mr-1">
-              {priorityToBadge(livraison.priority)}
-            </span>
-          ))}
-        </TableCell>
-        <TableCell>{statusToBadge(commande.status)}</TableCell>
-        <TableCell>
-          <div className="font-medium">{getTotalItems(commande.livraisons)} articles</div>
-        </TableCell>
-        <TableCell>
-          <div className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Clock className="h-3 w-3" />
-            <span>{new Date(commande.createdAt).toLocaleDateString('fr-FR')}</span>
-          </div>
-        </TableCell>
-        <TableCell>
-          <Link href={`/app/commandes/${commande.id}`} onClick={(e) => e.stopPropagation()}>
-            <Button variant="ghost" size="sm">
-              <Pencil className="h-4 w-4" />
-            </Button>
-          </Link>
-        </TableCell>
-      </TableRow>
-      {isExpanded && (
-        <TableRow>
-          <TableCell colSpan={9} className="bg-muted/20 p-0">
-            <ExpandedRow commande={commande} />
-          </TableCell>
-        </TableRow>
-      )}
-    </>
+        </div>
+      </TableCell>
+
+      <TableCell>{statusToBadge(commande.status)}</TableCell>
+      <TableCell>
+        <div className="font-medium">{getTotalItems(commande.livraisons)} articles</div>
+      </TableCell>
+      <TableCell>
+        <div className="text-muted-foreground flex items-center gap-2 text-sm">
+          <Clock className="h-3 w-3" />
+          <span>{new Date(commande.createdAt).toLocaleDateString('fr-FR')}</span>
+        </div>
+      </TableCell>
+    </TableRow>
   );
 }

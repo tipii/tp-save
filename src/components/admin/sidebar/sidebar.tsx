@@ -46,11 +46,11 @@ const items = [
     url: '/app/commandes',
     icon: Inbox,
   },
-  {
-    title: 'Livraisons',
-    url: '/app/livraisons',
-    icon: Package,
-  },
+  // {
+  //   title: 'Livraisons',
+  //   url: '/app/livraisons',
+  //   icon: Package,
+  // },
   {
     title: 'Chargements',
     url: '/app/chargements',
@@ -71,7 +71,9 @@ const items = [
 export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>Tallin Pi</SidebarHeader>
+      <SidebarHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
+        Tallin Pi
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -81,7 +83,7 @@ export function AppSidebar() {
                   key={item.title}
                   title={item.title}
                   url={item.url}
-                  icon={<item.icon />}
+                  icon={<item.icon className="h-4 w-4" />}
                 />
               ))}
             </SidebarMenu>

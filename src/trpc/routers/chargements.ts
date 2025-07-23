@@ -50,7 +50,7 @@ export const chargementsRouter = createTRPCRouter({
         data: {
           name: input.name || 'Chargement ' + new Date().toLocaleDateString(),
           livreurId: input.livreurId,
-          status: 'ready',
+          status: Status.READY,
           livraisons: {
             connect: input.livraisons.map((livraisonId) => ({ id: livraisonId })),
           },

@@ -9,18 +9,17 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
-        secondary:
-          'border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90',
-        destructive:
-          'border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
-        outline: 'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
-        priorityUrgent:
-          'border-transparent bg-red-600 text-white [a&]:hover:bg-primary/90 font-bold text-xs',
-        priorityNormal:
-          'border-transparent bg-yellow-400 text-white [a&]:hover:bg-primary/90 font-bold text-xs',
-        priorityIsles:
-          'border-transparent bg-blue-600 text-white [a&]:hover:bg-primary/90 font-bold text-xs',
+        default: 'bg-gray-100 text-gray-600',
+        secondary: ' bg-secondary text-secondary-foreground',
+        destructive: 'bg-destructive text-white ',
+        outline: 'text-foreground',
+        red: 'bg-red-50 text-red-600 ',
+        orange: 'bg-orange-50 text-orange-600 ',
+        urgent: 'bg-red-50 text-red-600 ',
+        blue: 'bg-blue-50 text-blue-600 ',
+        green: 'bg-green-50 text-green-600 ',
+        purple: 'bg-purple-50 text-purple-600 ',
+        yellow: 'bg-yellow-50 text-yellow-600 ',
       },
     },
     defaultVariants: {

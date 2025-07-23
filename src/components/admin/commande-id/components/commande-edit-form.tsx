@@ -23,16 +23,17 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Edit, Save, X, User, Calendar, Truck, Package } from 'lucide-react';
+import { Edit, Save, X, User, Calendar, Truck, Package, NotebookText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCommandeEdit } from '../hooks/use-commande-edit';
 import { useQuery } from '@tanstack/react-query';
 import { useTRPC } from '@/trpc/client';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Combobox } from '../../../ui/combobox';
 
 const commandeUpdateSchema = z.object({
-  ref: z.string().min(1, 'La référence est requise'),
+  name: z.string().min(1, 'Le nom est requise'),
   status: z.enum(Status),
   orderReceivedById: z.string().optional(),
   orderTransmittedById: z.string().optional(),
@@ -55,7 +56,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
   const form = useForm<CommandeUpdateForm>({
     resolver: zodResolver(commandeUpdateSchema),
     defaultValues: {
-      ref: '',
+      name: '',
       status: Status.PENDING,
       orderReceivedById: '',
       orderTransmittedById: '',
@@ -68,7 +69,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
   useEffect(() => {
     if (commande) {
       form.reset({
-        ref: commande.ref,
+        name: commande.name || 'Commande',
         status: commande.status as Status,
         orderReceivedById: commande.orderReceivedById || '',
         orderTransmittedById: commande.orderTransmittedById || '',
@@ -82,7 +83,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
 
   const handleSave = async (data: CommandeUpdateForm) => {
     await updateCommande({
-      ref: data.ref,
+      name: data.name,
       status: data.status,
       orderReceivedById: data.orderReceivedById || undefined,
       orderTransmittedById: data.orderTransmittedById || undefined,
@@ -94,7 +95,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
   const handleCancel = () => {
     if (commande) {
       form.reset({
-        ref: commande.ref,
+        name: commande.name || 'Commande',
         status: commande.status as Status,
         orderReceivedById: commande.orderReceivedById || '',
         orderTransmittedById: commande.orderTransmittedById || '',
@@ -114,7 +115,9 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Edit className="h-5 w-5" />
+          <div className="rounded-lg bg-blue-100 p-2">
+            <Edit className="h-5 w-5 text-blue-600" />
+          </div>
           Détails de la Commande
         </CardTitle>
         <CardDescription>
@@ -128,10 +131,10 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
           <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
             <FormField
               control={form.control}
-              name="ref"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Référence</FormLabel>
+                  <FormLabel>Nom</FormLabel>
                   <FormControl>
                     <Input {...field} disabled={!canEdit} placeholder="Saisir la référence" />
                   </FormControl>
@@ -169,7 +172,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
             />
 
             {/* User Assignment Fields */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               <FormField
                 control={form.control}
                 name="orderReceivedById"
@@ -179,21 +182,12 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
                       <User className="h-4 w-4" />
                       Réceptionné par
                     </FormLabel>
-                    <Select disabled={!canEdit} onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un utilisateur" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="N/A">Aucun</SelectItem>
-                        {users?.map((user) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Combobox
+                      options={users?.map((user) => ({ value: user.id, label: user.name })) || []}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={!canEdit}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -205,31 +199,20 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
-                      <Truck className="h-4 w-4" />
+                      <NotebookText className="h-4 w-4" />
                       Transmis par
                     </FormLabel>
-                    <Select disabled={!canEdit} onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un utilisateur" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="N/A">Aucun</SelectItem>
-                        {users?.map((user) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Combobox
+                      options={users?.map((user) => ({ value: user.id, label: user.name })) || []}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={!canEdit}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="orderReceptionMode"
@@ -291,7 +274,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
             </div>
 
             {canEdit && (
-              <div className="flex gap-2">
+              <div className="flex flex-1 justify-end gap-2 pt-4">
                 <Button type="submit" disabled={mutations.update.isPending}>
                   <Save className="mr-2 h-4 w-4" />
                   Enregistrer les modifications

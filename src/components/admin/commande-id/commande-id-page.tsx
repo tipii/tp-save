@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CommandeEditControls } from './components/commande-edit-controls';
 import { CommandeEditForm } from './components/commande-edit-form';
 import { CommandeReadOnlyInfo } from './components/commande-read-only-info';
 import { LivraisonEdit } from './components/livraison-edit/livraison-edit';
 import { useCommandeEdit } from './hooks/use-commande-edit';
 import CommandeLinkBl from './components/commande-link-bl';
+import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 
 interface CommandeIdPageProps {
   id: string;
@@ -14,6 +15,11 @@ interface CommandeIdPageProps {
 
 export default function CommandeIdPage({ id }: CommandeIdPageProps) {
   const { commande, isLoading, refetchCommande } = useCommandeEdit(id);
+  const { setBreadcrumb } = useBreadcrumb();
+
+  useEffect(() => {
+    setBreadcrumb([{ label: 'Commandes', href: '/app/commandes' }], commande?.name ?? 'Commande');
+  }, [setBreadcrumb, commande]);
 
   if (isLoading || !commande) {
     return <div className="p-6">Chargement...</div>;
