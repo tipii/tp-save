@@ -1,19 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useTRPC } from '@/trpc/client';
-import { TrpcChargement } from '@/types/trpc-types';
 import { useQuery } from '@tanstack/react-query';
-import { statusToBadge, statusToText, priorityToBadge } from '@/components/ui/enum-to-ui';
-import { Package, User, MapPin, Calendar, Clock } from 'lucide-react';
+import { statusToBadge, priorityToBadge, statusToTailwindColor } from '@/components/ui/enum-to-ui';
+import { Package, User, MapPin, Calendar, Clock, Building, Building2 } from 'lucide-react';
 import React from 'react';
 
 export default function ChargementModal({
@@ -42,6 +39,7 @@ export default function ChargementModal({
   const readyCount = chargement.livraisons.filter(
     (l) => l.status === 'READY' || l.status === 'DELIVERING',
   ).length;
+  const returnedLivraisons = chargement.livraisons.filter((l) => l.status === 'RETURNED');
 
   return (
     <Dialog modal>
@@ -61,6 +59,7 @@ export default function ChargementModal({
               {totalLivraisons} livraison{totalLivraisons > 1 ? 's' : ''} • {totalItems} article
               {totalItems > 1 ? 's' : ''}
             </div>
+
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               {new Date(chargement.createdAt).toLocaleDateString('fr-FR')}
@@ -84,6 +83,13 @@ export default function ChargementModal({
                 {totalLivraisons > 0 ? Math.round((deliveredCount / totalLivraisons) * 100) : 0}%
                 des livraisons complétées ({deliveredCount} / {totalLivraisons})
               </div>
+
+              {returnedLivraisons.length > 0 && (
+                <div className="text-muted-foreground mt-1 text-center text-xs">
+                  {returnedLivraisons.length} livraison{returnedLivraisons.length > 1 ? 's' : ''}
+                  retournée{returnedLivraisons.length > 1 ? 's' : ''}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -99,12 +105,15 @@ export default function ChargementModal({
                 const itemCount = Array.isArray(items) ? items.length : 0;
 
                 return (
-                  <Card key={livraison.id} className="border-l-4 border-l-blue-500">
+                  <Card
+                    key={livraison.id}
+                    className={`border ${statusToTailwindColor(livraison.status).border} p-0`}
+                  >
                     <CardContent className="py-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Badge variant="outline" className="font-mono text-xs">
-                            {livraison.commande.ref}
+                            {livraison.name}
                           </Badge>
                           {priorityToBadge(livraison.priority)}
                           {statusToBadge(livraison.status)}
@@ -113,10 +122,13 @@ export default function ChargementModal({
                           {itemCount} article{itemCount > 1 ? 's' : ''}
                         </div>
                       </div>
+                      <div className="text-muted-foreground mt-1 text-xs">
+                        {livraison.commande.bl_number}
+                      </div>
 
-                      <div className="mt-2 flex items-center justify-between text-sm">
+                      <div className="mt-1 flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
-                          <MapPin className="text-muted-foreground h-3 w-3" />
+                          <Building className="text-muted-foreground h-3 w-3" />
                           <span className="font-medium">
                             {livraison.commande.client?.name || 'Client inconnu'}
                           </span>

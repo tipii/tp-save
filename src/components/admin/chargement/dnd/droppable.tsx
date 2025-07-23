@@ -12,6 +12,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import ChargementModal from '@/components/modals/chargement-modal/chargement-modal';
 import DraggableLot from './draggable';
+import { statusToIcon } from '@/components/ui/enum-to-ui';
 
 export const DroppableLivreur = ({
   livreur,
@@ -29,7 +30,6 @@ export const DroppableLivreur = ({
   const trpc = useTRPC();
   const { refetch } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
   const { refetch: refetchLots } = useQuery(trpc.livraisons.getPendingLivraisons.queryOptions());
-	
 
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-${livreur.id}`,
@@ -76,18 +76,6 @@ export const DroppableLivreur = ({
     });
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'ready':
-        return <Warehouse size={16} />;
-      case 'delivering':
-        return <Truck size={16} />;
-      case 'delivered':
-        return <Check size={16} />;
-      default:
-        return <CircleQuestionMark size={16} />;
-    }
-  };
   return (
     <div
       key={livreur.id}
@@ -106,7 +94,7 @@ export const DroppableLivreur = ({
             className="flex items-center justify-between gap-2 rounded-sm border border-emerald-200 bg-emerald-50 px-2"
           >
             <div className="flex items-center gap-2">
-              <p className="text-xs text-slate-500">{getStatusIcon(chargement.status)}</p>
+              <p className="text-xs text-slate-500">{statusToIcon(chargement.status)}</p>
               <p className="text-sm">{chargement.name}</p>
             </div>
             <ChargementModal chargementId={chargement.id}>
@@ -119,32 +107,34 @@ export const DroppableLivreur = ({
       </div>
       <div
         ref={setNodeRef}
-        className="rounded-lg border-2 border-dashed border-slate-200 p-2 text-center"
+        className="flex flex-1 flex-col items-center rounded-lg border-2 border-dashed border-slate-200 p-2 text-center"
       >
-        <h3 className="mb-1 text-sm font-medium text-slate-900">Chargement</h3>
-        <div className="flex flex-col items-center justify-center gap-1 pb-4">
-          {droppedLivraisons.map((livraison) => (
-            <div key={livraison.id} className="flex w-full items-center">
-              <DraggableLot key={livraison.id} livraison={livraison} />
-              <div className="">
-                <CommandeModal commande={livraison.commande as TrpcCommande}>
-                  <Button variant="ghost" className="h-5 w-5">
-                    <Eye size={16} />
+        <div className="flex flex-1 flex-col items-center justify-center">
+          <h3 className="mb-1 text-sm font-bold text-slate-900">Chargement</h3>
+          <div className="flex flex-col items-center justify-center gap-1 pb-4">
+            {droppedLivraisons.map((livraison) => (
+              <div key={livraison.id} className="flex w-full items-center">
+                <DraggableLot key={livraison.id} livraison={livraison} />
+                <div className="">
+                  <CommandeModal commande={livraison.commande as TrpcCommande}>
+                    <Button variant="ghost" className="h-5 w-5">
+                      <Eye size={16} />
+                    </Button>
+                  </CommandeModal>
+                  <Button
+                    variant="ghost"
+                    className="h-5 w-5"
+                    onClick={() => onRemoveLivraison(livraison.id)}
+                  >
+                    <X size={16} />
                   </Button>
-                </CommandeModal>
-                <Button
-                  variant="ghost"
-                  className="h-5 w-5"
-                  onClick={() => onRemoveLivraison(livraison.id)}
-                >
-                  <X size={16} />
-                </Button>
+                </div>
               </div>
-            </div>
-          ))}
-          {droppedLivraisons.length === 0 && (
-            <div className="text-xs text-slate-500">Déposer les commandes ici</div>
-          )}
+            ))}
+            {droppedLivraisons.length === 0 && (
+              <div className="text-xs text-slate-500">Déposer les commandes ici</div>
+            )}
+          </div>
         </div>
 
         <Button

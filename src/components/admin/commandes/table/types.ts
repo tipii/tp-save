@@ -1,30 +1,6 @@
 import { type CommandeFiltersActions } from '../use-commande-filters';
 import { type TrpcCommande, type TrpcLivraisonFromCommande } from '@/types/trpc-types';
 
-export interface Commande {
-  id: string;
-  ref: string;
-  clientName: string;
-  clientPhone?: string;
-  clientEmail?: string;
-  clientAddress?: string;
-  priority: 'URGENT' | 'NORMAL' | 'ILES';
-  status: 'pending' | 'ready' | 'delivering' | 'delivered' | 'cancelled';
-  createdAt: Date;
-  updatedAt: Date;
-  lots: Livraison[];
-}
-
-export interface Livraison {
-  id: string;
-  ref: string;
-  priority: 'URGENT' | 'NORMAL' | 'ILES';
-  status: 'pending' | 'ready' | 'delivering' | 'delivered' | 'cancelled';
-  items: Livraisontem[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export interface Livraisontem {
   id: string;
   productName: string;

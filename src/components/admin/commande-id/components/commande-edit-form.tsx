@@ -115,7 +115,9 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Edit className="h-5 w-5" />
+          <div className="rounded-lg bg-blue-100 p-2">
+            <Edit className="h-5 w-5 text-blue-600" />
+          </div>
           Détails de la Commande
         </CardTitle>
         <CardDescription>
