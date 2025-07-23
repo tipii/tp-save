@@ -1,7 +1,7 @@
 model Commande {
   id        String   @id @default(cuid())
   ref       String
-  name      String?
+  name      String   @default("Commande")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   status    Status   @default(PENDING)

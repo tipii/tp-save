@@ -6,7 +6,7 @@ import { Calendar } from 'lucide-react';
 import { Priority, Status } from '@/generated/prisma';
 import ClientCard from '@/components/admin/clients/client-card';
 import { useCommandeEdit } from '../hooks/use-commande-edit';
-import { statusToBadge, priorityToBadge } from '@/lib/enum-to-ui';
+import { statusToBadge, priorityToBadge } from '@/components/ui/enum-to-ui';
 
 interface CommandeReadOnlyInfoProps {
   commandeId: string;

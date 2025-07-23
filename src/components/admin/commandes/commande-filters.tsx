@@ -14,7 +14,7 @@ import {
 import { Search, Filter, X, Calendar, SortAsc } from 'lucide-react';
 import { useCommandeFilters, type CommandeFiltersActions } from './use-commande-filters';
 import { Priority, Status } from '@/generated/prisma';
-import { priorityToText, statusToText } from '@/lib/enum-to-ui';
+import { priorityToText, statusToText } from '@/components/ui/enum-to-ui';
 import { Combobox } from '@/components/ui/combobox';
 import { Card, CardHeader } from '@/components/ui/card';
 

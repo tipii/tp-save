@@ -5,7 +5,7 @@ import { TrpcLivraison } from '@/types/trpc-types';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import React from 'react';
-import { priorityToBadge } from '@/lib/enum-to-ui';
+import { priorityToBadge } from '@/components/ui/enum-to-ui';
 
 export default function DraggableLot({ livraison }: { livraison: TrpcLivraison }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({

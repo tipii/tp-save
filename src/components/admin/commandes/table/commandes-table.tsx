@@ -20,7 +20,6 @@ export function CommandesTable({ commandes, filters, pagination }: CommandesTabl
             <TableHead>Bon Préparation</TableHead>
             <TableHead>Bon Livraison</TableHead>
             <TableHead>Livraison(s)</TableHead>
-            <TableHead>Priorité</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead>Articles totaux</TableHead>
             <TableHead>Date création</TableHead>

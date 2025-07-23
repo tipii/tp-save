@@ -46,11 +46,11 @@ const items = [
     url: '/app/commandes',
     icon: Inbox,
   },
-  {
-    title: 'Livraisons',
-    url: '/app/livraisons',
-    icon: Package,
-  },
+  // {
+  //   title: 'Livraisons',
+  //   url: '/app/livraisons',
+  //   icon: Package,
+  // },
   {
     title: 'Chargements',
     url: '/app/chargements',

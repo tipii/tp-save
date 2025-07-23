@@ -30,7 +30,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { priorityToBadge, priorityToText, statusToBadge, statusToText } from '@/lib/enum-to-ui';
+import {
+  priorityToBadge,
+  priorityToText,
+  statusToBadge,
+  statusToText,
+} from '@/components/ui/enum-to-ui';
 import { Label } from '@/components/ui/label';
 import {
   Form,

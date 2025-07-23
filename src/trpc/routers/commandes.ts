@@ -285,7 +285,7 @@ export const commandesRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        ref: z.string().optional(),
+        name: z.string().optional(),
         priority: z.enum(Priority).optional(),
         status: z.enum(Status).optional(),
         orderReceivedById: z.string().optional(),

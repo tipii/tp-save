@@ -33,7 +33,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Combobox } from '../../../ui/combobox';
 
 const commandeUpdateSchema = z.object({
-  ref: z.string().min(1, 'La référence est requise'),
+  name: z.string().min(1, 'Le nom est requise'),
   status: z.enum(Status),
   orderReceivedById: z.string().optional(),
   orderTransmittedById: z.string().optional(),
@@ -56,7 +56,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
   const form = useForm<CommandeUpdateForm>({
     resolver: zodResolver(commandeUpdateSchema),
     defaultValues: {
-      ref: '',
+      name: '',
       status: Status.PENDING,
       orderReceivedById: '',
       orderTransmittedById: '',
@@ -69,7 +69,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
   useEffect(() => {
     if (commande) {
       form.reset({
-        ref: commande.ref,
+        name: commande.name || 'Commande',
         status: commande.status as Status,
         orderReceivedById: commande.orderReceivedById || '',
         orderTransmittedById: commande.orderTransmittedById || '',
@@ -83,7 +83,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
 
   const handleSave = async (data: CommandeUpdateForm) => {
     await updateCommande({
-      ref: data.ref,
+      name: data.name,
       status: data.status,
       orderReceivedById: data.orderReceivedById || undefined,
       orderTransmittedById: data.orderTransmittedById || undefined,
@@ -95,7 +95,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
   const handleCancel = () => {
     if (commande) {
       form.reset({
-        ref: commande.ref,
+        name: commande.name || 'Commande',
         status: commande.status as Status,
         orderReceivedById: commande.orderReceivedById || '',
         orderTransmittedById: commande.orderTransmittedById || '',
@@ -129,10 +129,10 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
           <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
             <FormField
               control={form.control}
-              name="ref"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Référence</FormLabel>
+                  <FormLabel>Nom</FormLabel>
                   <FormControl>
                     <Input {...field} disabled={!canEdit} placeholder="Saisir la référence" />
                   </FormControl>

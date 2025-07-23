@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TrpcLivreur } from '@/types/trpc-types';
-import { priorityToBadge } from '@/lib/enum-to-ui';
+import { priorityToBadge } from '@/components/ui/enum-to-ui';
 
 interface LivreursTableProps {
   livreurs: TrpcLivreur[];

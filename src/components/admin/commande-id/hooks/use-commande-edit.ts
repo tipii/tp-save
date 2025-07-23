@@ -88,7 +88,7 @@ export function useCommandeEdit(commandeId: string) {
   };
 
   const updateCommande = async (data: {
-    ref?: string;
+    name?: string;
     priority?: Priority;
     status?: Status;
     orderReceivedById?: string;

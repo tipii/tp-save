@@ -14,7 +14,7 @@ import {
 import { cn } from '@/lib/utils';
 import { getTotalItems } from './utils';
 import Link from 'next/link';
-import { statusToBadge, priorityToBadge } from '@/lib/enum-to-ui';
+import { statusToBadge, priorityToBadge } from '@/components/ui/enum-to-ui';
 import { useRouter } from 'next/navigation';
 import { TrpcCommande } from '@/types/trpc-types';
 import { Badge } from '@/components/ui/badge';
@@ -83,19 +83,23 @@ export function CommandeRow({ commande }: CommandeRowProps) {
         <div className="flex items-center gap-2">
           <Package className="text-muted-foreground h-4 w-4" />
           <span className="font-medium">{commande.livraisons.length}</span>
+          {commande.livraisons.length > 0 && (
+            <div className="grid grid-cols-3 gap-1">
+              <div className="flex flex-col items-end justify-evenly gap-0 text-xs">
+                <span className="text-muted-foreground">Priorités :</span>
+                <span className="text-muted-foreground">Statuts :</span>
+              </div>
+              {commande.livraisons.map((livraison) => (
+                <div className="flex flex-col items-center gap-0" key={livraison.id}>
+                  {priorityToBadge(livraison.priority)}
+                  {statusToBadge(livraison.status)}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </TableCell>
-      <TableCell>
-        {commande.livraisons.length > 0 ? (
-          commande.livraisons.map((livraison) => (
-            <span key={livraison.id} className="mr-1">
-              {priorityToBadge(livraison.priority)}
-            </span>
-          ))
-        ) : (
-          <span className="text-muted-foreground">Non défini</span>
-        )}
-      </TableCell>
+
       <TableCell>{statusToBadge(commande.status)}</TableCell>
       <TableCell>
         <div className="font-medium">{getTotalItems(commande.livraisons)} articles</div>

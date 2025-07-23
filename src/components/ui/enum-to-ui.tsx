@@ -26,19 +26,19 @@ export const statusToBadge = (status: Status) => {
   switch (status) {
     case Status.PENDING:
       return (
-        <Badge variant="default" id={'status'}>
+        <Badge variant="yellow" id={'status'}>
           {statusToText(status)}
         </Badge>
       );
     case Status.READY:
       return (
-        <Badge variant="secondary" id={'status'}>
+        <Badge variant="yellow" id={'status'}>
           {statusToText(status)}
         </Badge>
       );
     case Status.DELIVERING:
       return (
-        <Badge variant="outline" id={'status'}>
+        <Badge variant="blue" id={'status'}>
           {statusToText(status)}
         </Badge>
       );
@@ -50,13 +50,13 @@ export const statusToBadge = (status: Status) => {
       );
     case Status.TO_RETURN:
       return (
-        <Badge variant="destructive" id={'status'}>
+        <Badge variant="orange" id={'status'}>
           {statusToText(status)}
         </Badge>
       );
     case Status.RETURNED:
       return (
-        <Badge variant="secondary" id={'status'}>
+        <Badge variant="red" id={'status'}>
           {statusToText(status)}
         </Badge>
       );
@@ -68,7 +68,7 @@ export const statusToBadge = (status: Status) => {
       );
     case Status.MIXED:
       return (
-        <Badge variant="outline" id={'status'}>
+        <Badge variant="purple" id={'status'}>
           {statusToText(status)}
         </Badge>
       );
@@ -91,12 +91,12 @@ export const priorityToText = (priority: Priority) => {
 export const priorityToBadge = (priority: Priority) => {
   switch (priority) {
     case Priority.URGENT:
-      return <Badge variant="destructive">{priorityToText(priority)}</Badge>;
+      return <Badge variant="urgent">{priorityToText(priority)}</Badge>;
     case Priority.NORMAL:
-      return <Badge variant="default">{priorityToText(priority)}</Badge>;
+      return <Badge variant="yellow">{priorityToText(priority)}</Badge>;
     case Priority.ILES:
-      return <Badge variant="outline">{priorityToText(priority)}</Badge>;
+      return <Badge variant="blue">{priorityToText(priority)}</Badge>;
     case Priority.UNDEFINED:
-      return <Badge variant="secondary">{priorityToText(priority)}</Badge>;
+      return <Badge variant="default">{priorityToText(priority)}</Badge>;
   }
 };
