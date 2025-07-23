@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useTRPC } from '@/trpc/client';
 import { toast } from 'sonner';
 import { Item } from '@/types/types';
@@ -18,7 +18,7 @@ import { Plus } from 'lucide-react';
 import { useCommandeEdit } from '../../hooks/use-commande-edit';
 import { EditableLivraisonCard } from './editable-livraison-card';
 import { TransferItemModal, TransferItemForm } from './transfer-item-modal';
-import { Priority } from '@/generated/prisma';
+import { Priority, Status } from '@/generated/prisma';
 
 interface LivraisonEditProps {
   commandeId: string;
@@ -26,8 +26,6 @@ interface LivraisonEditProps {
 
 export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
   const { commande, canEdit, refetchCommande } = useCommandeEdit(commandeId);
-  const [editingLot, setEditingLot] = useState<string | null>(null);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [transferModal, setTransferModal] = useState<{
     isOpen: boolean;
     item: Item | null;
@@ -39,16 +37,9 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
   });
 
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
 
   const createLivraisonMutation = useMutation(trpc.livraisons.createLivraison.mutationOptions());
-  const updateLivraisonMutation = useMutation(
-    trpc.livraisons.updateLivraisonItems.mutationOptions(),
-  );
   const transferItemMutation = useMutation(trpc.livraisons.transferSingleItem.mutationOptions());
-  const deleteLivraisonMutation = useMutation(trpc.livraisons.deleteLivraison.mutationOptions());
-  const changePriorityMutation = useMutation(trpc.livraisons.changePriority.mutationOptions());
-
   const livraisons = commande?.livraisons || [];
   const parsedLivraisons = livraisons.map((livraison) => ({
     ...livraison,
@@ -66,32 +57,12 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
         items: [],
       });
       refetchCommande();
-      setShowCreateDialog(false);
       toast.success('Livraison créée', {
         description: 'La nouvelle livraison a été créée avec succès.',
       });
     } catch (error) {
       toast.error('Erreur', {
         description: error instanceof Error ? error.message : 'Impossible de créer la livraison',
-      });
-    }
-  };
-
-  const handleUpdateLivraisonItems = async (livraisonId: string, items: Item[]) => {
-    try {
-      await updateLivraisonMutation.mutateAsync({
-        livraisonId,
-        items,
-      });
-      refetchCommande();
-      setEditingLot(null);
-      toast.success('Livraison mise à jour', {
-        description: 'Les éléments de la livraison ont été mis à jour avec succès.',
-      });
-    } catch (error) {
-      toast.error('Erreur', {
-        description:
-          error instanceof Error ? error.message : 'Impossible de mettre à jour la livraison',
       });
     }
   };
@@ -118,55 +89,12 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
     }
   };
 
-  const handleDeleteLivraison = async (livraisonId: string) => {
-    const livraison = parsedLivraisons.find((l) => l.id === livraisonId);
-    if (livraison && livraison.items.length > 0) {
-      toast.error('Impossible de supprimer', {
-        description:
-          "La livraison contient des éléments. Veuillez les transférer ou les supprimer d'abord.",
-      });
-      return;
-    }
-
-    try {
-      await deleteLivraisonMutation.mutateAsync({ livraisonId });
-      refetchCommande();
-      toast.success('Livraison supprimée', {
-        description: 'La livraison a été supprimée avec succès.',
-      });
-    } catch (error) {
-      toast.error('Erreur', {
-        description:
-          error instanceof Error ? error.message : 'Impossible de supprimer la livraison',
-      });
-    }
-  };
-
   const openTransferModal = (item: Item, sourceLivraisonId: string) => {
     setTransferModal({
       isOpen: true,
       item,
       sourceLivraisonId,
     });
-  };
-
-  const handleChangePriority = async (livraisonId: string, priority: Priority) => {
-    await changePriorityMutation.mutateAsync(
-      { livraisonId, priority },
-      {
-        onSuccess: () => {
-          toast.success('Priorité mise à jour', {
-            description: 'La priorité de la livraison a été mise à jour avec succès.',
-          });
-          refetchCommande();
-        },
-        onError: () => {
-          toast.error('Erreur', {
-            description: 'Impossible de mettre à jour la priorité de la livraison',
-          });
-        },
-      },
-    );
   };
 
   if (!commande) {
@@ -197,20 +125,14 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {parsedLivraisons.map((livraison, index) => (
+        {parsedLivraisons.map((livraison) => (
           <EditableLivraisonCard
             key={livraison.id}
             livraison={livraison}
-            index={index}
             canEdit={canEdit}
-            isEditing={editingLot === livraison.id}
-            onEdit={() => setEditingLot(livraison.id)}
-            onSave={(items) => handleUpdateLivraisonItems(livraison.id, items)}
-            onCancel={() => setEditingLot(null)}
-            onDelete={() => handleDeleteLivraison(livraison.id)}
             onTransferItem={(item) => openTransferModal(item, livraison.id)}
             availableLots={parsedLivraisons.filter((l) => l.id !== livraison.id)}
-            onPriorityChange={(priority) => handleChangePriority(livraison.id, priority)}
+            refetchCommande={refetchCommande}
           />
         ))}
       </div>

@@ -32,6 +32,7 @@ export const livraisonsRouter = createTRPCRouter({
     // console.log(livraisons);
     return livraisons;
   }),
+
   changePriority: protectedProcedure
     .input(
       z.object({
@@ -44,6 +45,23 @@ export const livraisonsRouter = createTRPCRouter({
       const livraison = await ctx.prisma.livraison.update({
         where: { id: livraisonId },
         data: { priority },
+      });
+
+      return livraison;
+    }),
+
+  changeStatus: protectedProcedure
+    .input(
+      z.object({
+        livraisonId: z.string(),
+        status: z.enum(Status),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { livraisonId, status } = input;
+      const livraison = await ctx.prisma.livraison.update({
+        where: { id: livraisonId },
+        data: { status },
       });
 
       return livraison;
@@ -78,6 +96,26 @@ export const livraisonsRouter = createTRPCRouter({
           items: items,
           status: Status.PENDING,
         },
+      });
+
+      return livraison;
+    }),
+
+  updateLivraisonInfos: protectedProcedure
+    .input(
+      z.object({
+        livraisonId: z.string(),
+        name: z.string().optional(),
+        priority: z.enum(Priority).optional(),
+        status: z.enum(Status).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { livraisonId, name, priority, status } = input;
+
+      const livraison = await ctx.prisma.livraison.update({
+        where: { id: livraisonId },
+        data: { name, priority, status },
       });
 
       return livraison;

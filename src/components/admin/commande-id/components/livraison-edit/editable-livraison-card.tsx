@@ -1,6 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
+import { useTRPC } from '@/trpc/client';
+import { toast } from 'sonner';
 import { Item } from '@/types/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +22,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Plus, Package, ArrowRightLeft, Trash2, Edit, Save, X } from 'lucide-react';
 import { z } from 'zod';
-import { Livraison, Priority } from '@/generated/prisma';
+import { Livraison, Priority, Status } from '@/generated/prisma';
 import {
   Select,
   SelectContent,
@@ -25,43 +30,76 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { priorityToText } from '@/lib/enum-to-ui';
+import { priorityToBadge, priorityToText, statusToBadge, statusToText } from '@/lib/enum-to-ui';
+import { Label } from '@/components/ui/label';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
 const itemSchema = z.object({
   name: z.string().min(1, 'Le nom est requis'),
   quantity: z.number().min(1, 'La quantité doit être supérieure à 0'),
 });
 
+const livraisonInfoSchema = z.object({
+  name: z.string().min(1, 'Le nom est requis'),
+  priority: z.nativeEnum(Priority),
+  status: z.nativeEnum(Status),
+});
+
 type ItemForm = z.infer<typeof itemSchema>;
+type LivraisonInfoForm = z.infer<typeof livraisonInfoSchema>;
 
 interface EditableLivraisonCardProps {
   livraison: Livraison & { items: Item[] };
-  index: number;
   canEdit: boolean;
-  isEditing: boolean;
-  onEdit: () => void;
-  onSave: (items: Item[]) => void;
-  onCancel: () => void;
-  onDelete: () => void;
   onTransferItem: (item: Item) => void;
   availableLots: Array<{ id: string; name: string | null }>;
-  onPriorityChange: (priority: Priority) => void;
+  refetchCommande: () => void;
 }
 
 export function EditableLivraisonCard({
   livraison,
-  index,
   canEdit,
-  isEditing,
-  onEdit,
-  onSave,
-  onCancel,
-  onDelete,
   onTransferItem,
   availableLots,
-  onPriorityChange,
+  refetchCommande,
 }: EditableLivraisonCardProps) {
   const [items, setItems] = useState<Item[]>(livraison.items);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const trpc = useTRPC();
+
+  const updateLivraisonItemsMutation = useMutation(
+    trpc.livraisons.updateLivraisonItems.mutationOptions(),
+  );
+  const deleteLivraisonMutation = useMutation(trpc.livraisons.deleteLivraison.mutationOptions());
+  const updateLivraisonInfosMutation = useMutation(
+    trpc.livraisons.updateLivraisonInfos.mutationOptions(),
+  );
+
+  const form = useForm<LivraisonInfoForm>({
+    resolver: zodResolver(livraisonInfoSchema),
+    defaultValues: {
+      name: livraison.name,
+      priority: livraison.priority,
+      status: livraison.status,
+    },
+  });
+
+  useEffect(() => {
+    setItems(livraison.items);
+    form.reset({
+      name: livraison.name,
+      priority: livraison.priority,
+      status: livraison.status,
+    });
+  }, [livraison.items, livraison.name, livraison.priority, livraison.status, form]);
 
   const addItem = () => {
     setItems([
@@ -92,9 +130,78 @@ export function EditableLivraisonCard({
     setItems(items.filter((_, i) => i !== index));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const validItems = items.filter((item) => item.DL_Design && Number(item.DL_QTEBL) > 0);
-    onSave(validItems);
+    try {
+      await updateLivraisonItemsMutation.mutateAsync({
+        livraisonId: livraison.id,
+        items: validItems,
+      });
+      refetchCommande();
+      setIsEditing(false);
+      toast.success('Livraison mise à jour', {
+        description: 'Les éléments de la livraison ont été mis à jour avec succès.',
+      });
+    } catch (error) {
+      toast.error('Erreur', {
+        description:
+          error instanceof Error ? error.message : 'Impossible de mettre à jour la livraison',
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    setItems(livraison.items);
+    setIsEditing(false);
+  };
+
+  const handleDelete = async () => {
+    if (livraison.items.length > 0) {
+      toast.error('Impossible de supprimer', {
+        description:
+          "La livraison contient des éléments. Veuillez les transférer ou les supprimer d'abord.",
+      });
+      return;
+    }
+
+    try {
+      await deleteLivraisonMutation.mutateAsync({ livraisonId: livraison.id });
+      refetchCommande();
+      toast.success('Livraison supprimée', {
+        description: 'La livraison a été supprimée avec succès.',
+      });
+    } catch (error) {
+      toast.error('Erreur', {
+        description:
+          error instanceof Error ? error.message : 'Impossible de supprimer la livraison',
+      });
+    }
+  };
+
+  const handleInfoSave = async (data: LivraisonInfoForm) => {
+    try {
+      await updateLivraisonInfosMutation.mutateAsync({
+        livraisonId: livraison.id,
+        ...data,
+      });
+      refetchCommande();
+
+      toast.success('Livraison mise à jour', {
+        description: 'La livraison a été mise à jour avec succès.',
+      });
+    } catch (error) {
+      toast.error('Erreur', {
+        description: 'Impossible de mettre à jour la livraison',
+      });
+    }
+  };
+
+  const handleInfoCancel = () => {
+    form.reset({
+      name: livraison.name,
+      priority: livraison.priority,
+      status: livraison.status,
+    });
   };
 
   const canDeleteLivraison = livraison.items.length === 0;
@@ -102,82 +209,202 @@ export function EditableLivraisonCard({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Package className="h-4 w-4" />
-            {livraison.name || `Livraison ${index + 1}`}
-            <Select onValueChange={onPriorityChange} value={livraison.priority}>
-              <SelectTrigger>
-                <SelectValue placeholder="Priorité" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(Priority).map((priority) => (
-                  <SelectItem key={priority} value={priority}>
-                    {priorityToText(priority)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardTitle>
-          {canEdit && (
-            <div className="flex gap-1">
-              {!isEditing ? (
+        <div className="space-y-4">
+          {/* Header with title and actions */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              <h3 className="text-muted-foreground text-sm font-medium">Livraison</h3>
+            </div>
+            {canEdit && (
+              <div className="flex gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button size="sm" variant="outline" onClick={onEdit}>
-                      <Edit className="h-4 w-4" />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={form.handleSubmit(handleInfoSave)}
+                      disabled={form.formState.isSubmitting}
+                    >
+                      <Save className="h-3 w-3" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Modifier le lot</p>
+                    <p>Sauvegarder les modifications</p>
                   </TooltipContent>
                 </Tooltip>
-              ) : (
-                <div className="flex gap-1">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="sm" onClick={handleSave}>
-                        <Save className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Sauvegarder les modifications</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="sm" variant="outline" onClick={onCancel}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Annuler les modifications</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="sm" variant="ghost" onClick={handleInfoCancel}>
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Réinitialiser</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
+          </div>
+
+          {/* Info Grid */}
+          <Form {...form}>
+            <div className="grid grid-cols-1 gap-3">
+              {/* Name Field */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel className="text-muted-foreground text-xs font-medium">Nom</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        readOnly={!canEdit}
+                        className={`h-8 text-sm transition-all ${
+                          canEdit
+                            ? 'border-input bg-background hover:border-primary/50 focus:border-primary'
+                            : 'cursor-default border-transparent bg-transparent font-medium shadow-none'
+                        }`}
+                        placeholder="Nom de la livraison"
+                      />
+                    </FormControl>
+                    {canEdit && <FormMessage />}
+                  </FormItem>
+                )}
+              />
+
+              {/* Priority and Status Row */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Priority Field */}
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-muted-foreground text-xs font-medium">
+                        Priorité
+                      </FormLabel>
+                      {canEdit ? (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="border-input hover:border-primary/50 h-8 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.values(Priority).map((priority) => (
+                              <SelectItem key={priority} value={priority}>
+                                {priorityToText(priority)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="flex h-8 items-center">
+                          {priorityToBadge(livraison.priority)}
+                        </div>
+                      )}
+                      {canEdit && <FormMessage />}
+                    </FormItem>
+                  )}
+                />
+
+                {/* Status Field */}
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-muted-foreground text-xs font-medium">
+                        Statut
+                      </FormLabel>
+                      {canEdit ? (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="border-input hover:border-primary/50 h-8 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.values(Status).map((status) => (
+                              <SelectItem key={status} value={status}>
+                                {statusToText(status)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="flex h-8 items-center">
+                          {statusToBadge(livraison.status)}
+                        </div>
+                      )}
+                      {canEdit && <FormMessage />}
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </Form>
+        </div>
+        {canEdit && (
+          <div className="flex gap-1">
+            {!isEditing ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={onDelete}
-                    disabled={!canDeleteLivraison}
-                  >
-                    <Trash2 className="h-4 w-4" />
+                  <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
+                    <Edit className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>
-                    {canDeleteLivraison
-                      ? 'Supprimer la livraison'
-                      : 'La livraison doit être vide pour être supprimée'}
-                  </p>
+                  <p>Modifier le lot</p>
                 </TooltipContent>
               </Tooltip>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="flex gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="sm" onClick={handleSave}>
+                      <Save className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Sauvegarder les modifications</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="sm" variant="outline" onClick={handleCancel}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Annuler les modifications</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleDelete}
+                  disabled={!canDeleteLivraison}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {canDeleteLivraison
+                    ? 'Supprimer la livraison'
+                    : 'La livraison doit être vide pour être supprimée'}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         {isEditing ? (
