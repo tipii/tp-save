@@ -3,11 +3,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
-import { getQueryParams, useCommandeFilters } from '../commandes/use-commande-filters';
+import { getQueryParams, useCommandeFilters } from './use-commande-filters';
 import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 import { useTRPC } from '@/trpc/client';
-import { CommandesTable } from '../commandes/table/commandes-table';
-import { CommandeFilters } from '../commandes/commande-filters';
+import { CommandesTable } from './table/commandes-table';
+import { CommandeFilters } from './commande-filters';
 
 export default function CommandesComponent() {
   const { setBreadcrumb } = useBreadcrumb();

@@ -80,11 +80,13 @@ export function CommandeRow({ commande }: CommandeRowProps) {
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-2">
-          <Package className="text-muted-foreground h-4 w-4" />
-          <span className="font-medium">{commande.livraisons.length}</span>
+        <div className="flex w-full items-center">
+          <div className="flex items-center gap-2">
+            <Package className="text-muted-foreground h-4 w-4" />
+            <span className="font-medium">{commande.livraisons.length}</span>
+          </div>
           {commande.livraisons.length > 0 && (
-            <div className="grid grid-cols-3 gap-1">
+            <div className="grid w-full grid-cols-3">
               <div className="flex flex-col items-end justify-evenly gap-0 text-xs">
                 <span className="text-muted-foreground">Priorités :</span>
                 <span className="text-muted-foreground">Statuts :</span>
