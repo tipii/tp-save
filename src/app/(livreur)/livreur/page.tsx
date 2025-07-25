@@ -1,9 +1,5 @@
-import LogoutBtn from '@/components/livreur/logout-btn';
+import Homepage from '@/components/livreur/homepage';
 
 export default function LivreurPage() {
-  return (
-    <div>
-      <LogoutBtn />
-    </div>
-  );
+  return <Homepage />;
 }

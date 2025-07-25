@@ -100,4 +100,29 @@ export const chargementsRouter = createTRPCRouter({
         error: null,
       };
     }),
+
+  /**
+   *
+   * Livreurs procedures
+   *
+   */
+  getChargementsByLivreur: protectedProcedure
+    .input(z.object({ livreurId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const chargements = await ctx.prisma.chargement.findMany({
+        where: { livreurId: ctx.user.id, status: Status.READY },
+        include: {
+          livraisons: {
+            include: {
+              commande: {
+                include: {
+                  client: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      return chargements;
+    }),
 });
