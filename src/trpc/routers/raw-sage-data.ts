@@ -14,55 +14,64 @@ export const rawSageDataRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { blNumber, commandeId } = input;
+      try {
+        const { blNumber, commandeId } = input;
 
-      if (!blNumber.startsWith('LB')) {
+        if (!blNumber.startsWith('L')) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Le numéro de BL doit commencer par LB',
+          });
+        }
+
+        const bl = await ctx.prisma.rawCommandeSage.findUnique({
+          where: {
+            DO_Piece: blNumber,
+          },
+        });
+
+        if (!bl) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'BL non trouvé',
+          });
+        }
+
+        // Import data to commande table
+
+        const client = await createClientAsync(wsdl, {
+          endpoint:
+            'http://tallinpi.dyndns.org:8095/WEBSERV_EASYTABLET_WEB/awws/WebServ_EasyTablet.awws',
+        });
+
+        const blLignes = await client.Liste_BonLivLignes_SAGEAsync({ P_NumBonLiv: bl.DO_Piece });
+
+        const parsedLignes = parseSoapLivraisonLignes(
+          String(blLignes[0].Liste_BonLivLignes_SAGEResult),
+        );
+
+        const livraison = await ctx.prisma.livraison.create({
+          data: {
+            commandeId,
+            items: parsedLignes,
+            name: 'Livraison 1',
+          },
+        });
+
+        // Update commande table
+        await ctx.prisma.commande.update({
+          where: { id: commandeId },
+          data: { bl_number: bl.DO_Piece, livraisons: { connect: { id: livraison.id } } },
+        });
+
+        return bl;
+      } catch (error) {
+        console.error(error);
         throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Le numéro de BL doit commencer par LB',
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Erreur lors de la récupération des données Sage',
         });
       }
-
-      const bl = await ctx.prisma.rawCommandeSage.findUnique({
-        where: {
-          DO_Piece: blNumber,
-        },
-      });
-
-      if (!bl) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'BL non trouvé',
-        });
-      }
-
-      // Import data to commande table
-      const client = await createClientAsync(wsdl, {
-        endpoint:
-          'http://tallinpi.dyndns.org:8095/WEBSERV_EASYTABLET_WEB/awws/WebServ_EasyTablet.awws',
-      });
-
-      const blLignes = await client.Liste_BonLivLignes_SAGEAsync({ P_NumBonLiv: bl.DO_Piece });
-
-      const parsedLignes = parseSoapLivraisonLignes(
-        String(blLignes[0].Liste_BonLivLignes_SAGEResult),
-      );
-
-      const livraison = await ctx.prisma.livraison.create({
-        data: {
-          commandeId,
-          items: parsedLignes,
-          name: 'Livraison 1',
-        },
-      });
-
-      // Update commande table
-      await ctx.prisma.commande.update({
-        where: { id: commandeId },
-        data: { bl_number: bl.DO_Piece, livraisons: { connect: { id: livraison.id } } },
-      });
-
-      return bl;
     }),
   unlinkBL: protectedProcedure
     .input(z.object({ commandeId: z.string() }))
