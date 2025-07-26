@@ -23,6 +23,8 @@ import ButtonPriseEnCharge from './action-buttons/button-prise-en-charge';
 import ButtonTransfert from './action-buttons/button-transfert';
 import { Button } from '@/components/ui/button';
 import ButtonLivraisonDeliver from './action-buttons/button-livraison-deliver';
+import ButtonLivraisonToReturn from './action-buttons/button-livraison-to-return';
+import ButtonLivraisonReturnDepot from './action-buttons/button-livraison-return-depot';
 
 export default function ChargementCard({ chargement }: { chargement: TrpcLivreurChargmenent }) {
   const [openLivraisons, setOpenLivraisons] = useState<string[]>([]);
@@ -212,10 +214,12 @@ export default function ChargementCard({ chargement }: { chargement: TrpcLivreur
                             <PackageX className="h-4 w-4" />
                             Retourner des articles
                           </Button>
-                          <Button className="w-full bg-red-500">
-                            <X className="h-4 w-4" />
-                            Retourner la commande
-                          </Button>
+                          <ButtonLivraisonToReturn livraisonId={livraison.id} />
+                        </div>
+                      )}
+                      {livraison.status === Status.TO_RETURN && (
+                        <div className="flex flex-col gap-2">
+                          <ButtonLivraisonReturnDepot livraisonId={livraison.id} />
                         </div>
                       )}
                     </div>

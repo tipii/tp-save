@@ -54,4 +54,60 @@ export const livreursLivraisonsRouter = createTRPCRouter({
         });
       }
     }),
+  returnLivraison: protectedProcedure
+    .input(z.object({ id: z.string(), returnInfo: z.string(), chargementId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const livraison = await ctx.prisma.livraison.update({
+          where: { id: input.id },
+          data: { status: Status.TO_RETURN, receptionInfo: input.returnInfo },
+        });
+
+        return livraison;
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Erreur lors de la retour de la livraison',
+        });
+      }
+    }),
+  returnLivraisonToDepot: protectedProcedure
+    .input(z.object({ id: z.string(), chargementId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const livraison = await ctx.prisma.livraison.update({
+          where: { id: input.id },
+          data: { status: Status.RETURNED },
+        });
+
+        const chargement = await ctx.prisma.chargement.findUnique({
+          where: { id: input.chargementId },
+          include: {
+            livraisons: true,
+          },
+        });
+
+        let allLivraisonsToReturn = false;
+        if (
+          chargement?.livraisons.every(
+            (livraison) =>
+              livraison.status === Status.RETURNED || livraison.status === Status.DELIVERED,
+          )
+        ) {
+          await ctx.prisma.chargement.update({
+            where: { id: input.chargementId },
+            data: { status: Status.DELIVERED },
+          });
+          allLivraisonsToReturn = true;
+        }
+        return { livraison, allLivraisonsToReturn };
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Erreur lors de la retour de la livraison au depot',
+        });
+      }
+    }),
 });

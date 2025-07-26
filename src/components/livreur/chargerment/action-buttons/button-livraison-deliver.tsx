@@ -32,8 +32,8 @@ export default function ButtonLivraisonDeliver({ livraisonId }: { livraisonId: s
       { id: livraisonId, receptionInfo, chargementId: chargement?.id },
       {
         onSuccess: ({ allLivraisonsDelivered }) => {
+          refetchChargement();
           if (allLivraisonsDelivered) {
-            refetchChargement();
             toast.success('Chargement terminé');
             setOpen(false);
           } else {
@@ -51,7 +51,7 @@ export default function ButtonLivraisonDeliver({ livraisonId }: { livraisonId: s
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full">
+        <Button className="w-full bg-green-500">
           <Check className="h-4 w-4" />
           Valider la livraison
         </Button>
@@ -67,7 +67,7 @@ export default function ButtonLivraisonDeliver({ livraisonId }: { livraisonId: s
           onChange={(e) => setReceptionInfo(e.target.value)}
         />
         <Button
-          className="w-full"
+          className="w-full bg-green-500"
           onClick={handleDeliver}
           disabled={!receptionInfo || receptionInfo === '' || isPending}
         >
