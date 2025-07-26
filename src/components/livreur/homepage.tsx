@@ -1,18 +1,15 @@
 'use client';
 
-import { useTRPC } from '@/trpc/client';
-import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import LogoutBtn from './logout-btn';
 import { useUser } from '@/hooks/use-user';
 import ChargementCard from './chargerment/chargement-card';
+import { useCurrentChargement } from './hooks/queries';
 
 export default function Homepage() {
-  const trpc = useTRPC();
+  const { data: chargement, isLoading, refetch } = useCurrentChargement();
   const { user } = useUser();
-  const { data: chargements } = useQuery(
-    trpc.chargements.getChargementsByLivreur.queryOptions({ livreurId: user?.id ?? '' }),
-  );
+
   return (
     <div className="flex flex-col gap-4">
       <header>
@@ -23,11 +20,17 @@ export default function Homepage() {
       </header>
 
       <div className="flex flex-col gap-2 px-1">
-        <h1 className="text-2xl font-bold">Chargement</h1>
-        <div className="flex flex-col gap-2">
-          {chargements?.map((chargement) => (
-            <ChargementCard key={chargement.id} chargement={chargement} />
-          ))}
+        {/* <h1 className="text-2xl font-bold">Chargement</h1> */}
+        <div className="flex min-h-[300px] flex-col gap-2">
+          {isLoading && (
+            <div className="flex h-full items-center justify-center">En cours de chargement...</div>
+          )}
+          {!isLoading && !chargement && (
+            <div className="flex h-full items-center justify-center">
+              Pas de chargement attribué pour le moment
+            </div>
+          )}
+          {chargement && <ChargementCard chargement={chargement} />}
         </div>
       </div>
     </div>

@@ -24,6 +24,8 @@ model Livraison {
   deliveryMode         String?
   bonLivraison         String?
 
+  receptionInfo String?
+
   @@index([commandeId])
   @@index([livreurId])
   @@map("livraison")
