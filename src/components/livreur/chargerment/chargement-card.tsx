@@ -84,10 +84,10 @@ export default function ChargementCard({ chargement }: { chargement: TrpcLivreur
                   onClick={() => toggleLivraison(livraison.id)}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="mb-1 flex items-center gap-2">
-                        <User className="h-4 w-4 text-gray-500" />
-                        <span className="font-medium text-gray-900">
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 flex-shrink-0 text-gray-500" />
+                        <span className="truncate font-medium text-gray-900">
                           {livraison.commande?.client?.name || 'Client inconnu'}
                         </span>
                       </div>
