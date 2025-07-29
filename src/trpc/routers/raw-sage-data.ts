@@ -16,13 +16,6 @@ export const rawSageDataRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { blNumber, commandeId } = input;
 
-      if (!blNumber.startsWith('LB')) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Le numéro de BL doit commencer par LB',
-        });
-      }
-
       const bl = await ctx.prisma.rawCommandeSage.findUnique({
         where: {
           DO_Piece: blNumber,

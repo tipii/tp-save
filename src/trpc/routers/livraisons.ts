@@ -2,7 +2,7 @@ import z from 'zod';
 import { Priority, Status } from '@/generated/prisma';
 import { createTRPCRouter, protectedProcedure } from '../init';
 
-const itemSchema = z.object({
+export const itemSchema = z.object({
   AR_REF: z.string(),
   DL_LIGNE: z.string(),
   DL_QTEBL: z.string(),
