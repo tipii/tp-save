@@ -39,9 +39,11 @@ export default function ButtonLivraisonDeliver({
       {
         onSuccess: ({ allLivraisonsDelivered }) => {
           refetchChargement();
-          allLivraisonsDelivered
-            ? toast.success('Chargement terminé')
-            : toast.success('Livraison validée avec succès');
+          if (allLivraisonsDelivered) {
+            toast.success('Chargement terminé');
+          } else {
+            toast.success('Livraison validée avec succès');
+          }
           setOpen(false);
           toggleLivraison();
         },

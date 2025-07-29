@@ -30,9 +30,11 @@ export default function ButtonLivraisonReturnDepot({
       {
         onSuccess: ({ allLivraisonsToReturn }) => {
           refetchChargement();
-          allLivraisonsToReturn
-            ? toast.success('Chargement terminé')
-            : toast.success('Livraison retournée au depot');
+          if (allLivraisonsToReturn) {
+            toast.success('Chargement terminé');
+          } else {
+            toast.success('Livraison retournée au depot');
+          }
           setOpen(false);
           toggleLivraison();
         },

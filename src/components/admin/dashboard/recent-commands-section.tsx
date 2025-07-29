@@ -50,7 +50,7 @@ export default function RecentCommandsSection() {
       </CardHeader>
       <CardContent className="max-h-[300px] overflow-y-auto">
         <div className="space-y-3">
-          {recentCommandes?.map((commande: any) => (
+          {recentCommandes?.map((commande) => (
             <div
               key={commande.id}
               className="flex items-center justify-between rounded-lg border p-3"

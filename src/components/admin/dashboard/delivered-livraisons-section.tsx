@@ -53,7 +53,7 @@ export default function DeliveredLivraisonsSection() {
       </CardHeader>
       <CardContent className="max-h-[300px] overflow-y-auto">
         <div className="space-y-3">
-          {deliveredLivraisons?.map((livraison: any) => (
+          {deliveredLivraisons?.map((livraison) => (
             <div
               key={livraison.id}
               className="flex items-center justify-between rounded-lg border p-3"
