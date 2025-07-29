@@ -14,7 +14,13 @@ import { useMutation } from '@tanstack/react-query';
 import { useTRPC } from '@/trpc/client';
 import { toast } from 'sonner';
 
-export default function ButtonLivraisonToReturn({ livraisonId }: { livraisonId: string }) {
+export default function ButtonLivraisonToReturn({
+  livraisonId,
+  toggleLivraison,
+}: {
+  livraisonId: string;
+  toggleLivraison: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const [returnInfo, setReturnInfo] = useState<string>('');
   const trpc = useTRPC();
@@ -34,6 +40,7 @@ export default function ButtonLivraisonToReturn({ livraisonId }: { livraisonId: 
           refetchChargement();
           toast.success('Livraison à retourner au depot');
           setOpen(false);
+          toggleLivraison();
         },
         onError: (error) => {
           toast.error(error.message);

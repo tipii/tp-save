@@ -6,7 +6,13 @@ import { useCurrentChargement } from '../../hooks/queries';
 import { useTRPC } from '@/trpc/client';
 import { toast } from 'sonner';
 
-export default function ButtonLivraisonReturnDepot({ livraisonId }: { livraisonId: string }) {
+export default function ButtonLivraisonReturnDepot({
+  livraisonId,
+  toggleLivraison,
+}: {
+  livraisonId: string;
+  toggleLivraison: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const [returnInfo, setReturnInfo] = useState<string>('');
   const trpc = useTRPC();
@@ -24,11 +30,11 @@ export default function ButtonLivraisonReturnDepot({ livraisonId }: { livraisonI
       {
         onSuccess: ({ allLivraisonsToReturn }) => {
           refetchChargement();
-          if (allLivraisonsToReturn) {
-            toast.success('Chargement terminé');
-          } else {
-            toast.success('Livraison retournée au depot');
-          }
+          allLivraisonsToReturn
+            ? toast.success('Chargement terminé')
+            : toast.success('Livraison retournée au depot');
+          setOpen(false);
+          toggleLivraison();
         },
         onError: (error) => {
           toast.error(error.message);

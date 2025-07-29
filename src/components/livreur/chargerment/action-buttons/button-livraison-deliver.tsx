@@ -15,7 +15,13 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { useCurrentChargement } from '../../hooks/queries';
 
-export default function ButtonLivraisonDeliver({ livraisonId }: { livraisonId: string }) {
+export default function ButtonLivraisonDeliver({
+  livraisonId,
+  toggleLivraison,
+}: {
+  livraisonId: string;
+  toggleLivraison: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const [receptionInfo, setReceptionInfo] = useState<string>('');
   const trpc = useTRPC();
@@ -33,13 +39,11 @@ export default function ButtonLivraisonDeliver({ livraisonId }: { livraisonId: s
       {
         onSuccess: ({ allLivraisonsDelivered }) => {
           refetchChargement();
-          if (allLivraisonsDelivered) {
-            toast.success('Chargement terminé');
-            setOpen(false);
-          } else {
-            toast.success('Livraison validée avec succès');
-            setOpen(false);
-          }
+          allLivraisonsDelivered
+            ? toast.success('Chargement terminé')
+            : toast.success('Livraison validée avec succès');
+          setOpen(false);
+          toggleLivraison();
         },
         onError: (error) => {
           toast.error(error.message);

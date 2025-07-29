@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import ButtonLivraisonDeliver from './action-buttons/button-livraison-deliver';
 import ButtonLivraisonToReturn from './action-buttons/button-livraison-to-return';
 import ButtonLivraisonReturnDepot from './action-buttons/button-livraison-return-depot';
+import ButtonArticlesReturn from './action-buttons/button-articles-return';
 
 export default function ChargementCard({ chargement }: { chargement: TrpcLivreurChargmenent }) {
   const [openLivraisons, setOpenLivraisons] = useState<string[]>([]);
@@ -40,7 +41,35 @@ export default function ChargementCard({ chargement }: { chargement: TrpcLivreur
     return total + items.length;
   }, 0);
 
-  const deliveredCount = chargement.livraisons.filter((l) => l.status === 'DELIVERED').length;
+  // Priority-based sorting for delivery workflow
+  const getStatusPriority = (status: Status): number => {
+    const priorities = {
+      [Status.DELIVERING]: 1, // Currently being delivered - highest priority
+      [Status.TO_RETURN]: 2, // Needs to be returned to depot
+      [Status.READY]: 3, // Ready to be picked up/delivered
+      [Status.PENDING]: 4, // Waiting to be ready
+      [Status.MIXED]: 5, // Mixed status - complex state
+      [Status.DELIVERED]: 6, // Successfully completed
+      [Status.RETURNED]: 7, // Returned to depot
+      [Status.CANCELLED]: 8, // Cancelled - lowest priority
+    };
+    return priorities[status] || 999; // Default for unknown status
+  };
+
+  const sortedLivraisons = chargement.livraisons.sort((a, b) => {
+    const priorityA = getStatusPriority(a.status);
+    const priorityB = getStatusPriority(b.status);
+
+    // Primary sort: by status priority
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
+
+    // Secondary sort: by creation date (newest first) for same priority
+    return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+  });
+
+  const deliveredCount = sortedLivraisons.filter((l) => l.status === 'DELIVERED').length;
 
   return (
     <Card className="overflow-hidden bg-white">
@@ -71,7 +100,7 @@ export default function ChargementCard({ chargement }: { chargement: TrpcLivreur
         </div>
 
         <div className="space-y-1">
-          {chargement.livraisons.map((livraison, index) => {
+          {sortedLivraisons.map((livraison, index) => {
             const items = (livraison.items as Item[]) || [];
             const statusColors = statusToTailwindColor(livraison.status);
             const isOpen = openLivraisons.includes(livraison.id);
@@ -209,17 +238,28 @@ export default function ChargementCard({ chargement }: { chargement: TrpcLivreur
                       )}
                       {livraison.status === Status.DELIVERING && (
                         <div className="flex flex-col gap-2">
-                          <ButtonLivraisonDeliver livraisonId={livraison.id} />
-                          <Button className="w-full bg-orange-500">
-                            <PackageX className="h-4 w-4" />
-                            Retourner des articles
-                          </Button>
-                          <ButtonLivraisonToReturn livraisonId={livraison.id} />
+                          <ButtonLivraisonDeliver
+                            livraisonId={livraison.id}
+                            toggleLivraison={() => toggleLivraison(livraison.id)}
+                          />
+                          <ButtonArticlesReturn
+                            livraisonId={livraison.id}
+                            items={items}
+                            chargementId={chargement.id}
+                            toggleLivraison={() => toggleLivraison(livraison.id)}
+                          />
+                          <ButtonLivraisonToReturn
+                            livraisonId={livraison.id}
+                            toggleLivraison={() => toggleLivraison(livraison.id)}
+                          />
                         </div>
                       )}
                       {livraison.status === Status.TO_RETURN && (
                         <div className="flex flex-col gap-2">
-                          <ButtonLivraisonReturnDepot livraisonId={livraison.id} />
+                          <ButtonLivraisonReturnDepot
+                            livraisonId={livraison.id}
+                            toggleLivraison={() => toggleLivraison(livraison.id)}
+                          />
                         </div>
                       )}
                     </div>
@@ -232,14 +272,12 @@ export default function ChargementCard({ chargement }: { chargement: TrpcLivreur
       </CardContent>
 
       {/* Footer */}
-      <CardFooter className="flex flex-col gap-2 border-t bg-gray-50 p-4">
-        {chargement.status === Status.READY && (
-          <>
-            <ButtonPriseEnCharge />
-            <ButtonTransfert />
-          </>
-        )}
-      </CardFooter>
+      {chargement.status === Status.READY && (
+        <CardFooter className="flex flex-col gap-2 border-t p-4">
+          <ButtonPriseEnCharge />
+          <ButtonTransfert />
+        </CardFooter>
+      )}
     </Card>
   );
 }
