@@ -9,6 +9,7 @@ import { rawSageDataRouter } from './raw-sage-data';
 import { usersRouter } from './users';
 import { livreursChargementsRouter } from './livreurs/chargements';
 import { livreursLivraisonsRouter } from './livreurs/livraison';
+import { dashboardRouter } from './dashboard';
 
 export const appRouter = createTRPCRouter({
   // Admin routes
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   livraisons: livraisonsRouter,
   soapService: soapServiceRouter,
   rawSageData: rawSageDataRouter,
+  dashboard: dashboardRouter,
   // Livreur only routes
   livreursChargements: livreursChargementsRouter,
   livreursLivraisons: livreursLivraisonsRouter,

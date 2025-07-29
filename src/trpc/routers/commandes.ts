@@ -350,4 +350,23 @@ export const commandesRouter = createTRPCRouter({
 
       return updatedCommande;
     }),
+  getDashboardCommandes: protectedProcedure.query(async ({ ctx }) => {
+    const commandes = await ctx.prisma.commande.findMany({
+      where: { status: Status.PENDING },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 20,
+      include: {
+        client: true,
+        livraisons: {
+          include: {
+            chargement: true,
+          },
+        },
+      },
+    });
+
+    return commandes;
+  }),
 });
