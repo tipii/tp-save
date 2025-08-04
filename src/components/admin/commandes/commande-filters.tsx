@@ -21,7 +21,7 @@ import { useCommandeFilters } from './use-commande-filters';
 import { Priority, Status } from '@/generated/prisma';
 import { priorityToText, statusToText } from '@/components/ui/enum-to-ui';
 import { Combobox } from '@/components/ui/combobox';
-import { Card, CardHeader } from '@/components/ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface CommandeFiltersProps {
@@ -84,8 +84,8 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
   }, [filters.search]);
 
   return (
-    <Card className="bg-background m-4 rounded-sm">
-      <CardHeader>
+    <Card className="flex flex-col rounded-sm">
+      <CardHeader className="flex-shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
             <div className="rounded-lg bg-blue-100 p-2">
@@ -102,7 +102,7 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
         </div>
       </CardHeader>
 
-      <div className="space-y-4 p-4">
+      <CardContent className="flex-1 space-y-4 overflow-y-auto">
         {/* Search and Sort Section */}
         <div className="flex flex-col gap-4 lg:flex-row">
           {/* Search */}
@@ -349,7 +349,7 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
             </div>
           </div>
         )}
-      </div>
+      </CardContent>
     </Card>
   );
 }

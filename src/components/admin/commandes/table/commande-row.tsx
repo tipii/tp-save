@@ -1,16 +1,7 @@
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import {
-  ChevronDown,
-  ChevronRight,
-  FileText,
-  Building,
-  Package,
-  Clock,
-  AlertCircle,
-  Pencil,
-} from 'lucide-react';
+import { FileText, Building, Package, Clock, AlertCircle, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getTotalItems } from './utils';
 import Link from 'next/link';
@@ -18,6 +9,7 @@ import { statusToBadge, priorityToBadge } from '@/components/ui/enum-to-ui';
 import { useRouter } from 'next/navigation';
 import { TrpcCommande } from '@/types/trpc-types';
 import { Badge } from '@/components/ui/badge';
+import { useCommande } from '../commande-context';
 
 export interface CommandeRowProps {
   commande: TrpcCommande;
@@ -25,10 +17,21 @@ export interface CommandeRowProps {
 
 export function CommandeRow({ commande }: CommandeRowProps) {
   const router = useRouter();
+  const { selectedCommande, setSelectedCommande } = useCommande();
+
+  const handleRowClick = () => {
+    setSelectedCommande(commande);
+  };
+
+  const isSelected = selectedCommande?.id === commande.id;
+
   return (
     <TableRow
-      className={cn('hover:bg-muted/50 cursor-pointer p-4 py-12')}
-      onClick={() => console.log('hello')}
+      className={cn(
+        'cursor-pointer p-4 py-12',
+        isSelected ? 'border-blue-200 bg-blue-50 hover:bg-blue-100' : 'hover:bg-muted/50',
+      )}
+      onClick={handleRowClick}
     >
       <TableCell>
         <div className="flex items-center space-x-3">

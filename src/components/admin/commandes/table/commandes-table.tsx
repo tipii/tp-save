@@ -11,9 +11,9 @@ export function CommandesTable({ commandes, filters, pagination }: CommandesTabl
   }
 
   return (
-    <div className="space-y-6">
-      <Table>
-        <TableHeader>
+    <div className="flex h-full flex-col space-y-4">
+      <Table className="min-h-0 flex-1 overflow-y-auto">
+        <TableHeader className="sticky top-0 z-10">
           <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
             <TableHead>Nom</TableHead>
             <TableHead>Client</TableHead>
@@ -33,7 +33,7 @@ export function CommandesTable({ commandes, filters, pagination }: CommandesTabl
         </TableBody>
       </Table>
 
-      <div className="px-6 pb-6">
+      <div className="">
         {pagination && (
           <Pagination
             pagination={pagination}

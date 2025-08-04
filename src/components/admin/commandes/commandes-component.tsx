@@ -9,6 +9,7 @@ import { useTRPC } from '@/trpc/client';
 import { CommandesTable } from './table/commandes-table';
 import { CommandeFilters } from './commande-filters';
 import { TrpcCommande } from '@/types/trpc-types';
+import CommandeItems from './commande-items';
 
 export default function CommandesComponent() {
   const { setBreadcrumb } = useBreadcrumb();
@@ -32,20 +33,23 @@ export default function CommandesComponent() {
   const pagination = commandesData?.pagination;
 
   return (
-    <div className="flex h-full flex-col gap-2">
-      <Card className="h-1/2 rounded-sm">
-        <CardHeader>
+    <div className="m-2 flex h-[98%] min-h-0 flex-col gap-2">
+      <Card className="flex min-h-0 flex-1 flex-col rounded-sm">
+        <CardHeader className="flex-shrink-0">
           <CardTitle>Commandes</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-y-auto">
+        <CardContent className="min-h-0 flex-1">
           <CommandesTable commandes={commandes} filters={filters} pagination={pagination} />
         </CardContent>
       </Card>
-      <div className="grid h-1/2 grid-cols-2 gap-2">
-        <Card className="col-span-1 rounded-sm">
-          <CardHeader>
+      <div className="grid min-h-0 flex-1 grid-cols-2 gap-2">
+        <Card className="flex min-h-0 flex-col rounded-sm">
+          <CardHeader className="flex-shrink-0">
             <CardTitle>Items</CardTitle>
           </CardHeader>
+          <CardContent className="min-h-0 flex-1 overflow-y-auto">
+            <CommandeItems />
+          </CardContent>
         </Card>
 
         <CommandeFilters pagination={pagination} />
