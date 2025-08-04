@@ -30,6 +30,7 @@ export const rawSageDataRouter = createTRPCRouter({
       }
 
       // Import data to commande table
+
       const client = await createClientAsync(wsdl, {
         endpoint:
           'http://tallinpi.dyndns.org:8095/WEBSERV_EASYTABLET_WEB/awws/WebServ_EasyTablet.awws',

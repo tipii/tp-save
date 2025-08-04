@@ -23,6 +23,7 @@ export function CommandesTable({ commandes, filters, pagination }: CommandesTabl
             <TableHead>Statut</TableHead>
             <TableHead>Articles totaux</TableHead>
             <TableHead>Date création</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="border-b">

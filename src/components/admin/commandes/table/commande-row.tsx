@@ -28,7 +28,7 @@ export function CommandeRow({ commande }: CommandeRowProps) {
   return (
     <TableRow
       className={cn('hover:bg-muted/50 cursor-pointer p-4 py-12')}
-      onClick={() => router.push(`/app/commandes/${commande.id}`)}
+      onClick={() => console.log('hello')}
     >
       <TableCell>
         <div className="flex items-center space-x-3">
@@ -80,11 +80,13 @@ export function CommandeRow({ commande }: CommandeRowProps) {
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-2">
-          <Package className="text-muted-foreground h-4 w-4" />
-          <span className="font-medium">{commande.livraisons.length}</span>
+        <div className="flex w-full items-center">
+          <div className="flex items-center gap-2">
+            <Package className="text-muted-foreground h-4 w-4" />
+            <span className="font-medium">{commande.livraisons.length}</span>
+          </div>
           {commande.livraisons.length > 0 && (
-            <div className="grid grid-cols-3 gap-1">
+            <div className="grid w-full grid-cols-3">
               <div className="flex flex-col items-end justify-evenly gap-0 text-xs">
                 <span className="text-muted-foreground">Priorités :</span>
                 <span className="text-muted-foreground">Statuts :</span>
@@ -109,6 +111,13 @@ export function CommandeRow({ commande }: CommandeRowProps) {
           <Clock className="h-3 w-3" />
           <span>{new Date(commande.createdAt).toLocaleDateString('fr-FR')}</span>
         </div>
+      </TableCell>
+      <TableCell>
+        <Button variant="outline" size="icon" asChild>
+          <Link href={`/app/commandes/${commande.id}`}>
+            <Pencil className="h-4 w-4" />
+          </Link>
+        </Button>
       </TableCell>
     </TableRow>
   );
