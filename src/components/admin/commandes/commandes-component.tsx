@@ -10,6 +10,9 @@ import { CommandesTable } from './table/commandes-table';
 import { CommandeFilters } from './commande-filters';
 import { TrpcCommande } from '@/types/trpc-types';
 import CommandeItems from './commande-items';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Filter, RefreshCcw } from 'lucide-react';
 
 export default function CommandesComponent() {
   const { setBreadcrumb } = useBreadcrumb();
@@ -35,8 +38,17 @@ export default function CommandesComponent() {
   return (
     <div className="m-2 flex h-[98%] min-h-0 flex-col gap-2">
       <Card className="flex min-h-0 flex-1 flex-col rounded-sm">
-        <CardHeader className="flex-shrink-0">
+        <CardHeader className="mb-2 flex flex-row items-center justify-between">
           <CardTitle>Commandes</CardTitle>
+          <div className="flex items-center gap-2">
+            <Input type="text" placeholder="Rechercher" />
+            <Button variant="outline" size="icon">
+              <Filter />
+            </Button>
+            <Button variant="outline" size="icon">
+              <RefreshCcw />
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="min-h-0 flex-1">
           <CommandesTable commandes={commandes} filters={filters} pagination={pagination} />
