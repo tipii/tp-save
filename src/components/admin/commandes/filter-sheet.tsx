@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTRPC } from '@/trpc/client';
-import { useDebounce } from '@uidotdev/usehooks';
 import { parseISO, formatISO } from 'date-fns';
 import { fromZonedTime, toZonedTime, formatInTimeZone } from 'date-fns-tz';
 import { fr } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -16,15 +14,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Filter, X, Calendar as CalendarIcon } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Filter, X, Calendar as CalendarIcon } from 'lucide-react';
 import { useCommandeFilters } from './use-commande-filters';
 import { Priority, Status } from '@/generated/prisma';
 import { priorityToText, statusToText } from '@/components/ui/enum-to-ui';
 import { Combobox } from '@/components/ui/combobox';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
-interface CommandeFiltersProps {
+interface FilterSheetProps {
+  children: React.ReactNode;
   pagination?: {
     totalCount: number;
     currentPage: number;
@@ -34,14 +41,9 @@ interface CommandeFiltersProps {
 
 const TAHITI_TIMEZONE = 'Pacific/Tahiti';
 
-export function CommandeFilters({ pagination }: CommandeFiltersProps) {
+export function FilterSheet({ children, pagination }: FilterSheetProps) {
   const trpc = useTRPC();
   const filters = useCommandeFilters();
-  // Local state for search input
-  const [searchInput, setSearchInput] = useState(filters.search);
-
-  // Debounce the search input with 500ms delay
-  const debouncedSearch = useDebounce(searchInput, 500);
 
   // Get clients for filter dropdown
   const { data: clients } = useQuery(trpc.clients.getClients.queryOptions());
@@ -58,7 +60,6 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
   };
 
   const convertTahitiToUTC = (date: Date) => {
-    // Convert the selected date (assumed to be in Tahiti timezone) to UTC
     const utcDate = fromZonedTime(date, TAHITI_TIMEZONE);
     return formatISO(utcDate, { representation: 'date' });
   };
@@ -73,105 +74,103 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
     }
   };
 
-  // Update the URL search parameter when debounced value changes
-  useEffect(() => {
-    filters.setSearch(debouncedSearch);
-  }, [debouncedSearch]);
-
-  // Update local state when URL search parameter changes (e.g., from clearFilters)
-  useEffect(() => {
-    setSearchInput(filters.search);
-  }, [filters.search]);
-
   return (
-    <Card className="flex flex-col rounded-sm">
-      <CardHeader className="flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <div className="rounded-lg bg-blue-100 p-2">
-              <Filter className="h-5 w-5 text-blue-600" />
-            </div>
-            Filtres et recherche
-          </h2>
-          {filters.hasActiveFilters && (
-            <Button variant="outline" size="sm" onClick={filters.clearFilters}>
-              <X className="mr-2 h-4 w-4" />
-              Effacer tous les filtres
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-
-      <CardContent className="flex-1 space-y-4 overflow-y-auto">
-        {/* Search and Sort Section */}
-        <div className="flex flex-col gap-4 lg:flex-row">
-          {/* Search */}
-          <div className="flex-1 space-y-2">
-            <h3 className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
-              <Search className="h-4 w-4" />
-              Recherche
-            </h3>
-            <div className="relative max-w-md">
-              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-              <Input
-                placeholder="Rechercher par référence ou client..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-          {/* Sorting Options */}
-          <div className="space-y-2">
-            <div className="flex gap-3">
-              <div className="space-y-1">
-                <label className="text-muted-foreground text-xs">Trier par</label>
-                <Select value={filters.sortBy} onValueChange={filters.setSortBy}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="createdAt">Date de création</SelectItem>
-                    <SelectItem value="updatedAt">Dernière mise à jour</SelectItem>
-                    <SelectItem value="ref">Référence</SelectItem>
-                    <SelectItem value="priority">Priorité livraison(s)</SelectItem>
-                    <SelectItem value="status">Statut</SelectItem>
-                  </SelectContent>
-                </Select>
+    <Sheet>
+      <SheetTrigger asChild>{children}</SheetTrigger>
+      <SheetContent side="right" className="w-[400px] sm:w-[500px]">
+        <SheetHeader className="space-y-3">
+          <div className="flex items-center justify-between">
+            <SheetTitle className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-200 bg-blue-50">
+                <Filter className="h-4 w-4 text-blue-600" />
               </div>
-              <div className="space-y-1">
-                <label className="text-muted-foreground text-xs">Ordre</label>
-                <Select value={filters.sortOrder} onValueChange={filters.setSortOrder}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="desc">Décroissant</SelectItem>
-                    <SelectItem value="asc">Croissant</SelectItem>
-                  </SelectContent>
-                </Select>
+              <span className="text-lg font-semibold">Filtres</span>
+            </SheetTitle>
+          </div>
+          <SheetDescription className="text-muted-foreground text-sm">
+            Filtrez et organisez vos commandes selon vos critères
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="mt-8 flex-1 overflow-y-auto">
+          <div className="space-y-0">
+            {filters.hasActiveFilters && (
+              <div className="px-6 pb-4">
+                <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500"></div>
+                    <span className="text-sm font-medium text-amber-800">Filtres actifs</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={filters.clearFilters}
+                    className="h-7 border-amber-300 bg-white text-amber-700 hover:bg-amber-100 hover:text-amber-800"
+                  >
+                    <X className="mr-1 h-3 w-3" />
+                    Réinitialiser
+                  </Button>
+                </div>
+              </div>
+            )}
+            {/* Sorting Section */}
+            <div className="px-6 py-5">
+              <h3 className="mb-4 flex items-center gap-2 text-sm font-medium">
+                <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+                Tri et ordre
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                    Trier par
+                  </label>
+                  <Select value={filters.sortBy} onValueChange={filters.setSortBy}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="createdAt">Date de création</SelectItem>
+                      <SelectItem value="updatedAt">Dernière mise à jour</SelectItem>
+                      <SelectItem value="ref">Référence</SelectItem>
+                      <SelectItem value="priority">Priorité</SelectItem>
+                      <SelectItem value="status">Statut</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                    Ordre
+                  </label>
+                  <Select value={filters.sortOrder} onValueChange={filters.setSortOrder}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="desc">↓ Décroissant</SelectItem>
+                      <SelectItem value="asc">↑ Croissant</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Quick Filters and Date Range Section */}
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between gap-4">
-            {/* Quick Filters */}
-            <div className="space-y-2">
-              <h3 className="flex items-center gap-2 text-sm font-medium">
-                <Filter className="h-4 w-4" />
+            <Separator />
+
+            {/* Filters Section */}
+            <div className="px-6 py-5">
+              <h3 className="mb-4 flex items-center gap-2 text-sm font-medium">
+                <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
                 Filtres
               </h3>
-              <div className="flex gap-4">
+              <div className="space-y-5">
                 {/* Client Filter */}
-                <div className="flex flex-col justify-end">
-                  <label className="text-muted-foreground text-xs">Client</label>
+                <div className="flex flex-col space-y-2">
+                  <label className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                    Client
+                  </label>
                   <Combobox
                     options={[
-                      { label: 'Tout les clients', value: 'all' },
+                      { label: 'Tous les clients', value: 'all' },
                       ...(clients?.map((client) => ({
                         label: client.name ?? 'Non défini',
                         value: client.id,
@@ -184,10 +183,12 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
 
                 {/* Priority Filter */}
                 <div className="space-y-2">
-                  <label className="text-muted-foreground text-xs">Priorité</label>
+                  <label className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                    Priorité
+                  </label>
                   <Select value={filters.priority} onValueChange={filters.setPriority}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Toutes les priorités" />
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Toutes" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Toutes les priorités</SelectItem>
@@ -207,10 +208,12 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
 
                 {/* Status Filter */}
                 <div className="space-y-2">
-                  <label className="text-muted-foreground text-xs">Statut</label>
+                  <label className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                    Statut
+                  </label>
                   <Select value={filters.status} onValueChange={filters.setStatus}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Tous les statuts" />
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Tous" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Tous les statuts</SelectItem>
@@ -238,17 +241,25 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
               </div>
             </div>
 
-            {/* Date Range */}
-            <div className="space-y-2">
-              <div className="flex gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-muted-foreground text-xs">Date de début</label>
+            <Separator />
+
+            {/* Date Range Section */}
+            <div className="px-6 py-5">
+              <h3 className="mb-4 flex items-center gap-2 text-sm font-medium">
+                <div className="h-1.5 w-1.5 rounded-full bg-orange-500"></div>
+                Période
+              </h3>
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                    Date de début
+                  </label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         className={cn(
-                          'w-40 justify-start text-left font-normal',
+                          'h-9 w-full justify-start text-left font-normal',
                           !filters.dateFrom && 'text-muted-foreground',
                         )}
                       >
@@ -256,7 +267,7 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
                         {filters.dateFrom ? (
                           formatDateForTahiti(filters.dateFrom)
                         ) : (
-                          <span>Choisir une date</span>
+                          <span>Sélectionner une date</span>
                         )}
                       </Button>
                     </PopoverTrigger>
@@ -278,14 +289,16 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
                     </PopoverContent>
                   </Popover>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-muted-foreground text-xs">Date de fin</label>
+                <div className="space-y-2">
+                  <label className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                    Date de fin
+                  </label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         className={cn(
-                          'w-40 justify-start text-left font-normal',
+                          'h-9 w-full justify-start text-left font-normal',
                           !filters.dateTo && 'text-muted-foreground',
                         )}
                       >
@@ -293,7 +306,7 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
                         {filters.dateTo ? (
                           formatDateForTahiti(filters.dateTo)
                         ) : (
-                          <span>Choisir une date</span>
+                          <span>Sélectionner une date</span>
                         )}
                       </Button>
                     </PopoverTrigger>
@@ -319,37 +332,7 @@ export function CommandeFilters({ pagination }: CommandeFiltersProps) {
             </div>
           </div>
         </div>
-
-        {/* Results Summary */}
-        {pagination && (
-          <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="font-medium">{pagination.totalCount}</span>
-              <span className="text-muted-foreground">
-                commande(s) trouvée(s)
-                {filters.hasActiveFilters && ' (filtrées)'}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-muted-foreground text-sm">Résultats par page:</span>
-              <Select
-                value={filters.limit.toString()}
-                onValueChange={(value) => filters.setLimit(Number(value))}
-              >
-                <SelectTrigger className="w-20">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      </SheetContent>
+    </Sheet>
   );
 }

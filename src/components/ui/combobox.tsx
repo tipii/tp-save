@@ -37,7 +37,7 @@ export function Combobox({ options, value, onChange, disabled }: ComboboxProps) 
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-[200px] justify-between font-normal"
           disabled={disabled}
         >
           {value ? options.find((option) => option.value === value)?.label : 'Choisir...'}
