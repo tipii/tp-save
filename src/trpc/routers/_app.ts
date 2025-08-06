@@ -10,6 +10,7 @@ import { usersRouter } from './users';
 import { livreursChargementsRouter } from './livreurs/chargements';
 import { livreursLivraisonsRouter } from './livreurs/livraison';
 import { dashboardRouter } from './dashboard';
+import { triggerRouter } from './trigger';
 
 export const appRouter = createTRPCRouter({
   // Admin routes
@@ -25,6 +26,8 @@ export const appRouter = createTRPCRouter({
   // Livreur only routes
   livreursChargements: livreursChargementsRouter,
   livreursLivraisons: livreursLivraisonsRouter,
+  // Trigger routes
+  trigger: triggerRouter,
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;

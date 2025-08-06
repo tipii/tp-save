@@ -1,14 +1,14 @@
 import { createClientAsync } from '@/external-services/soap-service/generated/webserveasytablet/client';
 import { parseSoapLivraisonList } from '@/external-services/soap-service/parsing/parsing';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import { logger, schedules, wait } from '@trigger.dev/sdk/v3';
 import { wsdl } from './wsdl';
 
-export const firstScheduledTask = schedules.task({
+export const syncBonsFromSageScheduled = schedules.task({
   id: 'tallin-pi-sync-commandes',
 
   // Every hour
-  cron: '* * * * *',
+  cron: '0 * * * *',
 
   // Set an optional maxDuration to prevent tasks from running indefinitely
   maxDuration: 300, // Stop executing after 300 secs (5 mins) of compute
@@ -56,6 +56,7 @@ export const firstScheduledTask = schedules.task({
 
       const allBons = [...bonsCommande, ...bonsPrepa, ...bonsLivraison, ...bonsNeutre];
 
+      // Create raw bons from data
       await Promise.all(
         allBons.map(async (bon) => {
           await prisma.rawCommandeSage.upsert({
@@ -91,6 +92,7 @@ export const firstScheduledTask = schedules.task({
         }),
       );
 
+      // Create commandes from data
       await Promise.all(
         bonsPrepa.map(async (bon) => {
           // create a new commande with the bon data

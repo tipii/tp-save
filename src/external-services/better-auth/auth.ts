@@ -2,7 +2,7 @@ import { betterAuth, z } from 'better-auth';
 import { nextCookies } from 'better-auth/next-js';
 import { admin, phoneNumber, username } from 'better-auth/plugins';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 // import { sendEmail } from '@/external-services/email/email-service';
 import { env } from '@/external-services/env/env-validation';
 

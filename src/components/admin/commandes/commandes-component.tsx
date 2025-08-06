@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { getQueryParams, useCommandeFilters } from './use-commande-filters';
 import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
@@ -14,6 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Filter, RefreshCcw } from 'lucide-react';
 import { useDebounce } from '@uidotdev/usehooks';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 export default function CommandesComponent() {
   const { setBreadcrumb } = useBreadcrumb();
@@ -41,6 +43,18 @@ export default function CommandesComponent() {
     trpc.commandes.getCommandes.queryOptions(getQueryParams(filters)),
   );
 
+  const { mutate: syncBonsFromSage, isPending: isSyncingBonsFromSage } = useMutation(
+    trpc.trigger.syncBonsFromSage.mutationOptions({
+      onSuccess: ({ success }) => {
+        if (success) {
+          toast.success('Commandes synchronisées avec succès');
+        } else {
+          toast.error('Erreur lors de la synchronisation des commandes');
+        }
+      },
+    }),
+  );
+
   const commandes = commandesData?.commandes || [];
   const pagination = commandesData?.pagination;
 
@@ -61,8 +75,17 @@ export default function CommandesComponent() {
                 <Filter />
               </Button>
             </FilterSheet>
-            <Button variant="outline" size="icon">
-              <RefreshCcw />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                syncBonsFromSage({});
+                console.log('syncBonsFromSage');
+              }}
+              disabled={isSyncingBonsFromSage}
+              className={cn(isSyncingBonsFromSage && 'animate-pulse')}
+            >
+              <RefreshCcw className={cn(isSyncingBonsFromSage && 'animate-spin')} />
             </Button>
           </div>
         </CardHeader>
