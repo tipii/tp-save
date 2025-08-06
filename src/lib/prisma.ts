@@ -1,8 +1,8 @@
-import { env } from '@/external-services/env/env-validation';
 import { PrismaClient } from '@/generated/prisma';
 import { PrismaNeon } from '@prisma/adapter-neon';
 
 import { neonConfig } from '@neondatabase/serverless';
+import { serverEnv } from '@/external-services/env/server';
 
 import ws from 'ws';
 neonConfig.webSocketConstructor = ws;
@@ -15,7 +15,7 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-const connectionString = `${env.DATABASE_URL}`;
+const connectionString = serverEnv.DATABASE_URL;
 
 const adapter = new PrismaNeon({ connectionString });
 const prisma = global.prisma || new PrismaClient({ adapter });

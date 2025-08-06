@@ -4,11 +4,11 @@ import { admin, phoneNumber, username } from 'better-auth/plugins';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import prisma from '@/lib/prisma';
 // import { sendEmail } from '@/external-services/email/email-service';
-import { env } from '@/external-services/env/env-validation';
+import { clientEnv } from '@/external-services/env/client';
 
 export const auth = betterAuth({
-  trustedOrigins: [env.NEXT_PUBLIC_APP_URL],
-  baseURL: env.NEXT_PUBLIC_APP_URL,
+  trustedOrigins: [clientEnv.NEXT_PUBLIC_APP_URL],
+  baseURL: clientEnv.NEXT_PUBLIC_APP_URL,
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
