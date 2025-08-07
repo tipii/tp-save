@@ -39,9 +39,11 @@ export default function CommandesComponent() {
   const trpc = useTRPC();
 
   // Get commandes with filters
-  const { data: commandesData, isPending } = useQuery(
-    trpc.commandes.getCommandes.queryOptions(getQueryParams(filters)),
-  );
+  const {
+    data: commandesData,
+    isPending,
+    refetch,
+  } = useQuery(trpc.commandes.getCommandes.queryOptions(getQueryParams(filters)));
 
   const { mutate: syncBonsFromSage, isPending: isSyncingBonsFromSage } = useMutation(
     trpc.trigger.syncBonsFromSage.mutationOptions({
@@ -51,6 +53,7 @@ export default function CommandesComponent() {
         } else {
           toast.error('Erreur lors de la synchronisation des commandes');
         }
+        refetch();
       },
     }),
   );
@@ -90,7 +93,12 @@ export default function CommandesComponent() {
           </div>
         </CardHeader>
         <CardContent className="min-h-0 flex-1">
-          <CommandesTable commandes={commandes} filters={filters} pagination={pagination} />
+          <CommandesTable
+            commandes={commandes}
+            filters={filters}
+            pagination={pagination}
+            isPending={isPending}
+          />
         </CardContent>
       </Card>
       <div className="grid min-h-0 flex-1 grid-cols-2 gap-2">

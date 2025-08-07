@@ -1,11 +1,34 @@
 import React, { useState } from 'react';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { type CommandesTableProps } from './types';
 import { EmptyState } from './empty-state';
 import { CommandeRow } from './commande-row';
 import { Pagination } from './pagination';
+import { CommandeFiltersActions } from '../use-commande-filters';
+import { TrpcCommande } from '@/types/trpc-types';
+import { CommandesTableSkeleton } from './skeleton';
 
-export function CommandesTable({ commandes, filters, pagination }: CommandesTableProps) {
+export interface CommandesTableProps {
+  commandes: TrpcCommande[];
+  filters: CommandeFiltersActions & {
+    hasActiveFilters: boolean;
+    page: number;
+    limit: number;
+  };
+  pagination?: {
+    totalCount: number;
+    currentPage: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  isPending: boolean;
+}
+
+export function CommandesTable({ commandes, filters, pagination, isPending }: CommandesTableProps) {
+  if (isPending) {
+    return <CommandesTableSkeleton />;
+  }
+
   if (commandes.length === 0) {
     return <EmptyState hasActiveFilters={filters.hasActiveFilters} />;
   }
