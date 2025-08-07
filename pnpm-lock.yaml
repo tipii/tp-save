@@ -29,6 +29,9 @@ importers:
       '@prisma/client':
         specifier: ^6.13.0
         version: 6.13.0(prisma@6.13.0(typescript@5.8.3))(typescript@5.8.3)
+      '@prisma/nextjs-monorepo-workaround-plugin':
+        specifier: ^6.13.0
+        version: 6.13.0
       '@radix-ui/react-avatar':
         specifier: ^1.1.10
         version: 1.1.10(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -775,6 +778,9 @@ packages:
 
   '@prisma/get-platform@6.13.0':
     resolution: {integrity: sha512-Nii2pX50fY4QKKxQwm7/vvqT6Ku8yYJLZAFX4e2vzHwRdMqjugcOG5hOSLjxqoXb0cvOspV70TOhMzrw8kqAnw==}
+
+  '@prisma/nextjs-monorepo-workaround-plugin@6.13.0':
+    resolution: {integrity: sha512-RUNHn4SDb5lu8k7AcS2N2O4pftYPu0rVVRNOG6qzekup+1alb1ezgykAhsWhS15a/Sa2TThyLSegP+Ef8+3xlw==}
 
   '@protobufjs/aspromise@1.1.2':
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
@@ -4289,6 +4295,8 @@ snapshots:
   '@prisma/get-platform@6.13.0':
     dependencies:
       '@prisma/debug': 6.13.0
+
+  '@prisma/nextjs-monorepo-workaround-plugin@6.13.0': {}
 
   '@protobufjs/aspromise@1.1.2': {}
 
