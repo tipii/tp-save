@@ -26,22 +26,6 @@ export interface Pagination {
   totalPages: number;
 }
 
-export interface CommandesTableProps {
-  commandes: TrpcCommande[];
-  filters: CommandeFiltersActions & {
-    hasActiveFilters: boolean;
-    page: number;
-    limit: number;
-  };
-  pagination?: {
-    totalCount: number;
-    currentPage: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-  };
-}
-
 export interface ExpandedRowProps {
   commande: TrpcCommande;
 }

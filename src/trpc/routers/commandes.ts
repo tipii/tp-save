@@ -235,52 +235,6 @@ export const commandesRouter = createTRPCRouter({
       return commande;
     }),
 
-  enableEdit: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const { id } = input;
-      const userId = ctx.user.id;
-
-      // Check if commande is already unlocked for editing by someone else
-      const existing = await ctx.prisma.commande.findUnique({
-        where: { id },
-        select: { lockedBy: true, lockedUntil: true },
-      });
-
-      if (existing?.lockedBy && existing.lockedBy !== userId) {
-        const isUnlockExpired = existing.lockedUntil && new Date() > existing.lockedUntil;
-        if (!isUnlockExpired) {
-          throw new Error('Commande is already being edited by another user');
-        }
-      }
-
-      // Unlock for editing for 15 minutes
-      const lockedUntil = new Date(Date.now() + 15 * 60 * 1000);
-
-      return await ctx.prisma.commande.update({
-        where: { id },
-        data: {
-          lockedBy: userId,
-          lockedUntil,
-        },
-      });
-    }),
-
-  disableEdit: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const { id } = input;
-      const userId = ctx.user.id;
-
-      return await ctx.prisma.commande.update({
-        where: { id },
-        data: {
-          lockedBy: null,
-          lockedUntil: null,
-        },
-      });
-    }),
-
   updateCommande: protectedProcedure
     .input(
       z.object({
@@ -292,63 +246,70 @@ export const commandesRouter = createTRPCRouter({
         orderTransmittedById: z.string().optional(),
         orderReceptionMode: z.string().optional(),
         orderReceptionDate: z.date().optional(),
+        plannedDeliveryDate: z.date().optional(),
+        cf_bl_ou_rq_number: z.string().optional(),
+        quote_number: z.string().optional(),
+        bonPrepaGesco: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { id, ...updateData } = input;
       const userId = ctx.user.id;
 
-      // Check if user has unlocked the commande for editing
-      const existing = await ctx.prisma.commande.findUnique({
-        where: { id },
-        select: { lockedBy: true, lockedUntil: true },
-      });
+      try {
+        // Check if user has unlocked the commande for editing
+        const existing = await ctx.prisma.commande.findUnique({
+          where: { id },
+        });
 
-      if (existing?.lockedBy !== userId) {
-        throw new Error('You must unlock the commande before editing');
+        // Get current state for history
+        const currentCommande = await ctx.prisma.commande.findUnique({
+          where: { id },
+          include: {
+            client: true,
+            livraisons: {
+              include: {
+                chargement: true,
+              },
+            },
+          },
+        });
+
+        // Update the commande
+        const updatedCommande = await ctx.prisma.commande.update({
+          where: { id },
+          data: {
+            ...updateData,
+            updatedAt: new Date(),
+          },
+          include: {
+            client: true,
+            livraisons: {
+              include: {
+                chargement: true,
+              },
+            },
+          },
+        });
+
+        // Create history entry
+        await ctx.prisma.commandeHistory.create({
+          data: {
+            commandeId: id,
+            userId,
+            action: 'UPDATE',
+            snapshot: JSON.parse(JSON.stringify(currentCommande)),
+          },
+        });
+
+        return updatedCommande;
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to update commande',
+        });
       }
-
-      // Get current state for history
-      const currentCommande = await ctx.prisma.commande.findUnique({
-        where: { id },
-        include: {
-          client: true,
-          livraisons: {
-            include: {
-              chargement: true,
-            },
-          },
-        },
-      });
-
-      // Update the commande
-      const updatedCommande = await ctx.prisma.commande.update({
-        where: { id },
-        data: {
-          ...updateData,
-          updatedAt: new Date(),
-        },
-        include: {
-          client: true,
-          livraisons: {
-            include: {
-              chargement: true,
-            },
-          },
-        },
-      });
-
-      // Create history entry
-      await ctx.prisma.commandeHistory.create({
-        data: {
-          commandeId: id,
-          userId,
-          action: 'UPDATE',
-          snapshot: JSON.parse(JSON.stringify(currentCommande)),
-        },
-      });
-
-      return updatedCommande;
     }),
   getDashboardCommandes: protectedProcedure.query(async ({ ctx }) => {
     const commandes = await ctx.prisma.commande.findMany({

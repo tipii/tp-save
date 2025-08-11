@@ -8,10 +8,6 @@ model Commande {
 
   livraisons Livraison[]
 
-  // Simple Edit Lock
-  lockedBy    String? // User ID who locked it
-  lockedUntil DateTime? // Auto-unlock after timeout (e.g., 15 minutes)
-
   // Relations
   clientId String? // Foreign key to Client model
   client   Client?           @relation(fields: [clientId], references: [id])
@@ -40,6 +36,10 @@ model Commande {
   entreprises           String? // Company
   lieu                  String? // Location
   originalItems         Json?
+
+  // delivery infos
+  priority            Priority  @default(UNDEFINED)
+  plannedDeliveryDate DateTime? // Planned delivery date
 
   commentaires String? // Comments
 

@@ -8,8 +8,8 @@ import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 import { useTRPC } from '@/trpc/client';
 import { CommandesTable } from './table/commandes-table';
 import { FilterSheet } from './filter-sheet';
-import { TrpcCommande } from '@/types/trpc-types';
 import CommandeItems from './commande-items';
+import CommandeDetails from './commande-details';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Filter, RefreshCcw } from 'lucide-react';
@@ -116,9 +116,7 @@ export default function CommandesComponent() {
             <CardTitle>Détails</CardTitle>
           </CardHeader>
           <CardContent className="min-h-0 flex-1 overflow-y-auto">
-            <div className="text-muted-foreground flex h-full items-center justify-center">
-              Sélectionnez une commande pour voir les détails
-            </div>
+            <CommandeDetails refetch={refetch} />
           </CardContent>
         </Card>
       </div>
