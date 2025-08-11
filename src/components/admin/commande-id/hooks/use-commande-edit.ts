@@ -8,84 +8,13 @@ import { toast } from 'sonner';
 import { Priority, Status } from '@/generated/prisma';
 
 export function useCommandeEdit(commandeId: string) {
-  const [isEditing, setIsEditing] = useState(false);
-
   const trpc = useTRPC();
-  const { user } = useUser();
-  const queryClient = useQueryClient();
 
   const { data: commande, refetch: refetchCommande } = useQuery(
     trpc.commandes.getCommandeById.queryOptions({ id: commandeId }),
   );
 
-  // Sync isEditing state with server state when commande data changes
-  useEffect(() => {
-    if (commande && user) {
-      const isUnlockedByCurrentUser = commande.lockedBy === user.id;
-      const hasValidLock = commande.lockedUntil && new Date(commande.lockedUntil) > new Date();
-      setIsEditing(isUnlockedByCurrentUser && Boolean(hasValidLock));
-    } else {
-      setIsEditing(false);
-    }
-  }, [commande, user]);
-
-  const enableEditMutation = useMutation(trpc.commandes.enableEdit.mutationOptions());
-  const disableEditMutation = useMutation(trpc.commandes.disableEdit.mutationOptions());
   const updateMutation = useMutation(trpc.commandes.updateCommande.mutationOptions());
-
-  // Check if edit session has expired
-  useEffect(() => {
-    if (commande?.lockedUntil && commande.lockedBy === user?.id) {
-      const editUntil = new Date(commande.lockedUntil).getTime();
-      const now = new Date().getTime();
-
-      if (now >= editUntil) {
-        setIsEditing(false);
-      }
-    }
-  }, [commande?.lockedUntil, commande?.lockedBy, user?.id, refetchCommande]);
-
-  const enableEdit = async () => {
-    await enableEditMutation.mutateAsync(
-      { id: commandeId },
-      {
-        onError: (error) => {
-          toast.error('Erreur', {
-            description:
-              error instanceof Error ? error.message : 'Impossible de déverrouiller la commande',
-          });
-        },
-        onSuccess: () => {
-          setIsEditing(true);
-          refetchCommande();
-          toast.success('Commande déverrouillée', {
-            description: 'Vous pouvez maintenant modifier cette commande.',
-          });
-        },
-      },
-    );
-  };
-
-  const disableEdit = async () => {
-    await disableEditMutation.mutateAsync(
-      { id: commandeId },
-      {
-        onError: (error) => {
-          toast.error('Erreur', {
-            description:
-              error instanceof Error ? error.message : 'Impossible de verrouiller la commande',
-          });
-        },
-        onSuccess: () => {
-          setIsEditing(false);
-          refetchCommande();
-          toast.success('Commande verrouillée', {
-            description: "Le mode d'édition a été désactivé.",
-          });
-        },
-      },
-    );
-  };
 
   const updateCommande = async (data: {
     name?: string;
@@ -109,7 +38,6 @@ export function useCommandeEdit(commandeId: string) {
           });
         },
         onSuccess: async () => {
-          await disableEdit();
           refetchCommande();
           toast.success('Commande mise à jour', {
             description: 'Les modifications ont été enregistrées avec succès.',
@@ -119,24 +47,12 @@ export function useCommandeEdit(commandeId: string) {
     );
   };
 
-  const isUnlockedByCurrentUser = commande?.lockedBy === user?.id;
-  const isUnlockedByOther = commande?.lockedBy && !isUnlockedByCurrentUser;
-  const canEdit = isUnlockedByCurrentUser && isEditing;
-
   return {
     commande,
     refetchCommande,
-    isEditing,
-    canEdit,
-    isUnlockedByCurrentUser,
-    isUnlockedByOther,
-    enableEdit,
-    disableEdit,
     updateCommande,
     isLoading: !commande,
     mutations: {
-      enableEdit: enableEditMutation,
-      disableEdit: disableEditMutation,
       update: updateMutation,
     },
   };

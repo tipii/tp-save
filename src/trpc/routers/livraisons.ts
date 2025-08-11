@@ -78,16 +78,6 @@ export const livraisonsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { commandeId, name, items } = input;
 
-      // Check if user has permission to edit this commande
-      const commande = await ctx.prisma.commande.findUnique({
-        where: { id: commandeId },
-        select: { lockedBy: true },
-      });
-
-      if (commande?.lockedBy !== ctx.user.id) {
-        throw new Error('You must unlock the commande before creating livraisons');
-      }
-
       // Create the new livraison
       const livraison = await ctx.prisma.livraison.create({
         data: {
@@ -133,16 +123,6 @@ export const livraisonsRouter = createTRPCRouter({
 
       console.log(items);
 
-      // Check if user has permission to edit this livraison's commande
-      const livraison = await ctx.prisma.livraison.findUnique({
-        where: { id: livraisonId },
-        include: { commande: { select: { lockedBy: true } } },
-      });
-
-      if (livraison?.commande?.lockedBy !== ctx.user.id) {
-        throw new Error('You must unlock the commande before editing livraisons');
-      }
-
       // Update the livraison items
       const updatedLivraison = await ctx.prisma.livraison.update({
         where: { id: livraisonId },
@@ -170,24 +150,14 @@ export const livraisonsRouter = createTRPCRouter({
       const [sourceLivraison, targetLivraison] = await Promise.all([
         ctx.prisma.livraison.findUnique({
           where: { id: sourceLivraisonId },
-          include: { commande: { select: { lockedBy: true } } },
         }),
         ctx.prisma.livraison.findUnique({
           where: { id: targetLivraisonId },
-          include: { commande: { select: { lockedBy: true } } },
         }),
       ]);
 
       if (!sourceLivraison || !targetLivraison) {
         throw new Error('One or both livraisons not found');
-      }
-
-      // Check permissions for both livraisons
-      if (
-        sourceLivraison.commande?.lockedBy !== ctx.user.id ||
-        targetLivraison.commande?.lockedBy !== ctx.user.id
-      ) {
-        throw new Error('You must unlock the commande before transferring items');
       }
 
       // Parse current items
@@ -271,11 +241,9 @@ export const livraisonsRouter = createTRPCRouter({
       const [sourceLivraison, targetLivraison] = await Promise.all([
         ctx.prisma.livraison.findUnique({
           where: { id: sourceLivraisonId },
-          include: { commande: { select: { lockedBy: true } } },
         }),
         ctx.prisma.livraison.findUnique({
           where: { id: targetLivraisonId },
-          include: { commande: { select: { lockedBy: true } } },
         }),
       ]);
 
@@ -284,12 +252,6 @@ export const livraisonsRouter = createTRPCRouter({
       }
 
       // Check permissions for both livraisons
-      if (
-        sourceLivraison.commande?.lockedBy !== ctx.user.id ||
-        targetLivraison.commande?.lockedBy !== ctx.user.id
-      ) {
-        throw new Error('You must unlock the commande before transferring items');
-      }
 
       // Parse current items
       const sourceItems = (
@@ -370,12 +332,7 @@ export const livraisonsRouter = createTRPCRouter({
       // Check if user has permission to delete this livraison
       const livraison = await ctx.prisma.livraison.findUnique({
         where: { id: livraisonId },
-        include: { commande: { select: { lockedBy: true } } },
       });
-
-      if (livraison?.commande?.lockedBy !== ctx.user.id) {
-        throw new Error('You must unlock the commande before deleting livraisons');
-      }
 
       // Delete the livraison
       await ctx.prisma.livraison.delete({

@@ -62,7 +62,6 @@ type LivraisonInfoForm = z.infer<typeof livraisonInfoSchema>;
 
 interface EditableLivraisonCardProps {
   livraison: Livraison & { items: Item[] };
-  canEdit: boolean;
   onTransferItem: (item: Item) => void;
   availableLots: Array<{ id: string; name: string | null }>;
   refetchCommande: () => void;
@@ -70,7 +69,6 @@ interface EditableLivraisonCardProps {
 
 export function EditableLivraisonCard({
   livraison,
-  canEdit,
   onTransferItem,
   availableLots,
   refetchCommande,
@@ -221,35 +219,33 @@ export function EditableLivraisonCard({
               <Package className="h-4 w-4" />
               <h3 className="text-muted-foreground text-sm font-medium">Livraison</h3>
             </div>
-            {canEdit && (
-              <div className="flex gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={form.handleSubmit(handleInfoSave)}
-                      disabled={form.formState.isSubmitting}
-                    >
-                      <Save className="h-3 w-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Sauvegarder les modifications</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" variant="ghost" onClick={handleInfoCancel}>
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Réinitialiser</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            )}
+            <div className="flex gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={form.handleSubmit(handleInfoSave)}
+                    disabled={form.formState.isSubmitting}
+                  >
+                    <Save className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Sauvegarder les modifications</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="ghost" onClick={handleInfoCancel}>
+                    <X className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Réinitialiser</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
 
           {/* Info Grid */}
@@ -265,16 +261,11 @@ export function EditableLivraisonCard({
                     <FormControl>
                       <Input
                         {...field}
-                        readOnly={!canEdit}
-                        className={`h-8 text-sm transition-all ${
-                          canEdit
-                            ? 'border-input bg-background hover:border-primary/50 focus:border-primary'
-                            : 'cursor-default border-transparent bg-transparent font-medium shadow-none'
-                        }`}
+                        className={`border-input bg-background hover:border-primary/50 focus:border-primary h-8 text-sm transition-all`}
                         placeholder="Nom de la livraison"
                       />
                     </FormControl>
-                    {canEdit && <FormMessage />}
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -290,27 +281,21 @@ export function EditableLivraisonCard({
                       <FormLabel className="text-muted-foreground text-xs font-medium">
                         Priorité
                       </FormLabel>
-                      {canEdit ? (
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="border-input hover:border-primary/50 h-8 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.values(Priority).map((priority) => (
-                              <SelectItem key={priority} value={priority}>
-                                {priorityToText(priority)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="flex h-8 items-center">
-                          {priorityToBadge(livraison.priority)}
-                        </div>
-                      )}
-                      {canEdit && <FormMessage />}
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-input hover:border-primary/50 h-8 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(Priority).map((priority) => (
+                            <SelectItem key={priority} value={priority}>
+                              {priorityToText(priority)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -324,27 +309,21 @@ export function EditableLivraisonCard({
                       <FormLabel className="text-muted-foreground text-xs font-medium">
                         Statut
                       </FormLabel>
-                      {canEdit ? (
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="border-input hover:border-primary/50 h-8 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.values(Status).map((status) => (
-                              <SelectItem key={status} value={status}>
-                                {statusToText(status)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="flex h-8 items-center">
-                          {statusToBadge(livraison.status)}
-                        </div>
-                      )}
-                      {canEdit && <FormMessage />}
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-input hover:border-primary/50 h-8 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(Status).map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {statusToText(status)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -352,64 +331,62 @@ export function EditableLivraisonCard({
             </div>
           </Form>
         </div>
-        {canEdit && (
-          <div className="flex gap-1">
-            {!isEditing ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Modifier le lot</p>
-                </TooltipContent>
-              </Tooltip>
-            ) : (
-              <div className="flex gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" onClick={handleSave}>
-                      <Save className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Sauvegarder les modifications</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" variant="outline" onClick={handleCancel}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Annuler les modifications</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            )}
+        <div className="flex gap-1">
+          {!isEditing ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleDelete}
-                  disabled={!canDeleteLivraison}
-                >
-                  <Trash2 className="h-4 w-4" />
+                <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
+                  <Edit className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>
-                  {canDeleteLivraison
-                    ? 'Supprimer la livraison'
-                    : 'La livraison doit être vide pour être supprimée'}
-                </p>
+                <p>Modifier le lot</p>
               </TooltipContent>
             </Tooltip>
-          </div>
-        )}
+          ) : (
+            <div className="flex gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" onClick={handleSave}>
+                    <Save className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Sauvegarder les modifications</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="outline" onClick={handleCancel}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Annuler les modifications</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleDelete}
+                disabled={!canDeleteLivraison}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {canDeleteLivraison
+                  ? 'Supprimer la livraison'
+                  : 'La livraison doit être vide pour être supprimée'}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </CardHeader>
       <CardContent>
         {isEditing ? (
@@ -463,9 +440,7 @@ export function EditableLivraisonCard({
                   <TableRow>
                     <TableHead>Article</TableHead>
                     <TableHead className="text-center">Quantité</TableHead>
-                    {canEdit && availableLots.length > 0 && (
-                      <TableHead className="text-center">Actions</TableHead>
-                    )}
+                    <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -475,24 +450,22 @@ export function EditableLivraisonCard({
                       <TableCell className="text-center">
                         <Badge variant="secondary">{item.DL_QTEBL}</Badge>
                       </TableCell>
-                      {canEdit && availableLots.length > 0 && (
-                        <TableCell className="text-center">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => onTransferItem(item)}
-                              >
-                                <ArrowRightLeft className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Transférer vers un autre lot</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TableCell>
-                      )}
+                      <TableCell className="text-center">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => onTransferItem(item)}
+                            >
+                              <ArrowRightLeft className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Transférer vers un autre lot</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

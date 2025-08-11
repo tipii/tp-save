@@ -25,7 +25,7 @@ interface LivraisonEditProps {
 }
 
 export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
-  const { commande, canEdit, refetchCommande } = useCommandeEdit(commandeId);
+  const { commande, refetchCommande } = useCommandeEdit(commandeId);
   const [transferModal, setTransferModal] = useState<{
     isOpen: boolean;
     item: Item | null;
@@ -105,23 +105,21 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
     <div className="mt-6 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Gestion des livraisons</h3>
-        {canEdit && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="sm"
-                onClick={handleCreateLivraison}
-                disabled={createLivraisonMutation.isPending}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Nouvelle livraison
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Créer une nouvelle livraison</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm"
+              onClick={handleCreateLivraison}
+              disabled={createLivraisonMutation.isPending}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Nouvelle livraison
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Créer une nouvelle livraison</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -129,7 +127,6 @@ export function LivraisonEdit({ commandeId }: LivraisonEditProps) {
           <EditableLivraisonCard
             key={livraison.id}
             livraison={livraison}
-            canEdit={canEdit}
             onTransferItem={(item) => openTransferModal(item, livraison.id)}
             availableLots={parsedLivraisons.filter((l) => l.id !== livraison.id)}
             refetchCommande={refetchCommande}

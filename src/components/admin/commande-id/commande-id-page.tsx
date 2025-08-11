@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { CommandeEditControls } from './components/commande-edit-controls';
 import { CommandeEditForm } from './components/commande-edit-form';
 import { CommandeReadOnlyInfo } from './components/commande-read-only-info';
 import { LivraisonEdit } from './components/livraison-edit/livraison-edit';
@@ -28,7 +27,11 @@ export default function CommandeIdPage({ id }: CommandeIdPageProps) {
   return (
     <div className="space-y-6 p-6">
       {/* Header with controls */}
-      <CommandeEditControls commandeId={id} commandeRef={commande.ref} />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Commande {commande.name}</h1>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

@@ -48,7 +48,7 @@ interface CommandeEditFormProps {
 }
 
 export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
-  const { commande, canEdit, updateCommande, mutations } = useCommandeEdit(commandeId);
+  const { commande, updateCommande, mutations } = useCommandeEdit(commandeId);
 
   const trpc = useTRPC();
   const { data: users } = useQuery(trpc.users.getUsers.queryOptions());
@@ -120,11 +120,6 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
           </div>
           Détails de la Commande
         </CardTitle>
-        <CardDescription>
-          {canEdit
-            ? 'Document déverrouillé - Mode édition activé'
-            : 'Document verrouillé - Mode lecture seule'}
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -136,7 +131,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
                 <FormItem>
                   <FormLabel>Nom</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={!canEdit} placeholder="Saisir la référence" />
+                    <Input {...field} placeholder="Saisir la référence" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -149,7 +144,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Statut</FormLabel>
-                  <Select disabled={!canEdit} onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner le statut" />
@@ -186,7 +181,6 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
                       options={users?.map((user) => ({ value: user.id, label: user.name })) || []}
                       value={field.value}
                       onChange={field.onChange}
-                      disabled={!canEdit}
                     />
                     <FormMessage />
                   </FormItem>
@@ -206,7 +200,6 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
                       options={users?.map((user) => ({ value: user.id, label: user.name })) || []}
                       value={field.value}
                       onChange={field.onChange}
-                      disabled={!canEdit}
                     />
                     <FormMessage />
                   </FormItem>
@@ -223,7 +216,7 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
                       Mode de réception
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} disabled={!canEdit} placeholder="Mode de réception" />
+                      <Input {...field} placeholder="Mode de réception" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -245,7 +238,6 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
                           <Button
                             variant="outline"
                             className="w-full justify-start text-left font-normal"
-                            disabled={!canEdit}
                           >
                             {field.value ? (
                               new Date(field.value).toLocaleDateString('fr-FR')
@@ -273,18 +265,16 @@ export function CommandeEditForm({ commandeId }: CommandeEditFormProps) {
               />
             </div>
 
-            {canEdit && (
-              <div className="flex flex-1 justify-end gap-2 pt-4">
-                <Button type="submit" disabled={mutations.update.isPending}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Enregistrer les modifications
-                </Button>
-                <Button type="button" variant="outline" onClick={handleCancel}>
-                  <X className="mr-2 h-4 w-4" />
-                  Annuler
-                </Button>
-              </div>
-            )}
+            <div className="flex flex-1 justify-end gap-2 pt-4">
+              <Button type="submit" disabled={mutations.update.isPending}>
+                <Save className="mr-2 h-4 w-4" />
+                Enregistrer les modifications
+              </Button>
+              <Button type="button" variant="outline" onClick={handleCancel}>
+                <X className="mr-2 h-4 w-4" />
+                Annuler
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>
