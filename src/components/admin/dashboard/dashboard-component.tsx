@@ -8,9 +8,17 @@ import RecentCommandsSection from './recent-commands-section';
 import DeliveringLivraisonsSection from './delivering-livraisons-section';
 import DeliveredLivraisonsSection from './delivered-livraisons-section';
 import ReturnsLivraisonsSection from './returns-livraisons-section';
+import Stats from './stats';
+import { CheckCircle, Package, PackageMinus, Truck } from 'lucide-react';
+import { useTRPC } from '@/trpc/client';
+import { useQuery } from '@tanstack/react-query';
 
 export default function DashboardComponent() {
   const { setBreadcrumb } = useBreadcrumb();
+
+  const trpc = useTRPC();
+
+  const { data: stats, isLoading } = useQuery(trpc.dashboard.getStats.queryOptions());
 
   useEffect(() => {
     setBreadcrumb([], 'Dashboard');
@@ -18,19 +26,54 @@ export default function DashboardComponent() {
 
   return (
     <div className="space-y-6 p-4">
-      {/* Main Dashboard Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Recent Commands */}
-        <RecentCommandsSection />
+      <Stats
+        stats={[
+          {
+            label: 'Commandes reçues',
+            value: stats?.commandesRecuesToday ?? 0,
+            description: "Commandes reçues aujourd'hui",
+            icon: <Package />,
+            // trend: { value: 10, isUp: true },
+          },
+          {
+            label: 'Livraisons en cours',
+            value: stats?.livraisonsEnCours ?? 0,
+            description: 'Livraisons en cours',
+            icon: <Truck />,
+            // trend: { value: 10, isUp: true },
+          },
+          {
+            label: 'Livraisons effectuées',
+            value: stats?.livraisonsEffectuees ?? 0,
+            description: 'Livraisons effectuées',
+            icon: <CheckCircle />,
+            // trend: { value: 10, isUp: true },
+          },
+          {
+            label: 'Retours',
+            value: stats?.retoursEnCours ?? 0,
+            description: 'Retours en cours',
+            icon: <PackageMinus />,
+            // trend: { value: 10, isUp: true },
+          },
+        ]}
+        isLoading={isLoading}
+      />
+      <div className="space-y-6">
+        {/* Main Dashboard Grid */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {/* Recent Commands */}
+          <RecentCommandsSection />
 
-        {/* Delivering Livraisons */}
-        <DeliveringLivraisonsSection />
+          {/* Delivering Livraisons */}
+          <DeliveringLivraisonsSection />
 
-        {/* Delivered Livraisons */}
-        <DeliveredLivraisonsSection />
+          {/* Delivered Livraisons */}
+          <DeliveredLivraisonsSection />
 
-        {/* Returns */}
-        <ReturnsLivraisonsSection />
+          {/* Returns */}
+          <ReturnsLivraisonsSection />
+        </div>
       </div>
     </div>
   );
