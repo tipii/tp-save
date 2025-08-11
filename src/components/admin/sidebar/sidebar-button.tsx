@@ -20,17 +20,12 @@ export default function SidebarButton({
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild>
-        <Link
-          href={url}
-          className={`w-full justify-start rounded-lg px-4 py-6 font-bold text-slate-600 ${
-            isActive && 'bg-blue-600 text-white'
-          }`}
-        >
+      <Link href={url}>
+        <SidebarMenuButton isActive={isActive} className="cursor-pointer">
           {icon}
           <span>{title}</span>
-        </Link>
-      </SidebarMenuButton>
+        </SidebarMenuButton>
+      </Link>
     </SidebarMenuItem>
   );
 }

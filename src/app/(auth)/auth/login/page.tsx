@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
+    <Card className="w-full max-w-md border-none shadow-none">
+      <CardHeader className="mb-4">
         <CardTitle>Connexion</CardTitle>
         <CardDescription>Entrez vos identifiants pour accéder à l'application</CardDescription>
       </CardHeader>

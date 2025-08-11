@@ -67,7 +67,7 @@ export function LoginForm() {
               <FormItem>
                 <div className="flex items-center justify-between">
                   <FormLabel>Mot de passe</FormLabel>
-                  <Link href="/auth/forgot-password">
+                  {/* <Link href="/auth/forgot-password">
                     <Button
                       type="button"
                       variant="link"
@@ -75,7 +75,7 @@ export function LoginForm() {
                     >
                       Mot de passe oublié ?
                     </Button>
-                  </Link>
+                  </Link> */}
                 </div>
                 <FormControl>
                   <Input {...field} type="password" className="bg-white" />
@@ -99,7 +99,7 @@ export function LoginForm() {
           />
           <Button
             type="submit"
-            className="bg-primary hover:bg-primary/90 w-full"
+            className="bg-tallin-blue hover:bg-tallin-blue/90 text-tallin-yellow w-full"
             disabled={isPending}
           >
             {isPending ? (

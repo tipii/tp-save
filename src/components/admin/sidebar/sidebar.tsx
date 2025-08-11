@@ -26,6 +26,7 @@ import { NavUser } from './nav-user';
 import Link from 'next/link';
 import SidebarButton from './sidebar-button';
 import RefreshButton from './refresh-button';
+import Image from 'next/image';
 
 const adminItems = [
   {
@@ -71,8 +72,8 @@ const items = [
 export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
-        Tallin Pi
+      <SidebarHeader className="bg-clip-text text-xl font-bold">
+        <Image src="/tallin-logo.png" alt="logo" width={200} height={200} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
