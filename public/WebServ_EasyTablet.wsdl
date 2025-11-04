@@ -1346,6 +1346,30 @@
         </xsd:sequence>
       </xsd:complexType>
       <xsd:element name="Liste_BonLivLignes_SAGEResponse" type="s0:tListe_BonLivLignes_SAGEResponse"/>
+      <xsd:complexType name="tListe_DocVente_SAGE">
+        <xsd:sequence>
+          <xsd:element name="P_DateRef" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="Liste_DocVente_SAGE" type="s0:tListe_DocVente_SAGE"/>
+      <xsd:complexType name="tListe_DocVente_SAGEResponse">
+        <xsd:sequence>
+          <xsd:element name="Liste_DocVente_SAGEResult" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="Liste_DocVente_SAGEResponse" type="s0:tListe_DocVente_SAGEResponse"/>
+      <xsd:complexType name="tListe_DocVenteLignes_SAGE">
+        <xsd:sequence>
+          <xsd:element name="P_DateRef" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="Liste_DocVenteLignes_SAGE" type="s0:tListe_DocVenteLignes_SAGE"/>
+      <xsd:complexType name="tListe_DocVenteLignes_SAGEResponse">
+        <xsd:sequence>
+          <xsd:element name="Liste_DocVenteLignes_SAGEResult" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="Liste_DocVenteLignes_SAGEResponse" type="s0:tListe_DocVenteLignes_SAGEResponse"/>
     </xsd:schema>
   </types>
   <message name="WebServ_EasyTablet_Liste_Articles_MessageIn">
@@ -2002,6 +2026,18 @@
   <message name="WebServ_EasyTablet_Liste_BonLivLignes_SAGE_MessageOut">
     <part name="parameters" element="s0:Liste_BonLivLignes_SAGEResponse"/>
   </message>
+  <message name="WebServ_EasyTablet_Liste_DocVente_SAGE_MessageIn">
+    <part name="parameters" element="s0:Liste_DocVente_SAGE"/>
+  </message>
+  <message name="WebServ_EasyTablet_Liste_DocVente_SAGE_MessageOut">
+    <part name="parameters" element="s0:Liste_DocVente_SAGEResponse"/>
+  </message>
+  <message name="WebServ_EasyTablet_Liste_DocVenteLignes_SAGE_MessageIn">
+    <part name="parameters" element="s0:Liste_DocVenteLignes_SAGE"/>
+  </message>
+  <message name="WebServ_EasyTablet_Liste_DocVenteLignes_SAGE_MessageOut">
+    <part name="parameters" element="s0:Liste_DocVenteLignes_SAGEResponse"/>
+  </message>
   <portType name="WebServ_EasyTabletSOAPPortType">
     <operation name="Liste_Articles">
       <documentation>R&amp;eacute;sum&amp;eacute; : &amp;lt;indiquez ici ce que fait la proc&amp;eacute;dure&amp;gt;&lt;br /&gt;Syntaxe :&lt;br /&gt;[ &amp;lt;R&amp;eacute;sultat&amp;gt; = ] Liste_Articles (&amp;lt;p_PtVente&amp;gt;)&lt;br /&gt;&lt;br /&gt;Param&amp;egrave;tres :&lt;br /&gt;p_PtVente : &amp;lt;indiquez ici le r&amp;#244;le de p_PtVente&amp;gt;&lt;br /&gt;Valeur de retour :&lt;br /&gt;cha&amp;#238;ne : // 	Aucune&lt;br /&gt;&lt;br /&gt;Exemple :&lt;br /&gt;Indiquez ici un exemple d'utilisation.&lt;br /&gt;</documentation>
@@ -2546,6 +2582,16 @@
       <documentation>R&amp;eacute;sum&amp;eacute; : &amp;lt;indiquez ici ce que fait la proc&amp;eacute;dure&amp;gt;&lt;br /&gt;Syntaxe :&lt;br /&gt;[ &amp;lt;R&amp;eacute;sultat&amp;gt; = ] Liste_BonLivLignes_SAGE (&amp;lt;P_NumBonLiv&amp;gt;)&lt;br /&gt;&lt;br /&gt;Param&amp;egrave;tres :&lt;br /&gt;P_NumBonLiv : &amp;lt;indiquez ici le r&amp;#244;le de P_NumBonLiv&amp;gt;&lt;br /&gt;Valeur de retour :&lt;br /&gt;cha&amp;#238;ne ANSI : &amp;lt;indiquez ici le r&amp;#244;le de la valeur de retour&amp;gt;&lt;br /&gt;&lt;br /&gt;Exemple :&lt;br /&gt;&amp;lt;Indiquez ici un exemple d'utilisation&amp;gt;&lt;br /&gt;</documentation>
       <input message="s0:WebServ_EasyTablet_Liste_BonLivLignes_SAGE_MessageIn"/>
       <output message="s0:WebServ_EasyTablet_Liste_BonLivLignes_SAGE_MessageOut"/>
+    </operation>
+    <operation name="Liste_DocVente_SAGE">
+      <documentation>R&amp;eacute;sum&amp;eacute; : &amp;lt;indiquez ici ce que fait la proc&amp;eacute;dure&amp;gt;&lt;br /&gt;Syntaxe :&lt;br /&gt;Liste_DocVente_SAGE ()&lt;br /&gt;&lt;br /&gt;Param&amp;egrave;tres :&lt;br /&gt;Aucun&lt;br /&gt;Valeur de retour :&lt;br /&gt;Aucune&lt;br /&gt;&lt;br /&gt;Exemple :&lt;br /&gt;&amp;lt;Indiquez ici un exemple d'utilisation&amp;gt;&lt;br /&gt;</documentation>
+      <input message="s0:WebServ_EasyTablet_Liste_DocVente_SAGE_MessageIn"/>
+      <output message="s0:WebServ_EasyTablet_Liste_DocVente_SAGE_MessageOut"/>
+    </operation>
+    <operation name="Liste_DocVenteLignes_SAGE">
+      <documentation>R&amp;eacute;sum&amp;eacute; : &amp;lt;indiquez ici ce que fait la proc&amp;eacute;dure&amp;gt;&lt;br /&gt;Syntaxe :&lt;br /&gt;Liste_DocVenteLignes_SAGE ()&lt;br /&gt;&lt;br /&gt;Param&amp;egrave;tres :&lt;br /&gt;Aucun&lt;br /&gt;Valeur de retour :&lt;br /&gt;Aucune&lt;br /&gt;&lt;br /&gt;Exemple :&lt;br /&gt;&amp;lt;Indiquez ici un exemple d'utilisation&amp;gt;&lt;br /&gt;</documentation>
+      <input message="s0:WebServ_EasyTablet_Liste_DocVenteLignes_SAGE_MessageIn"/>
+      <output message="s0:WebServ_EasyTablet_Liste_DocVenteLignes_SAGE_MessageOut"/>
     </operation>
   </portType>
   <binding name="WebServ_EasyTabletSOAPBinding" type="s0:WebServ_EasyTabletSOAPPortType">
@@ -3524,6 +3570,24 @@
     </operation>
     <operation name="Liste_BonLivLignes_SAGE">
       <soap:operation soapAction="urn:WebServ_EasyTablet/Liste_BonLivLignes_SAGE" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="Liste_DocVente_SAGE">
+      <soap:operation soapAction="urn:WebServ_EasyTablet/Liste_DocVente_SAGE" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="Liste_DocVenteLignes_SAGE">
+      <soap:operation soapAction="urn:WebServ_EasyTablet/Liste_DocVenteLignes_SAGE" style="document"/>
       <input>
         <soap:body use="literal"/>
       </input>

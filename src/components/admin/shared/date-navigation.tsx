@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, addDays, subDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Calendar, ChevronLeft, ChevronRight, CalendarIcon } from 'lucide-react';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { getTahitiToday, toTahitiTime, normalizeToTahitiDay } from '@/lib/date-utils';
 
 interface DateNavigationProps {
   selectedDate?: Date;
@@ -17,16 +18,30 @@ interface DateNavigationProps {
 }
 
 export function DateNavigation({
-  selectedDate = new Date(),
+  selectedDate = getTahitiToday(),
   onDateChange,
   className,
 }: DateNavigationProps) {
-  const [date, setDate] = useState<Date>(selectedDate);
+  // Normalize selectedDate to Tahiti timezone day
+  const normalizedSelectedDate = selectedDate
+    ? normalizeToTahitiDay(selectedDate)
+    : getTahitiToday();
+
+  const [date, setDate] = useState<Date>(normalizedSelectedDate);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
+  // Sync internal state when selectedDate prop changes
+  useEffect(() => {
+    if (selectedDate) {
+      setDate(normalizeToTahitiDay(selectedDate));
+    }
+  }, [selectedDate]);
+
   const handleDateChange = (newDate: Date) => {
-    setDate(newDate);
-    onDateChange?.(newDate);
+    // Normalize to Tahiti timezone day before setting
+    const normalized = normalizeToTahitiDay(newDate);
+    setDate(normalized);
+    onDateChange?.(normalized);
   };
 
   const goToPreviousDay = () => {
@@ -40,7 +55,7 @@ export function DateNavigation({
   };
 
   const goToToday = () => {
-    const today = new Date();
+    const today = getTahitiToday();
     handleDateChange(today);
   };
 
@@ -52,11 +67,13 @@ export function DateNavigation({
   };
 
   const isToday = (date: Date) => {
-    const today = new Date();
+    const today = getTahitiToday();
+    const tahitiDate = toTahitiTime(date);
+    const tahitiToday = toTahitiTime(today);
     return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
+      tahitiDate.getDate() === tahitiToday.getDate() &&
+      tahitiDate.getMonth() === tahitiToday.getMonth() &&
+      tahitiDate.getFullYear() === tahitiToday.getFullYear()
     );
   };
 
@@ -76,8 +93,10 @@ export function DateNavigation({
       {/* Current Date Display */}
       <div className="flex items-center gap-2">
         <div className="flex min-w-[120px] flex-col items-center">
-          <div className="text-sm font-medium">{format(date, 'EEEE', { locale: fr })}</div>
-          <div className="text-lg font-semibold">{format(date, 'dd/MM/yyyy')}</div>
+          <div className="text-sm font-medium">
+            {format(toTahitiTime(date), 'EEEE', { locale: fr })}
+          </div>
+          <div className="text-lg font-semibold">{format(toTahitiTime(date), 'dd/MM/yyyy')}</div>
         </div>
 
         {/* Calendar Popover */}
@@ -108,7 +127,7 @@ export function DateNavigation({
           <PopoverContent className="w-auto p-0" align="center">
             <CalendarComponent
               mode="single"
-              selected={date}
+              selected={toTahitiTime(date)}
               onSelect={handleCalendarSelect}
               autoFocus
               locale={fr}

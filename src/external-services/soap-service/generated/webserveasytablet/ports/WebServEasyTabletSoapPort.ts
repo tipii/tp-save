@@ -216,6 +216,10 @@ import { S0TListeBonLivSage } from "../definitions/S0TListeBonLivSage";
 import { S0TListeBonLivSageResponse } from "../definitions/S0TListeBonLivSageResponse";
 import { S0TListeBonLivLignesSage } from "../definitions/S0TListeBonLivLignesSage";
 import { S0TListeBonLivLignesSageResponse } from "../definitions/S0TListeBonLivLignesSageResponse";
+import { S0TListeDocVenteSage } from "../definitions/S0TListeDocVenteSage";
+import { S0TListeDocVenteSageResponse } from "../definitions/S0TListeDocVenteSageResponse";
+import { S0TListeDocVenteLignesSage } from "../definitions/S0TListeDocVenteLignesSage";
+import { S0TListeDocVenteLignesSageResponse } from "../definitions/S0TListeDocVenteLignesSageResponse";
 
 export interface WebServEasyTabletSoapPort {
     Liste_Articles(listeArticles: S0TListeArticles, callback: (err: any, result: S0TListeArticlesResponse, rawResponse: any, soapHeader: any, rawRequest: any) => void): void;
@@ -327,4 +331,6 @@ export interface WebServEasyTabletSoapPort {
     Import_Palettes_DocCom(importPalettesDocCom: S0TImportPalettesDocCom, callback: (err: any, result: S0TImportPalettesDocComResponse, rawResponse: any, soapHeader: any, rawRequest: any) => void): void;
     Liste_BonLiv_SAGE(listeBonLivSage: S0TListeBonLivSage, callback: (err: any, result: S0TListeBonLivSageResponse, rawResponse: any, soapHeader: any, rawRequest: any) => void): void;
     Liste_BonLivLignes_SAGE(listeBonLivLignesSage: S0TListeBonLivLignesSage, callback: (err: any, result: S0TListeBonLivLignesSageResponse, rawResponse: any, soapHeader: any, rawRequest: any) => void): void;
+    Liste_DocVente_SAGE(listeDocVenteSage: S0TListeDocVenteSage, callback: (err: any, result: S0TListeDocVenteSageResponse, rawResponse: any, soapHeader: any, rawRequest: any) => void): void;
+    Liste_DocVenteLignes_SAGE(listeDocVenteLignesSage: S0TListeDocVenteLignesSage, callback: (err: any, result: S0TListeDocVenteLignesSageResponse, rawResponse: any, soapHeader: any, rawRequest: any) => void): void;
 }

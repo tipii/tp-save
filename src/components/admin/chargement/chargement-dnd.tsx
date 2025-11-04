@@ -13,10 +13,17 @@ import { DroppableLivreur } from './dnd/droppable';
 import { PriorityZone } from './dnd/priority-zone';
 import { Priority } from '@/generated/prisma';
 import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
+import { getTahitiToday, normalizeToTahitiDay } from '@/lib/date-utils';
 
 export default function ChargementDnd() {
+  const [selectedDate, setSelectedDate] = useState<Date>(() => getTahitiToday());
   const trpc = useTRPC();
-  const { data: livraisons } = useQuery(trpc.livraisons.getPendingLivraisons.queryOptions());
+
+  const { data: livraisons } = useQuery(
+    trpc.livraisons.getPendingLivraisons.queryOptions({
+      expectedDeliveryDate: selectedDate ? selectedDate : undefined,
+    }),
+  );
   const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
 
   const { setBreadcrumb } = useBreadcrumb();
@@ -106,7 +113,10 @@ export default function ChargementDnd() {
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <div className="flex flex-col gap-4">
-        <DateNavigationComponent />
+        <DateNavigationComponent
+          selectedDate={selectedDate}
+          setSelectedDate={(date) => setSelectedDate(normalizeToTahitiDay(date))}
+        />
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-4 border-b border-gray-200 px-4 pb-4">
             <div className="flex justify-between">

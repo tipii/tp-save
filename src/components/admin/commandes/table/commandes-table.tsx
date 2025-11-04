@@ -40,9 +40,7 @@ export function CommandesTable({ commandes, filters, pagination, isPending }: Co
           <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
             <TableHead>Nom</TableHead>
             <TableHead>Client</TableHead>
-            <TableHead>Bon Préparation</TableHead>
-            <TableHead>Bon Livraison</TableHead>
-            <TableHead>Livraison(s)</TableHead>
+            <TableHead>Ref</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead>Articles totaux</TableHead>
             <TableHead>Date création</TableHead>

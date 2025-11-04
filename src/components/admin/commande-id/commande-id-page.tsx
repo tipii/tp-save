@@ -5,7 +5,6 @@ import { CommandeEditForm } from './components/commande-edit-form';
 import { CommandeReadOnlyInfo } from './components/commande-read-only-info';
 import { LivraisonEdit } from './components/livraison-edit/livraison-edit';
 import { useCommandeEdit } from './hooks/use-commande-edit';
-import CommandeLinkBl from './components/commande-link-bl';
 import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 
 interface CommandeIdPageProps {
@@ -43,7 +42,6 @@ export default function CommandeIdPage({ id }: CommandeIdPageProps) {
 
         {/* Read-only Information */}
         <div>
-          <CommandeLinkBl commandeId={id} />
           <CommandeReadOnlyInfo commandeId={id} />
         </div>
       </div>

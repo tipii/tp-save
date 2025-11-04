@@ -1,6 +1,8 @@
 import z from 'zod';
 import { Priority, Status } from '@/generated/prisma';
 import { createTRPCRouter, protectedProcedure } from '../init';
+import { TRPCError } from '@trpc/server';
+import { getTahitiDayStart, getTahitiDayEnd, formatDateForTahiti, getTahitiNow } from '@/lib/date-utils';
 
 export const itemSchema = z.object({
   AR_REF: z.string(),
@@ -14,24 +16,51 @@ export const itemSchema = z.object({
 });
 
 export const livraisonsRouter = createTRPCRouter({
-  getPendingLivraisons: protectedProcedure.query(async ({ ctx }) => {
-    const livraisons = await ctx.prisma.livraison.findMany({
-      where: {
-        status: Status.PENDING,
-      },
-      include: {
-        commande: {
-          include: {
-            client: true,
-            livraisons: true,
-          },
-        },
-      },
-    });
+  getPendingLivraisons: protectedProcedure
+    .input(
+      z.object({
+        expectedDeliveryDate: z.date().nullish(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const where: any = {
+          status: Status.PENDING,
+        };
 
-    // console.log(livraisons);
-    return livraisons;
-  }),
+        // If a date is provided, filter by date range (entire day in Tahiti timezone)
+        if (input.expectedDeliveryDate != null) {
+          const dayStart = getTahitiDayStart(input.expectedDeliveryDate);
+          const dayEnd = getTahitiDayEnd(input.expectedDeliveryDate);
+
+          where.expectedDeliveryDate = {
+            gte: dayStart,
+            lte: dayEnd,
+          };
+        }
+
+        const livraisons = await ctx.prisma.livraison.findMany({
+          where,
+          include: {
+            commande: {
+              include: {
+                client: true,
+                livraisons: true,
+              },
+            },
+          },
+        });
+
+        // console.log(livraisons);
+        return livraisons;
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Erreur lors de la récupération des livraisons',
+        });
+      }
+    }),
 
   changePriority: protectedProcedure
     .input(
@@ -78,11 +107,11 @@ export const livraisonsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { commandeId, name, items } = input;
 
-      // Create the new livraison
+      // Create the new livraison with Tahiti timezone date
       const livraison = await ctx.prisma.livraison.create({
         data: {
           commandeId,
-          name: name || `Livraison ${new Date().toLocaleDateString()}`,
+          name: name || `Livraison ${formatDateForTahiti(getTahitiNow())}`,
           items: items,
           status: Status.PENDING,
         },
@@ -123,12 +152,12 @@ export const livraisonsRouter = createTRPCRouter({
 
       console.log(items);
 
-      // Update the livraison items
+      // Update the livraison items with Tahiti timezone timestamp
       const updatedLivraison = await ctx.prisma.livraison.update({
         where: { id: livraisonId },
         data: {
           items: items,
-          updatedAt: new Date(),
+          updatedAt: getTahitiNow(),
         },
       });
 

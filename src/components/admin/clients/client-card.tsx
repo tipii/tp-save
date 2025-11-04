@@ -20,7 +20,6 @@ export default function ClientCard({ client }: { client: TrpcClient }) {
             title="Edit client"
           >
             <SquarePen className="h-4 w-4" />
-            Modifier
           </a>
         </CardTitle>
       </CardHeader>

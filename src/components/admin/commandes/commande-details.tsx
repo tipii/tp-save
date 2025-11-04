@@ -31,6 +31,13 @@ import { Calendar, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { Combobox } from '@/components/ui/combobox';
 import { priorityToText, statusToText, priorityToBadge } from '@/components/ui/enum-to-ui';
+import {
+  formatDateForTahiti,
+  parseDateForCalendar,
+  dateToTahitiDateString,
+  dateStringToTahitiDate,
+  convertTahitiToUTC,
+} from '@/lib/date-utils';
 
 const schema = z.object({
   priority: z.enum(Priority),
@@ -76,13 +83,9 @@ export default function CommandeDetails({ refetch }: { refetch: () => void }) {
     form.reset({
       priority: selectedCommande.priority,
       status: selectedCommande.status,
-      plannedDeliveryDate: selectedCommande.plannedDeliveryDate
-        ? new Date(selectedCommande.plannedDeliveryDate).toISOString().split('T')[0]
-        : '',
+      plannedDeliveryDate: dateToTahitiDateString(selectedCommande.plannedDeliveryDate) ?? '',
       orderReceptionMode: selectedCommande.orderReceptionMode ?? '',
-      orderReceptionDate: selectedCommande.orderReceptionDate
-        ? new Date(selectedCommande.orderReceptionDate).toISOString().split('T')[0]
-        : '',
+      orderReceptionDate: dateToTahitiDateString(selectedCommande.orderReceptionDate) ?? '',
       orderReceivedById: selectedCommande.orderReceivedById ?? '',
       orderTransmittedById: selectedCommande.orderTransmittedById ?? '',
       cf_bl_ou_rq_number: selectedCommande.cf_bl_ou_rq_number ?? '',
@@ -105,13 +108,9 @@ export default function CommandeDetails({ refetch }: { refetch: () => void }) {
         id: selectedCommande.id,
         priority: values.priority,
         status: values.status,
-        plannedDeliveryDate: values.plannedDeliveryDate
-          ? new Date(values.plannedDeliveryDate)
-          : undefined,
+        plannedDeliveryDate: dateStringToTahitiDate(values.plannedDeliveryDate),
         orderReceptionMode: values.orderReceptionMode || undefined,
-        orderReceptionDate: values.orderReceptionDate
-          ? new Date(values.orderReceptionDate)
-          : undefined,
+        orderReceptionDate: dateStringToTahitiDate(values.orderReceptionDate),
         orderReceivedById: values.orderReceivedById || undefined,
         orderTransmittedById: values.orderTransmittedById || undefined,
         cf_bl_ou_rq_number: values.cf_bl_ou_rq_number || undefined,
@@ -180,7 +179,7 @@ export default function CommandeDetails({ refetch }: { refetch: () => void }) {
                           className="w-full justify-start text-left font-normal"
                         >
                           {field.value ? (
-                            new Date(field.value).toLocaleDateString('fr-FR')
+                            formatDateForTahiti(field.value) || field.value
                           ) : (
                             <span className="text-muted-foreground">Sélectionner une date</span>
                           )}
@@ -190,10 +189,8 @@ export default function CommandeDetails({ refetch }: { refetch: () => void }) {
                     <PopoverContent className="w-auto p-0" align="start">
                       <CalendarComponent
                         mode="single"
-                        selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={(date) =>
-                          field.onChange(date ? date.toISOString().split('T')[0] : '')
-                        }
+                        selected={parseDateForCalendar(field.value)}
+                        onSelect={(date) => field.onChange(date ? convertTahitiToUTC(date) : '')}
                         disabled={(date) => date < new Date('1900-01-01')}
                         initialFocus
                       />
@@ -278,7 +275,7 @@ export default function CommandeDetails({ refetch }: { refetch: () => void }) {
                           className="w-full justify-start text-left font-normal"
                         >
                           {field.value ? (
-                            new Date(field.value).toLocaleDateString('fr-FR')
+                            formatDateForTahiti(field.value) || field.value
                           ) : (
                             <span className="text-muted-foreground">Sélectionner une date</span>
                           )}
@@ -288,10 +285,8 @@ export default function CommandeDetails({ refetch }: { refetch: () => void }) {
                     <PopoverContent className="w-auto p-0" align="start">
                       <CalendarComponent
                         mode="single"
-                        selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={(date) =>
-                          field.onChange(date ? date.toISOString().split('T')[0] : '')
-                        }
+                        selected={parseDateForCalendar(field.value)}
+                        onSelect={(date) => field.onChange(date ? convertTahitiToUTC(date) : '')}
                         disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                         initialFocus
                       />

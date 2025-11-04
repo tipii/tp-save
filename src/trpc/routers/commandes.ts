@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from '../init';
 import { Priority, Status, Prisma } from '@/generated/prisma';
 import { SortOrder } from '@/types/enums';
 import { TRPCError } from '@trpc/server';
+import { createTahitiDateRange, getTahitiNow } from '@/lib/date-utils';
 
 export const commandesRouter = createTRPCRouter({
   getPendingCommandes: protectedProcedure.query(async ({ ctx }) => {
@@ -144,18 +145,9 @@ export const commandesRouter = createTRPCRouter({
         where.status = status;
       }
 
-      // Date range filter
+      // Date range filter using Tahiti timezone
       if (dateFrom || dateTo) {
-        where.createdAt = {};
-        if (dateFrom) {
-          where.createdAt.gte = new Date(dateFrom);
-        }
-        if (dateTo) {
-          // Add one day to include the entire day
-          const endDate = new Date(dateTo);
-          endDate.setDate(endDate.getDate() + 1);
-          where.createdAt.lt = endDate;
-        }
+        where.createdAt = createTahitiDateRange(dateFrom, dateTo);
       }
 
       // Build orderBy clause
@@ -253,15 +245,10 @@ export const commandesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, ...updateData } = input;
+      const { id, priority, status, ...updateData } = input;
       const userId = ctx.user.id;
 
       try {
-        // Check if user has unlocked the commande for editing
-        const existing = await ctx.prisma.commande.findUnique({
-          where: { id },
-        });
-
         // Get current state for history
         const currentCommande = await ctx.prisma.commande.findUnique({
           where: { id },
@@ -275,12 +262,14 @@ export const commandesRouter = createTRPCRouter({
           },
         });
 
-        // Update the commande
+        // Update the commande with Tahiti timezone timestamp
         const updatedCommande = await ctx.prisma.commande.update({
           where: { id },
           data: {
             ...updateData,
-            updatedAt: new Date(),
+            updatedAt: getTahitiNow(),
+            priority: priority,
+            status: status,
           },
           include: {
             client: true,
@@ -291,6 +280,18 @@ export const commandesRouter = createTRPCRouter({
             },
           },
         });
+
+        if (updatedCommande.livraisons.length > 0) {
+          for (const livraison of updatedCommande.livraisons) {
+            await ctx.prisma.livraison.update({
+              where: { id: livraison.id },
+              data: {
+                priority: priority,
+                expectedDeliveryDate: updateData.plannedDeliveryDate,
+              },
+            });
+          }
+        }
 
         // Create history entry
         await ctx.prisma.commandeHistory.create({

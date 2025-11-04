@@ -7,7 +7,7 @@ export const triggerRouter = {
   syncBonsFromSage: adminProcedure.input(z.object({})).mutation(async ({ input, ctx }) => {
     console.log('syncBonsFromSage');
     try {
-      const handle = await tasks.triggerAndPoll<typeof syncBonsFromSageScheduled>(
+      const handle = await tasks.trigger<typeof syncBonsFromSageScheduled>(
         'tallin-pi-sync-commandes',
         {
           timestamp: new Date(),

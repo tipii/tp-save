@@ -1,6 +1,7 @@
 import { Status } from '@/generated/prisma';
 import { createTRPCRouter, protectedProcedure } from '../init';
 import z from 'zod';
+import { getTahitiToday, getTahitiDayEnd } from '@/lib/date-utils';
 
 export const dashboardRouter = createTRPCRouter({
   getLivraisonsByStatus: protectedProcedure
@@ -30,10 +31,9 @@ export const dashboardRouter = createTRPCRouter({
     }),
 
   getStats: protectedProcedure.query(async ({ ctx }) => {
-    // Compute time window for "today"
-    const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    // Compute time window for "today" in Tahiti timezone
+    const startOfToday = getTahitiToday();
+    const endOfToday = getTahitiDayEnd(startOfToday);
 
     const [commandesRecuesToday, livraisonsEnCours, livraisonsEffectuees, retoursEnCours] =
       await Promise.all([
@@ -41,7 +41,7 @@ export const dashboardRouter = createTRPCRouter({
           where: {
             createdAt: {
               gte: startOfToday,
-              lt: startOfTomorrow,
+              lte: endOfToday,
             },
           },
         }),

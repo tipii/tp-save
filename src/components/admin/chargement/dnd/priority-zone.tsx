@@ -29,6 +29,7 @@ export const PriorityZone = ({
     });
   }, [livraisons, droppedItems, priority]);
 
+  console.log(livraisons, availableLots);
   return (
     <div className={`flex-1 rounded-lg border ${backgroundColor} p-4 text-2xl font-bold`}>
       <div className="flex justify-between">

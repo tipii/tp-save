@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { TrpcCommande } from '@/types/trpc-types';
 import { Badge } from '@/components/ui/badge';
 import { useCommande } from '../commande-context';
+import { formatDateForTahiti } from '@/lib/date-utils';
 
 export interface CommandeRowProps {
   commande: TrpcCommande;
@@ -66,17 +67,8 @@ export function CommandeRow({ commande }: CommandeRowProps) {
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          {commande.bp_number ? (
-            <Badge variant="green">{commande.bp_number}</Badge>
-          ) : (
-            <span className="text-muted-foreground">Non défini</span>
-          )}
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          {commande.bl_number ? (
-            <Badge variant="purple">{commande.bl_number}</Badge>
+          {commande.ref ? (
+            <Badge variant="green">{commande.ref}</Badge>
           ) : (
             <span className="text-muted-foreground">Non défini</span>
           )}
@@ -84,10 +76,6 @@ export function CommandeRow({ commande }: CommandeRowProps) {
       </TableCell>
       <TableCell>
         <div className="flex w-full items-center">
-          <div className="flex items-center gap-2">
-            <Package className="text-muted-foreground h-4 w-4" />
-            <span className="font-medium">{commande.livraisons.length}</span>
-          </div>
           {commande.livraisons.length > 0 && (
             <div className="grid w-full grid-cols-3">
               <div className="flex flex-col items-end justify-evenly gap-0 text-xs">
@@ -104,15 +92,13 @@ export function CommandeRow({ commande }: CommandeRowProps) {
           )}
         </div>
       </TableCell>
-
-      <TableCell>{statusToBadge(commande.status)}</TableCell>
       <TableCell>
         <div className="font-medium">{getTotalItems(commande.livraisons)} articles</div>
       </TableCell>
       <TableCell>
         <div className="text-muted-foreground flex items-center gap-2 text-sm">
           <Clock className="h-3 w-3" />
-          <span>{new Date(commande.createdAt).toLocaleDateString('fr-FR')}</span>
+          <span>{formatDateForTahiti(commande.createdAt)}</span>
         </div>
       </TableCell>
       <TableCell>

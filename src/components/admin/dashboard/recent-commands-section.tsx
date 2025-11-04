@@ -23,7 +23,7 @@ export default function RecentCommandsSection() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Dernières Commandes
+            Dernières Livraisons
           </CardTitle>
         </CardHeader>
         <CardContent className="max-h-[300px] overflow-y-auto">
@@ -45,7 +45,7 @@ export default function RecentCommandsSection() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Package className="h-5 w-5" />
-          Dernières Commandes
+          Dernières Livraisons
         </CardTitle>
       </CardHeader>
       <CardContent className="max-h-[300px] overflow-y-auto">

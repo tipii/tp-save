@@ -217,6 +217,10 @@ import { S0TListeBonLivSage } from "./definitions/S0TListeBonLivSage";
 import { S0TListeBonLivSageResponse } from "./definitions/S0TListeBonLivSageResponse";
 import { S0TListeBonLivLignesSage } from "./definitions/S0TListeBonLivLignesSage";
 import { S0TListeBonLivLignesSageResponse } from "./definitions/S0TListeBonLivLignesSageResponse";
+import { S0TListeDocVenteSage } from "./definitions/S0TListeDocVenteSage";
+import { S0TListeDocVenteSageResponse } from "./definitions/S0TListeDocVenteSageResponse";
+import { S0TListeDocVenteLignesSage } from "./definitions/S0TListeDocVenteLignesSage";
+import { S0TListeDocVenteLignesSageResponse } from "./definitions/S0TListeDocVenteLignesSageResponse";
 import { WebServEasyTablet } from "./services/WebServEasyTablet";
 
 export interface WebServEasyTabletClient extends SoapClient {
@@ -330,6 +334,8 @@ export interface WebServEasyTabletClient extends SoapClient {
     Import_Palettes_DocComAsync(importPalettesDocCom: S0TImportPalettesDocCom, options?: ISoapExOptions): Promise<[result: S0TImportPalettesDocComResponse, rawResponse: any, soapHeader: any, rawRequest: any]>;
     Liste_BonLiv_SAGEAsync(listeBonLivSage: S0TListeBonLivSage, options?: ISoapExOptions): Promise<[result: S0TListeBonLivSageResponse, rawResponse: any, soapHeader: any, rawRequest: any]>;
     Liste_BonLivLignes_SAGEAsync(listeBonLivLignesSage: S0TListeBonLivLignesSage, options?: ISoapExOptions): Promise<[result: S0TListeBonLivLignesSageResponse, rawResponse: any, soapHeader: any, rawRequest: any]>;
+    Liste_DocVente_SAGEAsync(listeDocVenteSage: S0TListeDocVenteSage, options?: ISoapExOptions): Promise<[result: S0TListeDocVenteSageResponse, rawResponse: any, soapHeader: any, rawRequest: any]>;
+    Liste_DocVenteLignes_SAGEAsync(listeDocVenteLignesSage: S0TListeDocVenteLignesSage, options?: ISoapExOptions): Promise<[result: S0TListeDocVenteLignesSageResponse, rawResponse: any, soapHeader: any, rawRequest: any]>;
 }
 
 /** Create WebServEasyTabletClient */

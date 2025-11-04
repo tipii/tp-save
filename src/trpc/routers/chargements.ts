@@ -1,6 +1,7 @@
 import z from 'zod';
 import { createTRPCRouter, protectedProcedure } from '../init';
 import { Status } from '@/generated/prisma';
+import { formatDateForTahiti, getTahitiNow } from '@/lib/date-utils';
 
 export const chargementsRouter = createTRPCRouter({
   getChargements: protectedProcedure.query(async ({ ctx }) => {
@@ -48,7 +49,7 @@ export const chargementsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const chargement = await ctx.prisma.chargement.create({
         data: {
-          name: input.name || 'Chargement ' + new Date().toLocaleDateString(),
+          name: input.name || 'Chargement ' + formatDateForTahiti(getTahitiNow()),
           livreurId: input.livreurId,
           status: Status.READY,
           livraisons: {

@@ -16,6 +16,7 @@ import { Filter, RefreshCcw } from 'lucide-react';
 import { useDebounce } from '@uidotdev/usehooks';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useCommande } from './commande-context';
 
 export default function CommandesComponent() {
   const { setBreadcrumb } = useBreadcrumb();
@@ -57,6 +58,7 @@ export default function CommandesComponent() {
       },
     }),
   );
+  const { selectedCommande } = useCommande();
 
   const commandes = commandesData?.commandes || [];
   const pagination = commandesData?.pagination;

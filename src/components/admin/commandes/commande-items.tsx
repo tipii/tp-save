@@ -34,21 +34,23 @@ export default function CommandeItems() {
       {selectedCommande.livraisons.map((livraison, index) =>
         (livraison.items as Item[]).length > 0 ? (
           <div key={index} className="flex flex-col space-y-2">
-            <h3 className="mb-2 text-sm font-semibold text-slate-700">{livraison.name}</h3>
-            <Table>
+            {/* <h3 className="mb-2 text-sm font-semibold text-slate-700">{livraison.name}</h3> */}
+            <Table className="w-full max-w-full table-fixed">
               <TableHeader>
                 <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-                  <TableHead>Ref</TableHead>
+                  <TableHead className="w-24">Ref</TableHead>
                   <TableHead>Designation</TableHead>
-                  <TableHead>Quantité</TableHead>
+                  <TableHead className="w-24">Quantité</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="border-b">
                 {(livraison.items as Item[])?.map((item: Item, itemIndex: number) => (
                   <TableRow key={itemIndex}>
-                    <TableCell>{item.AR_REF}</TableCell>
-                    <TableCell>{item.DL_Design}</TableCell>
-                    <TableCell>{item.DL_QTEBL}</TableCell>
+                    <TableCell className="w-24">{item.AR_REF}</TableCell>
+                    <TableCell className="break-words whitespace-normal">
+                      {item.DL_Design}
+                    </TableCell>
+                    <TableCell className="w-24">{item.DL_QTEBL}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
