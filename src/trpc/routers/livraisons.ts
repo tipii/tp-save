@@ -1,8 +1,13 @@
 import z from 'zod';
-import { Priority, Status } from '@/generated/prisma';
+import { Priority, Prisma, Status } from '@/generated/prisma';
 import { createTRPCRouter, protectedProcedure } from '../init';
 import { TRPCError } from '@trpc/server';
-import { getTahitiDayStart, getTahitiDayEnd, formatDateForTahiti, getTahitiNow } from '@/lib/date-utils';
+import {
+  getTahitiDayStart,
+  getTahitiDayEnd,
+  formatDateForTahiti,
+  getTahitiNow,
+} from '@/lib/date-utils';
 
 export const itemSchema = z.object({
   AR_REF: z.string(),
@@ -24,7 +29,7 @@ export const livraisonsRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
-        const where: any = {
+        const where: Prisma.LivraisonWhereInput = {
           status: Status.PENDING,
         };
 

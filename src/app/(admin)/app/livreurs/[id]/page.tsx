@@ -2,11 +2,12 @@ import React from 'react';
 import { LivreurDetailPage } from '@/components/admin/livreurs/livreur-detail-page';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function Page({ params }: PageProps) {
-  return <LivreurDetailPage id={params.id} />;
+export default async function Page({ params }: PageProps) {
+  const { id } = await params;
+  return <LivreurDetailPage id={id} />;
 }

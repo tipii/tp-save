@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClientAsync } from '@/external-services/soap-service/generated/webserveasytablet/client';
 import {
   parseSoapLivraisonLignes,
