@@ -5,10 +5,9 @@ type RouterInput = inferRouterInputs<AppRouter>;
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
 export type TrpcLivreur = RouterOutput['livreurs']['getLivreurs'][0];
-export type TrpcCommande = RouterOutput['commandes']['getPendingCommandes'][0];
-export type TrpcLivraisonFromCommande =
-  RouterOutput['commandes']['getPendingCommandes'][0]['livraisons'][0];
-export type TrpcClientFromCommande = RouterOutput['commandes']['getPendingCommandes'][0]['client'];
+export type TrpcCommande = RouterOutput['commandes']['getCommandes']['commandes'][0];
+export type TrpcLivraisonFromCommande = TrpcCommande['livraisons'][0];
+export type TrpcClientFromCommande = TrpcCommande['client'];
 
 export type TrpcClient = RouterOutput['clients']['getClients'][0];
 export type TrpcChargement = RouterOutput['chargements']['getChargements'][0];

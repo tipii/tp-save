@@ -12,8 +12,10 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import ChargementModal from '@/components/modals/chargement-modal/chargement-modal';
 import DraggableLot from './draggable';
-import { statusToIcon } from '@/components/ui/enum-to-ui';
+import { statusToIcon, statusToTailwindColor } from '@/components/ui/enum-to-ui';
 import LivraisonModal from '@/components/modals/livraison-modal';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 export const DroppableLivreur = ({
   livreur,
@@ -29,7 +31,11 @@ export const DroppableLivreur = ({
   setDroppedItems: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
 }) => {
   const trpc = useTRPC();
-  const { refetch } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
+  const { refetch } = useQuery(
+    trpc.livreurs.getLivreurs.queryOptions(undefined, {
+      refetchInterval: 1000 * 10, // 30 seconds
+    }),
+  );
   const { refetch: refetchLots } = useQuery(trpc.livraisons.getPendingLivraisons.queryOptions({}));
 
   const { isOver, setNodeRef } = useDroppable({
@@ -93,17 +99,30 @@ export const DroppableLivreur = ({
       key={livreur.id}
       className="m-2 flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-2"
     >
-      <div className="flex items-center gap-2">
-        <Avatar className="h-10 w-10">
-          <AvatarFallback className="bg-slate-100 text-slate-700">{livreurInitials}</AvatarFallback>
-        </Avatar>
-        <p className="font-bold text-slate-900">{livreur.name}</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Avatar className="h-10 w-10">
+            <AvatarFallback className="bg-slate-100 text-slate-700">
+              {livreurInitials}
+            </AvatarFallback>
+          </Avatar>
+          <p className="font-bold text-slate-900">{livreur.name}</p>
+        </div>
+        <Link href={`/app/livreurs/${livreur.id}`}>
+          <Button variant="ghost" size="icon">
+            <Eye size={16} />
+          </Button>
+        </Link>
       </div>
       <div className="flex flex-col gap-1">
         {livreur.chargements.map((chargement) => (
           <div
             key={chargement.id}
-            className="flex items-center justify-between gap-2 rounded-sm border border-emerald-200 bg-emerald-50 px-2"
+            className={cn(
+              'flex items-center justify-between gap-2 rounded-sm border px-2',
+              statusToTailwindColor(chargement.status).border,
+              statusToTailwindColor(chargement.status).background,
+            )}
           >
             <div className="flex items-center gap-2">
               <p className="text-xs text-slate-500">{statusToIcon(chargement.status)}</p>

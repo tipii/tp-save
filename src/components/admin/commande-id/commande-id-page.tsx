@@ -3,16 +3,15 @@
 import React, { useEffect } from 'react';
 import { CommandeEditForm } from './components/commande-edit-form';
 import { CommandeReadOnlyInfo } from './components/commande-read-only-info';
-import { LivraisonEdit } from './components/livraison-edit/livraison-edit';
 import { useCommandeEdit } from './hooks/use-commande-edit';
 import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
-
+import { LivraisonReadOnlyInfo } from './components/livraison-read-only-info';
 interface CommandeIdPageProps {
   id: string;
 }
 
 export default function CommandeIdPage({ id }: CommandeIdPageProps) {
-  const { commande, isLoading, refetchCommande } = useCommandeEdit(id);
+  const { commande, isLoading } = useCommandeEdit(id);
   const { setBreadcrumb } = useBreadcrumb();
 
   useEffect(() => {
@@ -35,9 +34,9 @@ export default function CommandeIdPage({ id }: CommandeIdPageProps) {
       {/* Main Content */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Editable Form */}
-        <div className="lg:col-span-2">
+        <div className="flex flex-col gap-6 lg:col-span-2">
           <CommandeEditForm commandeId={id} />
-          <LivraisonEdit commandeId={id} />
+          <LivraisonReadOnlyInfo commandeId={id} />
         </div>
 
         {/* Read-only Information */}

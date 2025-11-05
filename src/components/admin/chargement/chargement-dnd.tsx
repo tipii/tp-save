@@ -1,8 +1,5 @@
 'use client';
 
-import { DateNavigationComponent } from '@/components/admin/shared/date-navigation-example';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { useTRPC } from '@/trpc/client';
@@ -14,6 +11,7 @@ import { PriorityZone } from './dnd/priority-zone';
 import { Priority } from '@/generated/prisma';
 import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 import { getTahitiToday, normalizeToTahitiDay } from '@/lib/date-utils';
+import { DateNavigation } from '../shared/date-navigation';
 
 export default function ChargementDnd() {
   const [selectedDate, setSelectedDate] = useState<Date>(() => getTahitiToday());
@@ -122,9 +120,10 @@ export default function ChargementDnd() {
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <div className="flex flex-col gap-4">
-        <DateNavigationComponent
+        <DateNavigation
           selectedDate={selectedDate}
-          setSelectedDate={(date) => setSelectedDate(normalizeToTahitiDay(date))}
+          onDateChange={(date) => setSelectedDate(normalizeToTahitiDay(date))}
+          className="bg-card flex w-full justify-between border-b border-gray-200 p-4"
         />
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-4 border-b border-gray-200 px-4 pb-4">

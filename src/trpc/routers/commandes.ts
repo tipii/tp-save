@@ -6,31 +6,6 @@ import { TRPCError } from '@trpc/server';
 import { createTahitiDateRange, getTahitiNow } from '@/lib/date-utils';
 
 export const commandesRouter = createTRPCRouter({
-  getPendingCommandes: protectedProcedure.query(async ({ ctx }) => {
-    const commandes = await ctx.prisma.commande.findMany({
-      where: {
-        livraisons: {
-          some: {
-            status: {
-              equals: Status.PENDING,
-            },
-          },
-        },
-      },
-      include: {
-        client: true,
-        livraisons: {
-          orderBy: {
-            createdAt: 'asc',
-          },
-          include: {
-            chargement: true,
-          },
-        },
-      },
-    });
-    return commandes;
-  }),
   getCommandes: protectedProcedure
     .input(
       z.object({
@@ -142,7 +117,11 @@ export const commandesRouter = createTRPCRouter({
 
       // Filter by status
       if (status) {
-        where.status = status;
+        where.livraisons = {
+          some: {
+            status: status,
+          },
+        };
       }
 
       // Date range filter using Tahiti timezone
@@ -220,6 +199,7 @@ export const commandesRouter = createTRPCRouter({
             },
             include: {
               chargement: true,
+              livreur: true,
             },
           },
         },

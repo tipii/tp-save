@@ -11,6 +11,7 @@ import { TrpcCommande } from '@/types/trpc-types';
 import { Badge } from '@/components/ui/badge';
 import { useCommande } from '../commande-context';
 import { formatDateForTahiti } from '@/lib/date-utils';
+import { toast } from 'sonner';
 
 export interface CommandeRowProps {
   commande: TrpcCommande;
@@ -22,6 +23,22 @@ export function CommandeRow({ commande }: CommandeRowProps) {
 
   const handleRowClick = () => {
     setSelectedCommande(commande);
+  };
+
+  const handleCopyRef = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click
+    if (commande.ref) {
+      try {
+        await navigator.clipboard.writeText(commande.ref);
+        toast.success('Référence copiée', {
+          description: `"${commande.ref}" a été copié dans le presse-papiers`,
+        });
+      } catch (error) {
+        toast.error('Erreur', {
+          description: 'Impossible de copier la référence',
+        });
+      }
+    }
   };
 
   const isSelected = selectedCommande?.id === commande.id;
@@ -68,7 +85,13 @@ export function CommandeRow({ commande }: CommandeRowProps) {
       <TableCell>
         <div className="flex items-center gap-2">
           {commande.ref ? (
-            <Badge variant="green">{commande.ref}</Badge>
+            <Badge
+              variant="green"
+              className="cursor-pointer transition-opacity hover:opacity-80"
+              onClick={handleCopyRef}
+            >
+              {commande.ref}
+            </Badge>
           ) : (
             <span className="text-muted-foreground">Non défini</span>
           )}
@@ -77,7 +100,13 @@ export function CommandeRow({ commande }: CommandeRowProps) {
       <TableCell>
         <div className="flex items-center gap-2">{priorityToBadge(commande.priority)}</div>
       </TableCell>
-      <TableCell>{statusToBadge(commande.status)}</TableCell>
+      <TableCell>
+        {commande.livraisons.length > 0 ? (
+          statusToBadge(commande.livraisons[0].status)
+        ) : (
+          <span className="text-muted-foreground">Non défini</span>
+        )}
+      </TableCell>
       <TableCell>
         {commande.plannedDeliveryDate ? (
           <Badge variant="blue">{formatDateForTahiti(commande.plannedDeliveryDate)}</Badge>

@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { statusToBadge, priorityToBadge, statusToTailwindColor } from '@/components/ui/enum-to-ui';
 import { Package, User, MapPin, Calendar, Clock, Building, Building2 } from 'lucide-react';
 import React from 'react';
+import Link from 'next/link';
 
 export default function ChargementModal({
   children,
@@ -86,7 +87,7 @@ export default function ChargementModal({
 
               {returnedLivraisons.length > 0 && (
                 <div className="text-muted-foreground mt-1 text-center text-xs">
-                  {returnedLivraisons.length} livraison{returnedLivraisons.length > 1 ? 's' : ''}
+                  {returnedLivraisons.length} livraison{returnedLivraisons.length > 1 ? 's ' : ' '}
                   retournée{returnedLivraisons.length > 1 ? 's' : ''}
                 </div>
               )}
@@ -96,7 +97,7 @@ export default function ChargementModal({
           {/* Livraisons List */}
           <div className="space-y-3">
             <h3 className="text-lg font-semibold">Livraisons ({totalLivraisons})</h3>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               {chargement.livraisons.map((livraison) => {
                 const items =
                   typeof livraison.items === 'string'
@@ -105,49 +106,53 @@ export default function ChargementModal({
                 const itemCount = Array.isArray(items) ? items.length : 0;
 
                 return (
-                  <Card
+                  <Link
+                    href={`/app/commandes/${livraison.commande.id}`}
                     key={livraison.id}
-                    className={`border ${statusToTailwindColor(livraison.status).border} p-0`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    <CardContent className="py-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Badge variant="outline" className="font-mono text-xs">
-                            {livraison.name}
-                          </Badge>
-                          {priorityToBadge(livraison.priority)}
-                          {statusToBadge(livraison.status)}
+                    <Card
+                      key={livraison.id}
+                      className={`border ${statusToTailwindColor(livraison.status).border} p-0`}
+                    >
+                      <CardContent className="py-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {livraison.commande.client!.name}
+                            {priorityToBadge(livraison.priority)}
+                            {statusToBadge(livraison.status)}
+                          </div>
+                          <div className="text-muted-foreground text-xs">
+                            {itemCount} article{itemCount > 1 ? 's' : ''}
+                          </div>
                         </div>
-                        <div className="text-muted-foreground text-xs">
-                          {itemCount} article{itemCount > 1 ? 's' : ''}
+                        <div className="text-muted-foreground mt-1 text-xs">
+                          {livraison.commande.bl_number}
                         </div>
-                      </div>
-                      <div className="text-muted-foreground mt-1 text-xs">
-                        {livraison.commande.bl_number}
-                      </div>
 
-                      <div className="mt-1 flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <Building className="text-muted-foreground h-3 w-3" />
-                          <span className="font-medium">
-                            {livraison.commande.client?.name || 'Client inconnu'}
-                          </span>
-                          {livraison.commande.client?.city && (
-                            <span className="text-muted-foreground text-xs">
-                              • {livraison.commande.client.city}
-                            </span>
+                        <div className="mt-1 flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="font-mono text-xs">
+                              {livraison.commande.name}
+                            </Badge>
+                            {livraison.commande.client?.city && (
+                              <span className="text-muted-foreground text-xs">
+                                • {livraison.commande.client.city}
+                              </span>
+                            )}
+                          </div>
+
+                          {livraison.deliveryDate && (
+                            <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                              <Calendar className="h-3 w-3" />
+                              {new Date(livraison.deliveryDate).toLocaleDateString('fr-FR')}
+                            </div>
                           )}
                         </div>
-
-                        {livraison.deliveryDate && (
-                          <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(livraison.deliveryDate).toLocaleDateString('fr-FR')}
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 );
               })}
             </div>

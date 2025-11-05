@@ -47,7 +47,7 @@ export default function ButtonLivraisonReturnDepot({
   return (
     <Button onClick={handleReturn} disabled={isPending} className="w-full bg-orange-500">
       <PackageX className="h-4 w-4" />
-      Retourner la livraison au depot
+      Confirmer le retourau depot
     </Button>
   );
 }

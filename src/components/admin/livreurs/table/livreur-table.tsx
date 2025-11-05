@@ -15,20 +15,21 @@ import {
   ChevronDown,
   ChevronRight,
   User,
-  Mail,
   Phone,
-  MapPin,
   Package,
   Clock,
   Truck,
   AlertTriangle,
   CheckCircle,
   XCircle,
+  Eye,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TrpcLivreur } from '@/types/trpc-types';
 import { priorityToBadge } from '@/components/ui/enum-to-ui';
 import { Status } from '@/generated/prisma';
+import { statusToBadge } from '@/components/ui/enum-to-ui';
+import Link from 'next/link';
 
 interface LivreursTableProps {
   livreurs: TrpcLivreur[];
@@ -64,54 +65,6 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
         Actif
       </Badge>
     );
-  };
-
-  const getChargementStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="secondary">En attente</Badge>;
-      case 'in_progress':
-        return <Badge variant="default">En cours</Badge>;
-      case 'completed':
-        return (
-          <Badge variant="default" className="bg-green-600 hover:bg-green-700">
-            Terminé
-          </Badge>
-        );
-      case 'cancelled':
-        return <Badge variant="destructive">Annulé</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'Urgent':
-        return (
-          <Badge variant="destructive" className="text-xs">
-            🔴 Urgent
-          </Badge>
-        );
-      case 'Normal':
-        return (
-          <Badge variant="secondary" className="text-xs">
-            ⚪ Normal
-          </Badge>
-        );
-      case 'Îles':
-        return (
-          <Badge variant="default" className="text-xs">
-            🏝️ Îles
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="outline" className="text-xs">
-            {priority}
-          </Badge>
-        );
-    }
   };
 
   const getActiveChargements = (livreur: TrpcLivreur) => {
@@ -192,9 +145,6 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
                         </div>
                         <div>
                           <div className="font-medium">{livreur.name}</div>
-                          <div className="text-muted-foreground text-sm">
-                            {livreur.username || "Pas de nom d'utilisateur"}
-                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -202,14 +152,10 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
                       <div className="space-y-1">
                         {livreur.email && (
                           <div className="flex items-center gap-2 text-sm">
-                            <Mail className="text-muted-foreground h-3 w-3" />
-                            <span className="truncate">{livreur.email}</span>
-                          </div>
-                        )}
-                        {livreur.phoneNumber && (
-                          <div className="flex items-center gap-2 text-sm">
                             <Phone className="text-muted-foreground h-3 w-3" />
-                            <span>{livreur.phoneNumber}</span>
+                            <span className="truncate">
+                              {livreur.phoneNumber ?? 'Non renseigné'}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -229,10 +175,11 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                        <Clock className="h-3 w-3" />
-                        <span>{new Date(livreur.updatedAt).toLocaleDateString('fr-FR')}</span>
-                      </div>
+                      <Link href={`/app/livreurs/${livreur.id}`}>
+                        <Button variant="ghost" size="icon">
+                          <Eye className="h-3 w-3" />
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                   {expandedRows.has(livreur.id) && (
@@ -255,10 +202,7 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
                                   <span className="font-medium">Téléphone:</span>{' '}
                                   {livreur.phoneNumber || 'Non renseigné'}
                                 </p>
-                                <p>
-                                  <span className="font-medium">Vérifié:</span>{' '}
-                                  {livreur.phoneNumberVerified ? '✅ Oui' : '❌ Non'}
-                                </p>
+
                                 <p>
                                   <span className="font-medium">Rôle:</span>{' '}
                                   {livreur.role || 'Non défini'}
@@ -266,10 +210,6 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
                               </div>
                             </div>
                             <div className="space-y-2">
-                              <h4 className="flex items-center gap-2 font-medium">
-                                <AlertTriangle className="h-4 w-4" />
-                                Statut du compte
-                              </h4>
                               <div className="text-sm">
                                 {livreur.banned ? (
                                   <div className="space-y-1">
@@ -297,8 +237,8 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
                           {/* Chargements */}
                           <div className="space-y-2">
                             <h4 className="flex items-center gap-2 font-medium">
-                              <Truck className="h-4 w-4" />
-                              Chargements ({livreur.chargements.length})
+                              <Truck className="h-4 w-4" />5 derniers chargements (
+                              {livreur.chargements.length})
                             </h4>
                             {livreur.chargements.length > 0 ? (
                               <div className="space-y-3">
@@ -310,7 +250,7 @@ export function LivreursTable({ livreurs }: LivreursTableProps) {
                                     <div className="mb-3 flex items-center justify-between">
                                       <div className="flex items-center gap-3">
                                         <span className="font-medium">{chargement.name}</span>
-                                        {getChargementStatusBadge(chargement.status)}
+                                        {statusToBadge(chargement.status)}
                                       </div>
                                       <div className="text-muted-foreground text-sm">
                                         {new Date(chargement.createdAt).toLocaleDateString('fr-FR')}

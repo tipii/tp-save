@@ -62,7 +62,7 @@ export const chargementsRouter = createTRPCRouter({
         where: {
           id: { in: input.livraisons },
         },
-        data: { status: Status.READY },
+        data: { status: Status.READY, livreurId: input.livreurId },
       });
 
       console.log(updatedLivraisons);

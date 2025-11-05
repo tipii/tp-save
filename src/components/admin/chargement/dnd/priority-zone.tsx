@@ -35,7 +35,7 @@ export const PriorityZone = ({
     <div className={`flex-1 rounded-lg border ${backgroundColor} p-4 text-2xl font-bold`}>
       <div className="flex justify-between">
         <div className="">{title}</div>
-        <div className="text-sm text-gray-500">Filter zone</div>
+        {/* <div className="text-sm text-gray-500">Filter zone</div> */}
       </div>
       {availableLots.length > 0 ? (
         <div className={`flex flex-col gap-1 ${backgroundColor}`}>
