@@ -41,8 +41,9 @@ export function CommandesTable({ commandes, filters, pagination, isPending }: Co
             <TableHead>Nom</TableHead>
             <TableHead>Client</TableHead>
             <TableHead>Ref</TableHead>
+            <TableHead>Priorité</TableHead>
             <TableHead>Statut</TableHead>
-            <TableHead>Articles totaux</TableHead>
+            <TableHead>Date livraison</TableHead>
             <TableHead>Date création</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>

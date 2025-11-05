@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import ChargementModal from '@/components/modals/chargement-modal/chargement-modal';
 import DraggableLot from './draggable';
 import { statusToIcon } from '@/components/ui/enum-to-ui';
+import LivraisonModal from '@/components/modals/livraison-modal';
 
 export const DroppableLivreur = ({
   livreur,
@@ -29,7 +30,7 @@ export const DroppableLivreur = ({
 }) => {
   const trpc = useTRPC();
   const { refetch } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
-  const { refetch: refetchLots } = useQuery(trpc.livraisons.getPendingLivraisons.queryOptions());
+  const { refetch: refetchLots } = useQuery(trpc.livraisons.getPendingLivraisons.queryOptions({}));
 
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-${livreur.id}`,
@@ -70,10 +71,21 @@ export const DroppableLivreur = ({
     }),
   );
   const handleCreateChargement = (lotIds: string[], livreurId: string) => {
-    mutate({
-      livraisons: lotIds,
-      livreurId,
-    });
+    mutate(
+      {
+        livraisons: lotIds,
+        livreurId,
+      },
+      {
+        onSuccess: () => {
+          refetch();
+          refetchLots();
+        },
+        onError: (error) => {
+          console.error(error);
+        },
+      },
+    );
   };
 
   return (
@@ -109,18 +121,18 @@ export const DroppableLivreur = ({
         ref={setNodeRef}
         className="flex flex-1 flex-col items-center rounded-lg border-2 border-dashed border-slate-200 p-2 text-center"
       >
-        <div className="flex flex-1 flex-col items-center justify-center">
+        <div className="flex w-full flex-1 flex-col items-center justify-center">
           <h3 className="mb-1 text-sm font-bold text-slate-900">Chargement</h3>
-          <div className="flex flex-col items-center justify-center gap-1 pb-4">
+          <div className="flex w-full flex-col items-center justify-center gap-1 pb-4">
             {droppedLivraisons.map((livraison) => (
               <div key={livraison.id} className="flex w-full items-center">
                 <DraggableLot key={livraison.id} livraison={livraison} />
                 <div className="">
-                  <CommandeModal commande={livraison.commande as TrpcCommande}>
+                  <LivraisonModal livraison={livraison}>
                     <Button variant="ghost" className="h-5 w-5">
                       <Eye size={16} />
                     </Button>
-                  </CommandeModal>
+                  </LivraisonModal>
                   <Button
                     variant="ghost"
                     className="h-5 w-5"

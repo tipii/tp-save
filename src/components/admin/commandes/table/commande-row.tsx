@@ -75,26 +75,17 @@ export function CommandeRow({ commande }: CommandeRowProps) {
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex w-full items-center">
-          {commande.livraisons.length > 0 && (
-            <div className="grid w-full grid-cols-3">
-              <div className="flex flex-col items-end justify-evenly gap-0 text-xs">
-                <span className="text-muted-foreground">Priorités :</span>
-                <span className="text-muted-foreground">Statuts :</span>
-              </div>
-              {commande.livraisons.map((livraison) => (
-                <div className="flex flex-col items-center gap-0" key={livraison.id}>
-                  {priorityToBadge(livraison.priority)}
-                  {statusToBadge(livraison.status)}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <div className="flex items-center gap-2">{priorityToBadge(commande.priority)}</div>
       </TableCell>
+      <TableCell>{statusToBadge(commande.status)}</TableCell>
       <TableCell>
-        <div className="font-medium">{getTotalItems(commande.livraisons)} articles</div>
+        {commande.plannedDeliveryDate ? (
+          <Badge variant="blue">{formatDateForTahiti(commande.plannedDeliveryDate)}</Badge>
+        ) : (
+          <span className="text-muted-foreground">Non défini</span>
+        )}
       </TableCell>
+
       <TableCell>
         <div className="text-muted-foreground flex items-center gap-2 text-sm">
           <Clock className="h-3 w-3" />

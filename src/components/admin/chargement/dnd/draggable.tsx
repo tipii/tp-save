@@ -29,22 +29,18 @@ export default function DraggableLot({ livraison }: { livraison: TrpcLivraison }
         livraison.priority === Priority.URGENT && 'border-red-200',
         livraison.priority === Priority.NORMAL && 'border-yellow-300',
         livraison.priority === Priority.ILES && 'border-blue-200',
-        isDragging ? 'z-100 max-w-sm' : 'w-full',
+        isDragging ? 'z-100 max-w-lg' : 'w-full',
       )}
     >
       <div className="flex items-center justify-between">
-        <div className="text-sm font-bold">{livraison.name} </div>
-        <div className="text-sm font-bold">
-          {livraison.commande.bl_number}
-          {livraison.commande.livraisons.length > 1 ? 's' : ''})
-        </div>
+        <div className="text-sm font-bold">{livraison.commande.name} </div>
+        <div className="text-sm font-bold">{livraison.commande.bl_number}</div>
         {priorityToBadge(livraison.priority)}
       </div>
       <div className="flex items-center justify-between">
         <div className="text-sm font-medium">
           {livraison.commande.client?.name || 'Sans client'}
         </div>
-        <div className="text-sm font-medium">{items.length} items</div>
       </div>
     </div>
   );

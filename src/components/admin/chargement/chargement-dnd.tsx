@@ -20,9 +20,18 @@ export default function ChargementDnd() {
   const trpc = useTRPC();
 
   const { data: livraisons } = useQuery(
-    trpc.livraisons.getPendingLivraisons.queryOptions({
-      expectedDeliveryDate: selectedDate ? selectedDate : undefined,
-    }),
+    trpc.livraisons.getPendingLivraisons.queryOptions(
+      {
+        expectedDeliveryDate: selectedDate ? selectedDate : undefined,
+      },
+      {
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+        refetchInterval: 1000 * 30, // 30 seconds
+        refetchIntervalInBackground: true,
+      },
+    ),
   );
   const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
 

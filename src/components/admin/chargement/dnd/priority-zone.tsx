@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { TrpcCommande, TrpcLivraison } from '@/types/trpc-types';
 import DraggableLot from './draggable';
+import LivraisonModal from '@/components/modals/livraison-modal';
 
 interface PriorityZoneProps {
   title: string;
@@ -41,11 +42,11 @@ export const PriorityZone = ({
           {availableLots.map((livraison) => (
             <div key={livraison.id} className="flex items-center gap-2">
               <DraggableLot key={livraison.id} livraison={livraison} />
-              <CommandeModal commande={livraison.commande as TrpcCommande}>
+              <LivraisonModal livraison={livraison}>
                 <Button variant="ghost" className="h-5 w-5">
                   <Eye size={16} />
                 </Button>
-              </CommandeModal>
+              </LivraisonModal>
             </div>
           ))}
         </div>
