@@ -1,5 +1,8 @@
-import { defineConfig } from '@trigger.dev/sdk/v3';
-import { prismaExtension } from '@trigger.dev/build/extensions/prisma';
+/**
+ * Custom Prisma extension for Trigger.dev that supports "models" folder
+ * Based on @trigger.dev/build/extensions/prisma but fixed for our use case
+ */
+
 import assert from 'node:assert';
 import { existsSync } from 'node:fs';
 import { cp, readdir } from 'node:fs/promises';
@@ -194,6 +197,9 @@ class CustomPrismaExtension implements BuildExtension {
       context.logger.warn('CustomPrismaExtension could not resolve DATABASE_URL');
     }
 
+    // Force Prisma to use npm instead of pnpm (since Docker image uses npm)
+    env.PRISMA_CLI_PACKAGE_MANAGER = 'npm';
+
     context.logger.debug('Adding prisma layer', {
       commands,
       env,
@@ -212,33 +218,3 @@ class CustomPrismaExtension implements BuildExtension {
     });
   }
 }
-
-export default defineConfig({
-  project: 'proj_esjmhnqwxgxnxqycoahl',
-  runtime: 'node',
-  logLevel: 'log',
-  // The max compute seconds a task is allowed to run. If the task run exceeds this duration, it will be stopped.
-  // You can override this on an individual task.
-  // See https://trigger.dev/docs/runs/max-duration
-  maxDuration: 3600,
-  retries: {
-    enabledInDev: true,
-    default: {
-      maxAttempts: 3,
-      minTimeoutInMs: 1000,
-      maxTimeoutInMs: 10000,
-      factor: 2,
-      randomize: true,
-    },
-  },
-  build: {
-    extensions: [
-      customPrismaExtension({
-        schema: './prisma/schema/schema.prisma',
-        version: '6.19.0',
-        directUrlEnvVarName: 'DATABASE_URL',
-      }),
-    ],
-  },
-  dirs: ['./src/trigger'],
-});
