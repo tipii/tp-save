@@ -12,6 +12,7 @@ import Stats from './stats';
 import { CheckCircle, Package, PackageMinus, Truck } from 'lucide-react';
 import { useTRPC } from '@/trpc/client';
 import { useQuery } from '@tanstack/react-query';
+import CalendarLivraison from './calendar-livraison';
 
 export default function DashboardComponent() {
   const { setBreadcrumb } = useBreadcrumb();
@@ -63,13 +64,11 @@ export default function DashboardComponent() {
         {/* Main Dashboard Grid */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Recent Commands */}
-          <RecentCommandsSection />
-
+          <CalendarLivraison />
           {/* Delivering Livraisons */}
           <DeliveringLivraisonsSection />
 
-          {/* Delivered Livraisons */}
-          <DeliveredLivraisonsSection />
+          <RecentCommandsSection />
 
           {/* Returns */}
           <ReturnsLivraisonsSection />

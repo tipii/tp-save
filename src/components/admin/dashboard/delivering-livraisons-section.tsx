@@ -7,6 +7,7 @@ import { Truck, User } from 'lucide-react';
 import { useTRPC } from '@/trpc/client';
 import { useQuery } from '@tanstack/react-query';
 import { Status } from '@/generated/prisma';
+import Link from 'next/link';
 
 export default function DeliveringLivraisonsSection() {
   const trpc = useTRPC();
@@ -54,8 +55,9 @@ export default function DeliveringLivraisonsSection() {
       <CardContent className="max-h-[300px] overflow-y-auto">
         <div className="space-y-3">
           {deliveringLivraisons?.map((livraison) => (
-            <div
+            <Link
               key={livraison.id}
+              href={`/app/commandes/${livraison.commande.id}`}
               className="flex items-center justify-between rounded-lg border p-3"
             >
               <div className="min-w-0 flex-1">
@@ -74,7 +76,7 @@ export default function DeliveringLivraisonsSection() {
                   )}
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
           {(!deliveringLivraisons || deliveringLivraisons.length === 0) && (
             <div className="py-6 text-center text-gray-500">

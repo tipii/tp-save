@@ -26,7 +26,7 @@ export default function ChargementDnd() {
         refetchOnMount: true,
         refetchOnWindowFocus: true,
         refetchOnReconnect: true,
-        refetchInterval: 1000 * 30, // 30 seconds
+        refetchInterval: 1000 * 10, // 10 seconds
         refetchIntervalInBackground: true,
       },
     ),
@@ -132,7 +132,7 @@ export default function ChargementDnd() {
             </div>
             <div className="m-0 flex h-full min-h-64 gap-x-4">
               <PriorityZone
-                title="Priorité"
+                title="Urgent"
                 priority={Priority.URGENT}
                 backgroundColor="bg-red-50 shadow-none border-red-200"
                 livraisons={livraisons}

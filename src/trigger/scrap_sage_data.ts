@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClientAsync } from '@/external-services/soap-service/generated/webserveasytablet/client';
 import {
+  DocVentePrismaInput,
+  parseSoapDocVenteForPrisma,
+  parseSoapDocVenteList,
   parseSoapLivraisonLignes,
   parseSoapLivraisonList,
 } from '@/external-services/soap-service/parsing/parsing';
@@ -69,17 +72,19 @@ async function initializeSoapClient() {
   return client;
 }
 
-/**
- * Fetch all bons from SAGE API
+/*
+ * Fetch doc ventes from SAGE
  */
-async function fetchBonsFromSage(soapClient: any, today: string): Promise<BonData[]> {
-  const bonsNeutreData = await soapClient.Liste_BonLiv_SAGEAsync({
-    P_DateRef: today,
-    P_Statut: '',
-    P_Type: '',
+async function fetchDocVentesFromSage(today: string): Promise<DocVentePrismaInput[]> {
+  const client = await createClientAsync(wsdl, {
+    endpoint: 'http://tallinpi.dyndns.org:8095/WEBSERV_EASYTABLET_WEB/awws/WebServ_EasyTablet.awws',
   });
+  logger.log('SOAP client connected successfully');
 
-  return parseSoapLivraisonList(String(bonsNeutreData[0].Liste_BonLiv_SAGEResult));
+  const docVentesData = await client.Liste_DocVente_SAGEAsync({
+    P_DateRef: today,
+  });
+  return parseSoapDocVenteForPrisma(String(docVentesData[0].Liste_DocVente_SAGEResult));
 }
 
 /**
@@ -97,12 +102,27 @@ async function fetchLivraisonLines(soapClient: any, bonPiece: string) {
 /**
  * Upsert raw bon data to database
  */
-async function upsertRawBon(bon: any) {
-  return await prisma.rawCommandeSage.upsert({
-    where: { DO_Piece: bon.DO_Piece },
-    update: bon,
-    create: bon,
+
+async function upsertRawDocVente(docVente: DocVentePrismaInput) {
+  // Try to find existing record by either piece or guid
+  const existing = await prisma.docVente.findFirst({
+    where: {
+      piece: docVente.piece,
+    },
   });
+
+  if (existing) {
+    // Update existing record
+    return await prisma.docVente.update({
+      where: { piece: existing.piece },
+      data: docVente,
+    });
+  } else {
+    // Create new record
+    return await prisma.docVente.create({
+      data: docVente,
+    });
+  }
 }
 
 /**
@@ -131,15 +151,15 @@ async function ensureClientExists(clientCode: string, clientName: string) {
  */
 async function createCommandeWithLivraison(
   soapClient: any,
-  bon: BonData,
+  docVente: DocVentePrismaInput,
   clientId: string,
   stats: SyncStats,
 ) {
   const newCommande = await prisma.commande.create({
     data: {
-      bp_number: bon.DO_Piece,
-      ref: bon.DO_Piece,
-      name: `${bon.DO_Piece} - ${bon.DO_Coord01}`,
+      bp_number: docVente.piece,
+      ref: docVente.piece,
+      name: `${docVente.piece}`,
       status: 'PENDING',
       clientId,
     },
@@ -149,7 +169,7 @@ async function createCommandeWithLivraison(
   stats.createdCount++;
 
   // Fetch and create livraison
-  const parsedLignes = await fetchLivraisonLines(soapClient, bon.DO_Piece);
+  const parsedLignes = await fetchLivraisonLines(soapClient, docVente.piece);
 
   const newLivraison = await prisma.livraison.create({
     data: {
@@ -168,12 +188,9 @@ async function createCommandeWithLivraison(
   return newCommande;
 }
 
-/**
- * Process a single bon (upsert, ensure client, create commande if needed)
- */
-async function processSingleBon(
+async function processSingleDocVente(
   soapClient: any,
-  bon: BonData,
+  docVente: DocVentePrismaInput,
   index: number,
   total: number,
   stats: SyncStats,
@@ -182,28 +199,23 @@ async function processSingleBon(
 
   try {
     stats.processedCount++;
+    await upsertRawDocVente(docVente);
 
-    // Upsert raw bon data
-    await upsertRawBon(bon);
+    const client = await ensureClientExists(docVente.tiers, docVente.tiers);
 
-    // Ensure client exists
-    const client = await ensureClientExists(bon.DO_Coord01, bon.DO_Coord01);
-
-    // Check if commande already exists
-    const existingCommande = await prisma.commande.findUnique({
-      where: { bp_number: bon.DO_Piece },
+    const existingCommande = await prisma.commande.findFirst({
+      where: { ref: docVente.piece },
     });
 
     if (existingCommande) {
-      logger.log(`${logPrefix} Commande ${bon.DO_Piece} already exists, skipping`);
+      logger.log(`${logPrefix} Commande ${docVente.piece} already exists, skipping`);
       stats.skippedCount++;
       return;
+    } else {
+      await createCommandeWithLivraison(soapClient, docVente, client.id, stats);
     }
-
-    // Create new commande with livraison
-    await createCommandeWithLivraison(soapClient, bon, client.id, stats);
   } catch (error) {
-    logger.error(`${logPrefix} Error processing bon ${bon.DO_Piece}:`, { error });
+    logger.error(`${logPrefix} Error processing doc vente ${docVente.piece}:`, { error });
     stats.errorCount++;
   }
 }
@@ -252,14 +264,22 @@ export const syncBonsFromSageScheduled = schedules.task({
 
       // Get today's date in Tahiti timezone
       const today = formatDateForTahiti(new Date()) ?? '';
+      // const today = '06/11/2025';
 
       // Fetch bons from SAGE
-      const allBons = await fetchBonsFromSage(soapClient, today);
-      logger.log(`Found ${allBons.length} bons to process`);
+      const allDocVentes = await fetchDocVentesFromSage(today);
+      const filteredDocVentes = allDocVentes.filter(
+        (docVente) =>
+          docVente.piece.startsWith('FA') ||
+          docVente.piece.startsWith('FAB') ||
+          docVente.piece.startsWith('LB') ||
+          docVente.piece.startsWith('L'),
+      );
+      logger.log(`Found ${filteredDocVentes.length} doc ventes to process`);
 
-      // Process bons in batches of 10 to respect API connection limits
-      await processBatch(allBons, 10, async (bon, index) => {
-        await processSingleBon(soapClient, bon, index, allBons.length, stats);
+      // Process doc ventes in batches of 10 to respect API connection limits
+      await processBatch(filteredDocVentes, 10, async (docVente, index) => {
+        await processSingleDocVente(soapClient, docVente, index, filteredDocVentes.length, stats);
       });
     } catch (error) {
       logger.error('Fatal error during sync:', { error });

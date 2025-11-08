@@ -1,17 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
 import { useTRPC } from '@/trpc/client';
 import { useQuery } from '@tanstack/react-query';
-import { Package, Calendar, User, Truck, MapPin, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Package, Calendar, User, Truck, MapPin, FileText } from 'lucide-react';
 import { priorityToBadge, statusToBadge } from '@/components/ui/enum-to-ui';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import {
   Table,
   TableBody,
@@ -28,24 +32,11 @@ interface LivraisonReadOnlyInfoProps {
 
 export function LivraisonReadOnlyInfo({ commandeId }: LivraisonReadOnlyInfoProps) {
   const trpc = useTRPC();
-  const [expandedLivraisons, setExpandedLivraisons] = useState<Set<string>>(new Set());
 
   // Fetch commande data with livraisons
   const { data: commande, isLoading } = useQuery(
     trpc.commandes.getCommandeById.queryOptions({ id: commandeId }),
   );
-
-  const toggleLivraison = (id: string) => {
-    setExpandedLivraisons((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
 
   if (isLoading) {
     return (
@@ -87,26 +78,33 @@ export function LivraisonReadOnlyInfo({ commandeId }: LivraisonReadOnlyInfoProps
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
+        <Accordion
+          type="multiple"
+          defaultValue={livraisons.map((l) => `livraison-${l.id}`)}
+          className="space-y-6"
+        >
           {livraisons.map((livraison, index) => (
-            <div key={livraison.id}>
+            <AccordionItem key={livraison.id} value={`livraison-${livraison.id}`} className="border-0">
               {index > 0 && <Separator className="my-4" />}
 
               {/* Livraison Header */}
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-semibold">{livraison.name || `Livraison ${index + 1}`}</h3>
+              <AccordionTrigger className="mb-4 hover:no-underline">
+                <div className="flex w-full items-center justify-between">
+                  <h3 className="font-semibold">{livraison.name || `Livraison ${index + 1}`}</h3>
 
-                <div className="mb-4 space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground flex items-center gap-2">Statut</span>
-                    <span className="font-medium">{statusToBadge(livraison.status)}</span>
-                    <span className="text-muted-foreground flex items-center gap-2">Priorité</span>
-                    <span className="font-medium">{priorityToBadge(livraison.priority)}</span>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground flex items-center gap-2">Statut</span>
+                      <span className="font-medium">{statusToBadge(livraison.status)}</span>
+                      <span className="text-muted-foreground flex items-center gap-2">Priorité</span>
+                      <span className="font-medium">{priorityToBadge(livraison.priority)}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </AccordionTrigger>
 
-              {/* Priority & Status */}
+              <AccordionContent>
+                {/* Priority & Status */}
 
               {/* Dates */}
               <div className="mb-4 space-y-2">
@@ -177,71 +175,41 @@ export function LivraisonReadOnlyInfo({ commandeId }: LivraisonReadOnlyInfoProps
                 </div>
               )}
 
-              {/* Items Section - Collapsible */}
+              {/* Items Section */}
               <div className="mb-4">
-                <Collapsible
-                  open={expandedLivraisons.has(livraison.id)}
-                  onOpenChange={() => toggleLivraison(livraison.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Package className="text-muted-foreground h-4 w-4" />
-                      <span className="text-muted-foreground">Articles:</span>
-                      <span className="font-medium">
-                        {Array.isArray(livraison.items) ? livraison.items.length : 0} article
-                        {Array.isArray(livraison.items) && livraison.items.length > 1 ? 's' : ''}
-                      </span>
-                    </div>
-                    {Array.isArray(livraison.items) && livraison.items.length > 0 && (
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          {expandedLivraisons.has(livraison.id) ? (
-                            <>
-                              <ChevronUp className="h-4 w-4" />
-                              <span className="ml-1 text-xs">Masquer</span>
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown className="h-4 w-4" />
-                              <span className="ml-1 text-xs">Voir les articles</span>
-                            </>
-                          )}
-                        </Button>
-                      </CollapsibleTrigger>
-                    )}
-                  </div>
+                <div className="flex items-center gap-2 text-sm mb-3">
+                  <Package className="text-muted-foreground h-4 w-4" />
+                  <span className="text-muted-foreground">Articles:</span>
+                  <span className="font-medium">
+                    {Array.isArray(livraison.items) ? livraison.items.length : 0} article
+                    {Array.isArray(livraison.items) && livraison.items.length > 1 ? 's' : ''}
+                  </span>
+                </div>
 
-                  <CollapsibleContent className="mt-3">
-                    {Array.isArray(livraison.items) && livraison.items.length > 0 ? (
-                      <div className="rounded-lg border">
-                        <Table className="w-full max-w-full table-fixed">
-                          <TableHeader>
-                            <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-                              <TableHead className="w-24">Ref</TableHead>
-                              <TableHead>Designation</TableHead>
-                              <TableHead className="w-24">Quantité</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody className="border-b">
-                            {(livraison.items as Item[])?.map((item: Item, itemIndex: number) => (
-                              <TableRow key={itemIndex}>
-                                <TableCell className="w-24">{item.AR_REF}</TableCell>
-                                <TableCell className="break-words whitespace-normal">
-                                  {item.DL_Design}
-                                </TableCell>
-                                <TableCell className="w-24">{item.DL_QTEBL}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    ) : (
-                      <div className="text-muted-foreground flex items-center justify-center py-4">
-                        <span className="text-sm">Aucun article dans cette livraison</span>
-                      </div>
-                    )}
-                  </CollapsibleContent>
-                </Collapsible>
+                {Array.isArray(livraison.items) && livraison.items.length > 0 && (
+                  <div className="rounded-lg border">
+                    <Table className="w-full max-w-full table-fixed">
+                      <TableHeader>
+                        <TableRow className="border-b border-slate-200 bg-linear-to-r from-slate-50 to-blue-50">
+                          <TableHead className="w-24">Ref</TableHead>
+                          <TableHead>Designation</TableHead>
+                          <TableHead className="w-24">Quantité</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody className="border-b">
+                        {(livraison.items as Item[]).map((item: Item, itemIndex: number) => (
+                          <TableRow key={itemIndex}>
+                            <TableCell className="w-24">{item.AR_REF}</TableCell>
+                            <TableCell className="wrap-break-words whitespace-normal">
+                              {item.DL_Design}
+                            </TableCell>
+                            <TableCell className="w-24">{item.DL_QTEBL}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </div>
 
               {/* Notes */}
@@ -259,9 +227,10 @@ export function LivraisonReadOnlyInfo({ commandeId }: LivraisonReadOnlyInfoProps
                   <p className="text-sm">{livraison.receptionInfo}</p>
                 </div>
               )}
-            </div>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </CardContent>
     </Card>
   );
