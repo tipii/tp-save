@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { useTRPC } from '@/trpc/client';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { DroppableLivreur } from './dnd/droppable';
@@ -12,12 +12,14 @@ import { Priority } from '@/generated/prisma';
 import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 import { getTahitiToday, normalizeToTahitiDay } from '@/lib/date-utils';
 import { DateNavigation } from '../shared/date-navigation';
+import { toast } from 'sonner';
 
 export default function ChargementDnd() {
   const [selectedDate, setSelectedDate] = useState<Date>(() => getTahitiToday());
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
-  const { data: livraisons } = useQuery(
+  const { data: livraisons, refetch: refetchLivraisons } = useQuery(
     trpc.livraisons.getPendingLivraisons.queryOptions(
       {
         expectedDeliveryDate: selectedDate ? selectedDate : undefined,
@@ -58,6 +60,55 @@ export default function ChargementDnd() {
     return sorted;
   }, [livreurs, sortOrder]);
 
+  const changePriorityMutation = useMutation(
+    trpc.livraisons.changePriority.mutationOptions({
+      onMutate: async (variables) => {
+        const queryKey = trpc.livraisons.getPendingLivraisons.queryKey({
+          expectedDeliveryDate: selectedDate ? selectedDate : undefined,
+        });
+
+        await queryClient.cancelQueries({ queryKey: queryKey });
+
+        const previousLivraisons = queryClient.getQueryData(queryKey);
+
+        queryClient.setQueryData(queryKey, (old) => {
+          return old?.map((livraison) => {
+            if (livraison.id === variables.livraisonId) {
+              return { ...livraison, priority: variables.priority };
+            }
+            return livraison;
+          });
+        });
+
+        return { previousLivraisons: previousLivraisons };
+      },
+      onSuccess: () => {
+        toast.success('Priorité modifiée avec succès');
+      },
+      onError: (error, variables, context) => {
+        toast.error('Erreur lors de la modification de la priorité');
+        console.error(error);
+        refetchLivraisons();
+      },
+    }),
+  );
+
+  function handlePriorityChange(
+    livraisonId: string,
+    newPriority: Priority,
+    oldPriority?: Priority,
+  ) {
+    console.log('=== Priority Change Detected ===');
+    console.log('Livraison ID:', livraisonId);
+    console.log('Old Priority:', oldPriority || 'Unknown (was in livreur zone)');
+    console.log('New Priority:', newPriority);
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('================================');
+
+    // Make the actual API call
+    changePriorityMutation.mutate({ livraisonId, priority: newPriority });
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
@@ -66,23 +117,51 @@ export default function ChargementDnd() {
     const activeId = String(active.id);
     const overId = String(over.id);
 
-    // Check if dropping on a livreur droppable zone
-    if (overId.startsWith('droppable-')) {
-      // Extract the command id from the draggable id (remove 'draggable-' prefix)
-      const commandId = activeId.replace('draggable-', '');
+    // Extract the livraison id from the draggable id (remove 'draggable-' prefix)
+    const livraisonId = activeId.replace('draggable-', '');
 
+    // Find the livraison to get its current priority
+    const livraison = livraisons?.find((l) => l.id === livraisonId);
+
+    // Check if dropping on a priority zone
+    if (overId.startsWith('priority-')) {
+      const newPriority = overId.replace('priority-', '') as Priority;
+
+      // Log the priority change
+      handlePriorityChange(livraisonId, newPriority, livraison?.priority);
+
+      // Remove the livraison from all livreur droppable zones
       setDroppedItems((prev) => {
         const newDroppedItems = { ...prev };
 
-        // Remove the command from all previous droppable zones
+        // Remove the livraison from all previous droppable zones
         Object.keys(newDroppedItems).forEach((droppableId) => {
           newDroppedItems[droppableId] = newDroppedItems[droppableId].filter(
-            (id) => id !== commandId,
+            (id) => id !== livraisonId,
           );
         });
 
-        // Add the command to the new droppable zone
-        newDroppedItems[overId] = [...(newDroppedItems[overId] || []), commandId];
+        return newDroppedItems;
+      });
+
+      // TODO: Update the livraison priority in the database
+      return;
+    }
+
+    // Check if dropping on a livreur droppable zone
+    if (overId.startsWith('droppable-')) {
+      setDroppedItems((prev) => {
+        const newDroppedItems = { ...prev };
+
+        // Remove the livraison from all previous droppable zones
+        Object.keys(newDroppedItems).forEach((droppableId) => {
+          newDroppedItems[droppableId] = newDroppedItems[droppableId].filter(
+            (id) => id !== livraisonId,
+          );
+        });
+
+        // Add the livraison to the new droppable zone
+        newDroppedItems[overId] = [...(newDroppedItems[overId] || []), livraisonId];
 
         return newDroppedItems;
       });

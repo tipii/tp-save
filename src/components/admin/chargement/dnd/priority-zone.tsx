@@ -1,11 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMemo } from 'react';
-import CommandeModal from '@/components/modals/commande-modal/commande-modal';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
-import { TrpcCommande, TrpcLivraison } from '@/types/trpc-types';
+import { TrpcLivraison } from '@/types/trpc-types';
 import DraggableLot from './draggable';
 import LivraisonModal from '@/components/modals/livraison-modal';
+import { useDroppable } from '@dnd-kit/core';
 
 interface PriorityZoneProps {
   title: string;
@@ -22,6 +21,10 @@ export const PriorityZone = ({
   livraisons,
   droppedItems,
 }: PriorityZoneProps) => {
+  const { isOver, setNodeRef } = useDroppable({
+    id: `priority-${priority}`,
+  });
+
   const availableLots = useMemo(() => {
     return livraisons.filter((livraison) => {
       // Check if this command is already dropped in any livreur zone
@@ -30,9 +33,11 @@ export const PriorityZone = ({
     });
   }, [livraisons, droppedItems, priority]);
 
-  console.log(livraisons, availableLots);
   return (
-    <div className={`flex-1 rounded-lg border ${backgroundColor} p-4 text-2xl font-bold`}>
+    <div
+      ref={setNodeRef}
+      className={`flex-1 rounded-lg border ${backgroundColor} p-4 text-2xl font-bold ${isOver ? 'ring-2 ring-blue-400' : ''}`}
+    >
       <div className="flex justify-between">
         <div className="">{title}</div>
         {/* <div className="text-sm text-gray-500">Filter zone</div> */}
