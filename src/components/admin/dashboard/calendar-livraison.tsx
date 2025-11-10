@@ -1,3 +1,4 @@
+import { CalendarDashboard } from '@/components/ui/calendar_dashboard';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
 import React from 'react';
@@ -11,8 +12,10 @@ export default function CalendarLivraison() {
           Calendrier des livraisons
         </CardTitle>
       </CardHeader>
-      <CardContent className="max-h-[300px] overflow-y-auto">
-        <div className="space-y-3">Calendrier</div>
+      <CardContent className="overflow-y-auto">
+        <div className="space-y-3">
+          <CalendarDashboard mode="single" showOutsideDays={false} />
+        </div>
       </CardContent>
     </Card>
   );

@@ -25,13 +25,13 @@ export function CommandeRow({ commande }: CommandeRowProps) {
     setSelectedCommande(commande);
   };
 
-  const handleCopyRef = async (e: React.MouseEvent) => {
+  const handleCopyRef = (source: 'ref' | 'client') => async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent row click
-    if (commande.ref) {
+    if (commande.ref && commande.client?.name) {
       try {
-        await navigator.clipboard.writeText(commande.ref);
+        await navigator.clipboard.writeText(source === 'ref' ? commande.ref : commande.client.name);
         toast.success('Référence copiée', {
-          description: `"${commande.ref}" a été copié dans le presse-papiers`,
+          description: `"${source === 'ref' ? commande.ref : commande.client.name}" a été copié dans le presse-papiers`,
         });
       } catch (error) {
         toast.error('Erreur', {
@@ -52,15 +52,18 @@ export function CommandeRow({ commande }: CommandeRowProps) {
       onClick={handleRowClick}
     >
       <TableCell>
-        <div className="flex items-center space-x-3">
-          <div className="rounded-lg bg-blue-100 p-1.5">
-            <FileText className="h-4 w-4 text-blue-600" />
-          </div>
-          <div>
-            <div className="text-sm leading-tight font-semibold text-slate-900">
-              {commande.name}
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          {commande.ref ? (
+            <Badge
+              variant="green"
+              className="text-md cursor-pointer transition-opacity hover:opacity-80"
+              onClick={handleCopyRef('ref')}
+            >
+              {commande.ref}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground">Non défini</span>
+          )}
         </div>
       </TableCell>
       <TableCell>
@@ -69,8 +72,8 @@ export function CommandeRow({ commande }: CommandeRowProps) {
             <div className="rounded-lg bg-orange-100 p-1.5">
               <Building className="h-4 w-4 text-orange-600" />
             </div>
-            <div>
-              <div className="font-medium">{commande.client.name}</div>
+            <div onClick={handleCopyRef('client')}>
+              <div className="cursor-pointer font-medium">{commande.client.name}</div>
             </div>
           </div>
         ) : (
@@ -82,21 +85,7 @@ export function CommandeRow({ commande }: CommandeRowProps) {
           </div>
         )}
       </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          {commande.ref ? (
-            <Badge
-              variant="green"
-              className="cursor-pointer transition-opacity hover:opacity-80"
-              onClick={handleCopyRef}
-            >
-              {commande.ref}
-            </Badge>
-          ) : (
-            <span className="text-muted-foreground">Non défini</span>
-          )}
-        </div>
-      </TableCell>
+
       <TableCell>
         <div className="flex items-center gap-2">{priorityToBadge(commande.priority)}</div>
       </TableCell>

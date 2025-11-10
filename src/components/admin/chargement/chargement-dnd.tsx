@@ -88,24 +88,14 @@ export default function ChargementDnd() {
       onError: (error, variables, context) => {
         toast.error('Erreur lors de la modification de la priorité');
         console.error(error);
+      },
+      onSettled: () => {
         refetchLivraisons();
       },
     }),
   );
 
-  function handlePriorityChange(
-    livraisonId: string,
-    newPriority: Priority,
-    oldPriority?: Priority,
-  ) {
-    console.log('=== Priority Change Detected ===');
-    console.log('Livraison ID:', livraisonId);
-    console.log('Old Priority:', oldPriority || 'Unknown (was in livreur zone)');
-    console.log('New Priority:', newPriority);
-    console.log('Timestamp:', new Date().toISOString());
-    console.log('================================');
-
-    // Make the actual API call
+  function handlePriorityChange(livraisonId: string, newPriority: Priority) {
     changePriorityMutation.mutate({ livraisonId, priority: newPriority });
   }
 
@@ -127,8 +117,7 @@ export default function ChargementDnd() {
     if (overId.startsWith('priority-')) {
       const newPriority = overId.replace('priority-', '') as Priority;
 
-      // Log the priority change
-      handlePriorityChange(livraisonId, newPriority, livraison?.priority);
+      handlePriorityChange(livraisonId, newPriority);
 
       // Remove the livraison from all livreur droppable zones
       setDroppedItems((prev) => {
@@ -144,7 +133,6 @@ export default function ChargementDnd() {
         return newDroppedItems;
       });
 
-      // TODO: Update the livraison priority in the database
       return;
     }
 

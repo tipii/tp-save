@@ -38,9 +38,8 @@ export function CommandesTable({ commandes, filters, pagination, isPending }: Co
       <Table className="min-h-0 flex-1 overflow-y-auto">
         <TableHeader className="sticky top-0 z-10">
           <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-            <TableHead>Nom</TableHead>
-            <TableHead>Client</TableHead>
             <TableHead>Ref</TableHead>
+            <TableHead>Client</TableHead>
             <TableHead>Priorité</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead>Date livraison</TableHead>

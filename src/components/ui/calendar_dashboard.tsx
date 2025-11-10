@@ -6,8 +6,13 @@ import { DayButton, DayPicker, getDefaultClassNames } from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { useTRPC } from '@/trpc/client';
+import { useQuery } from '@tanstack/react-query';
+import { Priority } from '@/generated/prisma';
+import { Badge } from './badge';
+import { useRouter } from 'next/navigation';
 
-function Calendar({
+function CalendarDashboard({
   className,
   classNames,
   showOutsideDays = true,
@@ -21,9 +26,14 @@ function Calendar({
 }) {
   const defaultClassNames = getDefaultClassNames();
 
+  const router = useRouter();
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      onDayClick={(day) => {
+        router.push(`/app/commandes`);
+      }}
       className={cn(
         'bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
@@ -36,7 +46,7 @@ function Calendar({
         ...formatters,
       }}
       classNames={{
-        root: cn('w-fit', defaultClassNames.root),
+        root: cn('max-w-lg mx-auto', defaultClassNames.root),
         months: cn('flex gap-4 flex-col md:flex-row relative', defaultClassNames.months),
         month: cn('flex flex-col w-full gap-4', defaultClassNames.month),
         nav: cn(
@@ -143,18 +153,42 @@ function CalendarDayButton({
   ...props
 }: React.ComponentProps<typeof DayButton>) {
   const defaultClassNames = getDefaultClassNames();
-
+  const trpc = useTRPC();
+  const { data: livraisons } = useQuery(
+    trpc.dashboard.getLivraisonsByMonth.queryOptions({
+      month: day.date.getMonth(),
+      year: day.date.getFullYear(),
+    }),
+  );
   const ref = React.useRef<HTMLButtonElement>(null);
   React.useEffect(() => {
     if (modifiers.focused) ref.current?.focus();
   }, [modifiers.focused]);
+
+  // Find the data for this specific day
+  const dayData = React.useMemo(() => {
+    if (!livraisons) return null;
+    return livraisons.find((item) => {
+      const itemDate = new Date(item.day);
+      return (
+        itemDate.getMonth() === day.date.getMonth() &&
+        itemDate.getFullYear() === day.date.getFullYear() &&
+        itemDate.getDate() === day.date.getDate()
+      );
+    });
+  }, [livraisons, day.date]);
+
+  // Get counts for each priority
+  const urgentCount = dayData?.livraisons.find((l) => l.priority === Priority.URGENT)?.count || 0;
+  const normalCount = dayData?.livraisons.find((l) => l.priority === Priority.NORMAL)?.count || 0;
+  const ilesCount = dayData?.livraisons.find((l) => l.priority === Priority.ILES)?.count || 0;
 
   return (
     <Button
       ref={ref}
       variant="ghost"
       size="icon"
-      data-day={day.date.toLocaleDateString()}
+      data-day={day.date.toISOString().split('T')[0]}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&
@@ -165,13 +199,19 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        'data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70',
+        'data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:opacity-70',
         defaultClassNames.day,
         className,
       )}
       {...props}
-    />
+    >
+      <span className="text-md font-bold">{day.date.getDate()}</span>
+      <div className="mt-1 flex w-full items-center justify-center gap-0.5">
+        {urgentCount > 0 && <Badge variant="urgent">{urgentCount}</Badge>}
+        {normalCount > 0 && <Badge variant="yellow">{normalCount}</Badge>}
+        {ilesCount > 0 && <Badge variant="blue">{ilesCount}</Badge>}
+      </div>
+    </Button>
   );
 }
-
-export { Calendar, CalendarDayButton };
+export { CalendarDashboard, CalendarDayButton };
