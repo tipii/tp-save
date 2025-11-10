@@ -11,6 +11,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Priority } from '@/generated/prisma';
 import { Badge } from './badge';
 import { useRouter } from 'next/navigation';
+import { toZonedTime } from 'date-fns-tz';
+import { TAHITI_TIMEZONE, toTahitiTime } from '@/lib/date-utils';
 
 function CalendarDashboard({
   className,
@@ -32,7 +34,10 @@ function CalendarDashboard({
     <DayPicker
       showOutsideDays={showOutsideDays}
       onDayClick={(day) => {
-        router.push(`/app/commandes`);
+        const dateString = day.toISOString().split('T')[0];
+        router.push(
+          `/app/commandes?expectedDeliveryFrom=${dateString}&expectedDeliveryTo=${dateString}`,
+        );
       }}
       className={cn(
         'bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
@@ -165,15 +170,18 @@ function CalendarDayButton({
     if (modifiers.focused) ref.current?.focus();
   }, [modifiers.focused]);
 
-  // Find the data for this specific day
+  // Find the data for this specific day (using Tahiti timezone)
   const dayData = React.useMemo(() => {
     if (!livraisons) return null;
     return livraisons.find((item) => {
-      const itemDate = new Date(item.day);
+      // Convert both dates to Tahiti timezone for consistent comparison
+      const itemDate = toZonedTime(new Date(item.day), TAHITI_TIMEZONE);
+      const currentDay = toZonedTime(day.date, TAHITI_TIMEZONE);
+
       return (
-        itemDate.getMonth() === day.date.getMonth() &&
-        itemDate.getFullYear() === day.date.getFullYear() &&
-        itemDate.getDate() === day.date.getDate()
+        itemDate.getMonth() === currentDay.getMonth() &&
+        itemDate.getFullYear() === currentDay.getFullYear() &&
+        itemDate.getDate() === currentDay.getDate()
       );
     });
   }, [livraisons, day.date]);

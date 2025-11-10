@@ -9,7 +9,7 @@ import DeliveringLivraisonsSection from './delivering-livraisons-section';
 import DeliveredLivraisonsSection from './delivered-livraisons-section';
 import ReturnsLivraisonsSection from './returns-livraisons-section';
 import Stats from './stats';
-import { CheckCircle, Package, PackageMinus, Truck } from 'lucide-react';
+import { CheckCircle, Clock, Package, PackageMinus, Truck } from 'lucide-react';
 import { useTRPC } from '@/trpc/client';
 import { useQuery } from '@tanstack/react-query';
 import CalendarLivraison from './calendar-livraison';
@@ -51,10 +51,10 @@ export default function DashboardComponent() {
             // trend: { value: 10, isUp: true },
           },
           {
-            label: 'Retours',
-            value: stats?.retoursEnCours ?? 0,
-            description: 'Retours en cours',
-            icon: <PackageMinus />,
+            label: 'En retard',
+            value: stats?.commandesEnRetard ?? 0,
+            description: 'Commandes en retard',
+            icon: <Clock />,
             // trend: { value: 10, isUp: true },
           },
         ]}

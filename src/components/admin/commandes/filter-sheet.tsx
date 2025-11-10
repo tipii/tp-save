@@ -247,7 +247,7 @@ export function FilterSheet({ children, pagination }: FilterSheetProps) {
             <div className="px-6 py-5">
               <h3 className="mb-4 flex items-center gap-2 text-sm font-medium">
                 <div className="h-1.5 w-1.5 rounded-full bg-orange-500"></div>
-                Période
+                Période de création
               </h3>
               <div className="space-y-5">
                 <div className="space-y-2">
@@ -321,6 +321,94 @@ export function FilterSheet({ children, pagination }: FilterSheetProps) {
                           const now = toZonedTime(new Date(), TAHITI_TIMEZONE);
                           const minDate = toZonedTime(new Date('1900-01-01'), TAHITI_TIMEZONE);
                           return date > now || date < minDate;
+                        }}
+                        initialFocus
+                        locale={fr}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Expected Delivery Date Range Section */}
+            <div className="px-6 py-5">
+              <h3 className="mb-4 flex items-center gap-2 text-sm font-medium">
+                <div className="h-1.5 w-1.5 rounded-full bg-purple-500"></div>
+                Date de livraison prévue
+              </h3>
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                    Du
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'h-9 w-full justify-start text-left font-normal',
+                          !filters.expectedDeliveryFrom && 'text-muted-foreground',
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {filters.expectedDeliveryFrom ? (
+                          formatDateForTahiti(filters.expectedDeliveryFrom)
+                        ) : (
+                          <span>Sélectionner une date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={parseDateForCalendar(filters.expectedDeliveryFrom)}
+                        onSelect={(date) => {
+                          filters.setExpectedDeliveryFrom(date ? convertTahitiToUTC(date) : '');
+                        }}
+                        disabled={(date) => {
+                          const minDate = toZonedTime(new Date('1900-01-01'), TAHITI_TIMEZONE);
+                          return date < minDate;
+                        }}
+                        initialFocus
+                        locale={fr}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                    Au
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'h-9 w-full justify-start text-left font-normal',
+                          !filters.expectedDeliveryTo && 'text-muted-foreground',
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {filters.expectedDeliveryTo ? (
+                          formatDateForTahiti(filters.expectedDeliveryTo)
+                        ) : (
+                          <span>Sélectionner une date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={parseDateForCalendar(filters.expectedDeliveryTo)}
+                        onSelect={(date) => {
+                          filters.setExpectedDeliveryTo(date ? convertTahitiToUTC(date) : '');
+                        }}
+                        disabled={(date) => {
+                          const minDate = toZonedTime(new Date('1900-01-01'), TAHITI_TIMEZONE);
+                          return date < minDate;
                         }}
                         initialFocus
                         locale={fr}

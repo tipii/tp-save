@@ -16,6 +16,8 @@ export const commandesRouter = createTRPCRouter({
         status: z.enum(Status).optional(),
         dateFrom: z.string().optional(), // ISO date string
         dateTo: z.string().optional(), // ISO date string
+        expectedDeliveryFrom: z.string().optional(), // ISO date string
+        expectedDeliveryTo: z.string().optional(), // ISO date string
 
         // Pagination
         limit: z.number().min(1).max(100).default(20),
@@ -36,6 +38,8 @@ export const commandesRouter = createTRPCRouter({
         status,
         dateFrom,
         dateTo,
+        expectedDeliveryFrom,
+        expectedDeliveryTo,
         limit,
         page,
         sortBy,
@@ -127,6 +131,17 @@ export const commandesRouter = createTRPCRouter({
       // Date range filter using Tahiti timezone
       if (dateFrom || dateTo) {
         where.createdAt = createTahitiDateRange(dateFrom, dateTo);
+      }
+
+      // Expected delivery date range filter using Tahiti timezone
+      if (expectedDeliveryFrom || expectedDeliveryTo) {
+        where.livraisons = {
+          ...where.livraisons,
+          some: {
+            ...(where.livraisons?.some || {}),
+            expectedDeliveryDate: createTahitiDateRange(expectedDeliveryFrom, expectedDeliveryTo),
+          },
+        };
       }
 
       // Build orderBy clause

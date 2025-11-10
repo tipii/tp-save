@@ -27,7 +27,7 @@ export default function CommandesComponent() {
   // Update the URL search parameter when debounced value changes
   useEffect(() => {
     filters.setSearch(debouncedSearch);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, filters]);
 
   useEffect(() => {
     setBreadcrumb([], 'Commandes');

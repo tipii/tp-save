@@ -87,7 +87,13 @@ export function CommandeRow({ commande }: CommandeRowProps) {
       </TableCell>
 
       <TableCell>
-        <div className="flex items-center gap-2">{priorityToBadge(commande.priority)}</div>
+        <div className="flex items-center gap-2">
+          {commande.livraisons.length > 0 ? (
+            priorityToBadge(commande.livraisons[0].priority)
+          ) : (
+            <span className="text-muted-foreground">Non défini</span>
+          )}
+        </div>
       </TableCell>
       <TableCell>
         {commande.livraisons.length > 0 ? (
