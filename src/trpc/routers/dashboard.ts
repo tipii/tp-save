@@ -2,7 +2,7 @@ import { Status, Priority } from '@/generated/prisma';
 import { createTRPCRouter, protectedProcedure } from '../init';
 import z from 'zod';
 import { getTahitiToday, getTahitiDayEnd, toTahitiTime, TAHITI_TIMEZONE } from '@/lib/date-utils';
-import { toZonedTime } from 'date-fns-tz';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 
 export const dashboardRouter = createTRPCRouter({
   getLivraisonsByStatus: protectedProcedure
@@ -100,11 +100,14 @@ export const dashboardRouter = createTRPCRouter({
       const { year, month } = input;
 
       // Calculate start and end of month in Tahiti timezone
-      // Create a date at the start of the month in Tahiti timezone
-      const startOfMonthTahiti = toZonedTime(new Date(year, month, 1, 0, 0, 0, 0), TAHITI_TIMEZONE);
+      // Create dates that represent the start/end of month in Tahiti timezone
+      // We create a plain date, then use fromZonedTime to convert it to UTC for database queries
+      const startOfMonthTahiti = fromZonedTime(
+        new Date(year, month, 1, 0, 0, 0, 0),
+        TAHITI_TIMEZONE,
+      );
 
-      // Create a date at the end of the month in Tahiti timezone
-      const endOfMonthTahiti = toZonedTime(
+      const endOfMonthTahiti = fromZonedTime(
         new Date(year, month + 1, 0, 23, 59, 59, 999),
         TAHITI_TIMEZONE,
       );
@@ -131,9 +134,8 @@ export const dashboardRouter = createTRPCRouter({
 
       for (let day = 1; day <= daysInMonth; day++) {
         // Create date in Tahiti timezone for this specific day
-        // First create a plain date object, then convert it to Tahiti timezone
-        const localDate = new Date(year, month, day, 0, 0, 0, 0);
-        const dayDate = toZonedTime(localDate, TAHITI_TIMEZONE);
+        // Use fromZonedTime to create a date that represents midnight in Tahiti timezone
+        const dayDate = fromZonedTime(new Date(year, month, day, 0, 0, 0, 0), TAHITI_TIMEZONE);
 
         // Filter livraisons for this specific day in Tahiti timezone
         const dayLivraisons = livraisons.filter((livraison) => {
