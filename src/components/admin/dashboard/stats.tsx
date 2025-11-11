@@ -44,7 +44,11 @@ export default function Stats({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((s, idx) => (
-        <Card key={idx} onClick={() => (s.link ? router.push(s.link) : undefined)}>
+        <Card
+          key={idx}
+          onClick={() => (s.link ? router.push(s.link) : undefined)}
+          className={`${s.link ? 'cursor-pointer' : ''}`}
+        >
           <CardHeader className="pb-2">
             <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm">
               {s.icon}

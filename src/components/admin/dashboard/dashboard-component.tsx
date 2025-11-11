@@ -34,6 +34,7 @@ export default function DashboardComponent() {
             value: stats?.commandesRecuesToday ?? 0,
             description: "Commandes reçues aujourd'hui",
             icon: <Package />,
+            link: '/app/commandes',
             // trend: { value: 10, isUp: true },
           },
           {
@@ -41,6 +42,7 @@ export default function DashboardComponent() {
             value: stats?.livraisonsEnCours ?? 0,
             description: 'Livraisons en cours',
             icon: <Truck />,
+            link: '/app/commandes?status=DELIVERING',
             // trend: { value: 10, isUp: true },
           },
           {
@@ -48,6 +50,7 @@ export default function DashboardComponent() {
             value: stats?.livraisonsEffectuees ?? 0,
             description: 'Livraisons effectuées',
             icon: <CheckCircle />,
+            link: '/app/commandes?status=DELIVERED',
             // trend: { value: 10, isUp: true },
           },
           {
