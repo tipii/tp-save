@@ -113,6 +113,36 @@ export function FilterSheet({ children, pagination }: FilterSheetProps) {
                 </div>
               </div>
             )}
+
+            {/* Quick Filters Section */}
+            <div className="px-6 py-5">
+              <h3 className="mb-4 flex items-center gap-2 text-sm font-medium">
+                <div className="h-1.5 w-1.5 rounded-full bg-cyan-500"></div>
+                Filtres rapides
+              </h3>
+              <div className="space-y-3">
+                <label className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={filters.noExpectedDeliveryDate}
+                    onChange={(e) => filters.setNoExpectedDeliveryDate(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium">Sans date de livraison prévue</span>
+                </label>
+                <label className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={filters.expectedDeliveryDatePassed}
+                    onChange={(e) => filters.setExpectedDeliveryDatePassed(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium">Date de livraison dépassée</span>
+                </label>
+              </div>
+            </div>
+
+            <Separator />
             {/* Sorting Section */}
             <div className="px-6 py-5">
               <h3 className="mb-4 flex items-center gap-2 text-sm font-medium">

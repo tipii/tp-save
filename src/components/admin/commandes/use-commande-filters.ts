@@ -1,6 +1,6 @@
 import { SortBy, SortOrder } from '@/types/enums';
 import { Priority, Status } from '@/generated/prisma';
-import { useQueryState, parseAsString, parseAsInteger } from 'nuqs';
+import { useQueryState, parseAsString, parseAsInteger, parseAsBoolean } from 'nuqs';
 
 export interface CommandeFilters {
   search: string;
@@ -11,6 +11,8 @@ export interface CommandeFilters {
   dateTo: string;
   expectedDeliveryFrom: string;
   expectedDeliveryTo: string;
+  noExpectedDeliveryDate: boolean;
+  expectedDeliveryDatePassed: boolean;
   sortBy: string;
   sortOrder: string;
   page: number;
@@ -26,6 +28,8 @@ export interface CommandeFiltersActions {
   setDateTo: (value: string) => void;
   setExpectedDeliveryFrom: (value: string) => void;
   setExpectedDeliveryTo: (value: string) => void;
+  setNoExpectedDeliveryDate: (value: boolean) => void;
+  setExpectedDeliveryDatePassed: (value: boolean) => void;
   setSortBy: (value: string) => void;
   setSortOrder: (value: string) => void;
   setPage: (value: number) => void;
@@ -49,6 +53,14 @@ export function useCommandeFilters(): CommandeFilters & CommandeFiltersActions {
   const [expectedDeliveryTo, setExpectedDeliveryTo] = useQueryState(
     'expectedDeliveryTo',
     parseAsString.withDefault(''),
+  );
+  const [noExpectedDeliveryDate, setNoExpectedDeliveryDate] = useQueryState(
+    'noExpectedDeliveryDate',
+    parseAsBoolean.withDefault(false),
+  );
+  const [expectedDeliveryDatePassed, setExpectedDeliveryDatePassed] = useQueryState(
+    'expectedDeliveryDatePassed',
+    parseAsBoolean.withDefault(false),
   );
   const [sortBy, setSortBy] = useQueryState('sortBy', parseAsString.withDefault('createdAt'));
   const [sortOrder, setSortOrder] = useQueryState('sortOrder', parseAsString.withDefault('desc'));
@@ -97,6 +109,16 @@ export function useCommandeFilters(): CommandeFilters & CommandeFiltersActions {
     setPage(1);
   };
 
+  const setNoExpectedDeliveryDateWithPageReset = (value: boolean) => {
+    setNoExpectedDeliveryDate(value);
+    setPage(1);
+  };
+
+  const setExpectedDeliveryDatePassedWithPageReset = (value: boolean) => {
+    setExpectedDeliveryDatePassed(value);
+    setPage(1);
+  };
+
   const setSortByWithPageReset = (value: string) => {
     setSortBy(value);
     setPage(1);
@@ -121,6 +143,8 @@ export function useCommandeFilters(): CommandeFilters & CommandeFiltersActions {
     setDateTo('');
     setExpectedDeliveryFrom('');
     setExpectedDeliveryTo('');
+    setNoExpectedDeliveryDate(false);
+    setExpectedDeliveryDatePassed(false);
     setSortBy('createdAt');
     setSortOrder('desc');
     setPage(1);
@@ -134,7 +158,9 @@ export function useCommandeFilters(): CommandeFilters & CommandeFiltersActions {
     !!dateFrom ||
     !!dateTo ||
     !!expectedDeliveryFrom ||
-    !!expectedDeliveryTo;
+    !!expectedDeliveryTo ||
+    noExpectedDeliveryDate ||
+    expectedDeliveryDatePassed;
 
   return {
     // Filter values
@@ -146,6 +172,8 @@ export function useCommandeFilters(): CommandeFilters & CommandeFiltersActions {
     dateTo,
     expectedDeliveryFrom,
     expectedDeliveryTo,
+    noExpectedDeliveryDate,
+    expectedDeliveryDatePassed,
     sortBy,
     sortOrder,
     page,
@@ -159,6 +187,8 @@ export function useCommandeFilters(): CommandeFilters & CommandeFiltersActions {
     setDateTo: setDateToWithPageReset,
     setExpectedDeliveryFrom: setExpectedDeliveryFromWithPageReset,
     setExpectedDeliveryTo: setExpectedDeliveryToWithPageReset,
+    setNoExpectedDeliveryDate: setNoExpectedDeliveryDateWithPageReset,
+    setExpectedDeliveryDatePassed: setExpectedDeliveryDatePassedWithPageReset,
     setSortBy: setSortByWithPageReset,
     setSortOrder: setSortOrderWithPageReset,
     setPage,
@@ -179,6 +209,8 @@ export function getQueryParams(filters: CommandeFilters) {
     dateTo: filters.dateTo || undefined,
     expectedDeliveryFrom: filters.expectedDeliveryFrom || undefined,
     expectedDeliveryTo: filters.expectedDeliveryTo || undefined,
+    noExpectedDeliveryDate: filters.noExpectedDeliveryDate || undefined,
+    expectedDeliveryDatePassed: filters.expectedDeliveryDatePassed || undefined,
     sortBy: filters.sortBy as SortBy,
     sortOrder: filters.sortOrder as SortOrder,
     limit: filters.limit,

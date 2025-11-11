@@ -33,6 +33,21 @@ export default function ChargementDnd() {
       },
     ),
   );
+
+  const { data: livraisonsEnRetard, refetch: refetchLivraisonsEnRetard } = useQuery(
+    trpc.livraisons.getLivraisonsEnRetard.queryOptions(
+      {
+        expectedDeliveryDate: selectedDate ? selectedDate : undefined,
+      },
+      {
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+        refetchInterval: 1000 * 10, // 10 seconds
+        refetchIntervalInBackground: true,
+      },
+    ),
+  );
   const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
 
   const { setBreadcrumb } = useBreadcrumb();
@@ -115,6 +130,11 @@ export default function ChargementDnd() {
 
     // Check if dropping on a priority zone
     if (overId.startsWith('priority-')) {
+      if (overId === 'priority-LATE') {
+        toast.error('Cette zone est réservée aux livraisons en retard');
+        return;
+      }
+
       const newPriority = overId.replace('priority-', '') as Priority;
 
       handlePriorityChange(livraisonId, newPriority);
@@ -219,6 +239,13 @@ export default function ChargementDnd() {
                 livraisons={livraisons}
                 droppedItems={droppedItems}
               />
+              <PriorityZone
+                title="En retard"
+                priority={'LATE'}
+                backgroundColor="bg-orange-50 shadow-none border-orange-300"
+                livraisons={livraisonsEnRetard ?? []}
+                droppedItems={droppedItems}
+              />
             </div>
           </div>
 
@@ -244,7 +271,7 @@ export default function ChargementDnd() {
                   key={livreur.id}
                   livreur={livreur}
                   droppedItems={droppedItems}
-                  livraisons={livraisons}
+                  livraisons={[...(livraisons ?? []), ...(livraisonsEnRetard ?? [])]}
                   onRemoveLivraison={handleRemoveLivraison}
                   setDroppedItems={setDroppedItems}
                 />

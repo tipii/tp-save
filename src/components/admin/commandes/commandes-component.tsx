@@ -17,6 +17,7 @@ import { useDebounce } from '@uidotdev/usehooks';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useCommande } from './commande-context';
+import CommandeDetailsNew from './commande-details-new';
 
 export default function CommandesComponent() {
   const { setBreadcrumb } = useBreadcrumb();
@@ -105,7 +106,7 @@ export default function CommandesComponent() {
       </Card>
       <div className="grid min-h-0 flex-1 grid-cols-2 gap-2">
         <Card className="flex min-h-0 flex-col rounded-sm">
-          <CardHeader className="flex-shrink-0">
+          <CardHeader className="shrink-0">
             <CardTitle>Items</CardTitle>
           </CardHeader>
           <CardContent className="min-h-0 flex-1 overflow-y-auto">
@@ -114,11 +115,11 @@ export default function CommandesComponent() {
         </Card>
 
         <Card className="flex min-h-0 flex-col rounded-sm">
-          <CardHeader className="flex-shrink-0">
+          <CardHeader className="shrink-0">
             <CardTitle>Détails</CardTitle>
           </CardHeader>
           <CardContent className="min-h-0 flex-1 overflow-y-auto">
-            <CommandeDetails refetch={refetch} />
+            <CommandeDetailsNew refetch={refetch} />
           </CardContent>
         </Card>
       </div>

@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from '../init';
 import { Priority, Status, Prisma } from '@/generated/prisma';
 import { SortOrder } from '@/types/enums';
 import { TRPCError } from '@trpc/server';
-import { createTahitiDateRange, getTahitiNow } from '@/lib/date-utils';
+import { createTahitiDateRange, getTahitiNow, getTahitiToday } from '@/lib/date-utils';
 
 export const commandesRouter = createTRPCRouter({
   getCommandes: protectedProcedure
@@ -18,6 +18,10 @@ export const commandesRouter = createTRPCRouter({
         dateTo: z.string().optional(), // ISO date string
         expectedDeliveryFrom: z.string().optional(), // ISO date string
         expectedDeliveryTo: z.string().optional(), // ISO date string
+
+        //quick filters
+        noExpectedDeliveryDate: z.boolean().optional(),
+        expectedDeliveryDatePassed: z.boolean().optional(),
 
         // Pagination
         limit: z.number().min(1).max(100).default(20),
@@ -44,6 +48,8 @@ export const commandesRouter = createTRPCRouter({
         page,
         sortBy,
         sortOrder,
+        noExpectedDeliveryDate,
+        expectedDeliveryDatePassed,
       } = input;
 
       // Build where clause
@@ -119,6 +125,28 @@ export const commandesRouter = createTRPCRouter({
         };
       }
 
+      // Filter by no expected delivery date
+      if (noExpectedDeliveryDate) {
+        where.livraisons = {
+          some: {
+            expectedDeliveryDate: null,
+            priority: Priority.UNDEFINED,
+          },
+        };
+      }
+      // Filter by expected delivery date passed (using Tahiti timezone)
+      if (expectedDeliveryDatePassed) {
+        where.livraisons = {
+          some: {
+            expectedDeliveryDate: {
+              lt: getTahitiToday(),
+            },
+            status: {
+              notIn: [Status.DELIVERED, Status.CANCELLED, Status.RETURNED],
+            },
+          },
+        };
+      }
       // Filter by status
       if (status) {
         where.livraisons = {
@@ -195,6 +223,7 @@ export const commandesRouter = createTRPCRouter({
         });
       }
     }),
+
   getCommandeById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
