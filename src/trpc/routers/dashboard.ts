@@ -131,7 +131,7 @@ export const dashboardRouter = createTRPCRouter({
 
       for (let day = 1; day <= daysInMonth; day++) {
         // Create date in Tahiti timezone for this specific day
-        const dayDate = toZonedTime(new Date(year, month, day, 0, 0, 0, 0), TAHITI_TIMEZONE);
+        const dayDate = new Date(year, month, day, 0, 0, 0, 0);
 
         // Filter livraisons for this specific day in Tahiti timezone
         const dayLivraisons = livraisons.filter((livraison) => {
