@@ -1,7 +1,10 @@
+'use client';
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export type StatItem = {
   label: string;
@@ -9,6 +12,7 @@ export type StatItem = {
   description?: string;
   trend?: { value: number; isUp: boolean };
   icon?: React.ReactNode;
+  link?: string;
 };
 
 export default function Stats({
@@ -18,6 +22,7 @@ export default function Stats({
   stats: StatItem[];
   isLoading?: boolean;
 }) {
+  const router = useRouter();
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -39,7 +44,7 @@ export default function Stats({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((s, idx) => (
-        <Card key={idx}>
+        <Card key={idx} onClick={() => (s.link ? router.push(s.link) : undefined)}>
           <CardHeader className="pb-2">
             <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm">
               {s.icon}

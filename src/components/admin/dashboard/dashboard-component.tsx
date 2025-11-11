@@ -55,6 +55,7 @@ export default function DashboardComponent() {
             value: stats?.commandesEnRetard ?? 0,
             description: 'Commandes en retard',
             icon: <Clock />,
+            link: '/app/commandes?expectedDeliveryDatePassed=true',
             // trend: { value: 10, isUp: true },
           },
         ]}

@@ -70,7 +70,7 @@ export const dashboardRouter = createTRPCRouter({
         where: {
           AND: {
             expectedDeliveryDate: {
-              lt: new Date(),
+              lt: toTahitiTime(new Date()),
             },
             status: {
               notIn: [Status.DELIVERED, Status.CANCELLED, Status.RETURNED],
