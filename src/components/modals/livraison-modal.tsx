@@ -21,7 +21,7 @@ import { TrpcClient, TrpcCommande, TrpcLivraison } from '@/types/trpc-types';
 import ClientCard from '@/components/admin/clients/client-card';
 import { priorityToBadge } from '@/components/ui/enum-to-ui';
 import { Item } from '@/types/types';
-import CommandeItems from '../admin/commandes/commande-items';
+import CommandeItems from '../admin/commandes/components/commande-items';
 
 export default function CommandeModal({
   children,

@@ -23,7 +23,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Filter, X, Calendar as CalendarIcon } from 'lucide-react';
-import { useCommandeFilters } from './use-commande-filters';
+import { useCommandeFilters } from '../hooks/use-commande-filters';
 import { Priority, Status } from '@/generated/prisma';
 import { priorityToText, statusToText } from '@/components/ui/enum-to-ui';
 import { Combobox } from '@/components/ui/combobox';

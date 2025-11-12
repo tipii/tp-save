@@ -3,21 +3,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
-import { getQueryParams, useCommandeFilters } from './use-commande-filters';
-import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
+import { getQueryParams, useCommandeFilters } from '../hooks/use-commande-filters';
+import { useBreadcrumb } from '../../shared/breadcrumb/breadcrumb-context';
 import { useTRPC } from '@/trpc/client';
 import { CommandesTable } from './table/commandes-table';
 import { FilterSheet } from './filter-sheet';
 import CommandeItems from './commande-items';
-import CommandeDetails from './commande-details';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Filter, RefreshCcw } from 'lucide-react';
 import { useDebounce } from '@uidotdev/usehooks';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { useCommande } from './commande-context';
-import CommandeDetailsNew from './commande-details-new';
+import CommandeDetailsNew from './commande-details';
 
 export default function CommandesComponent() {
   const { setBreadcrumb } = useBreadcrumb();
@@ -59,7 +57,6 @@ export default function CommandesComponent() {
       },
     }),
   );
-  const { selectedCommande } = useCommande();
 
   const commandes = commandesData?.commandes || [];
   const pagination = commandesData?.pagination;
@@ -106,18 +103,18 @@ export default function CommandesComponent() {
       </Card>
       <div className="grid min-h-0 flex-1 grid-cols-2 gap-2">
         <Card className="flex min-h-0 flex-col rounded-sm">
-          <CardHeader className="shrink-0">
+          {/* <CardHeader className="shrink-0">
             <CardTitle>Items</CardTitle>
-          </CardHeader>
+          </CardHeader> */}
           <CardContent className="min-h-0 flex-1 overflow-y-auto">
             <CommandeItems />
           </CardContent>
         </Card>
 
         <Card className="flex min-h-0 flex-col rounded-sm">
-          <CardHeader className="shrink-0">
+          {/* <CardHeader className="shrink-0">
             <CardTitle>Détails</CardTitle>
-          </CardHeader>
+          </CardHeader> */}
           <CardContent className="min-h-0 flex-1 overflow-y-auto">
             <CommandeDetailsNew refetch={refetch} />
           </CardContent>

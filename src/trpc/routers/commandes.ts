@@ -198,6 +198,7 @@ export const commandesRouter = createTRPCRouter({
                 chargement: true,
               },
             },
+
             client: true,
           },
           orderBy,
@@ -246,6 +247,7 @@ export const commandesRouter = createTRPCRouter({
               livreur: true,
             },
           },
+          docVente: true,
         },
       });
       return commande;
@@ -269,7 +271,7 @@ export const commandesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, priority, status, ...updateData } = input;
+      const { id, ...updateData } = input;
       const userId = ctx.user.id;
 
       try {
@@ -292,8 +294,6 @@ export const commandesRouter = createTRPCRouter({
           data: {
             ...updateData,
             updatedAt: getTahitiNow(),
-            priority: priority,
-            status: status,
           },
           include: {
             client: true,
@@ -305,12 +305,12 @@ export const commandesRouter = createTRPCRouter({
           },
         });
 
-        if (updatedCommande.livraisons.length > 0) {
+        if (updatedCommande.livraisons.length > 0 && updateData.priority) {
           for (const livraison of updatedCommande.livraisons) {
             await ctx.prisma.livraison.update({
               where: { id: livraison.id },
               data: {
-                priority: priority,
+                priority: updateData.priority,
                 expectedDeliveryDate: updateData.plannedDeliveryDate,
               },
             });
@@ -318,14 +318,14 @@ export const commandesRouter = createTRPCRouter({
         }
 
         // Create history entry
-        await ctx.prisma.commandeHistory.create({
-          data: {
-            commandeId: id,
-            userId,
-            action: 'UPDATE',
-            snapshot: JSON.parse(JSON.stringify(currentCommande)),
-          },
-        });
+        // await ctx.prisma.commandeHistory.create({
+        //   data: {
+        //     commandeId: id,
+        //     userId,
+        //     action: 'UPDATE',
+        //     snapshot: JSON.parse(JSON.stringify(currentCommande)),
+        //   },
+        // });
 
         return updatedCommande;
       } catch (error) {

@@ -20,7 +20,7 @@ export interface UserSeedData {
 export const usersData: UserSeedData[] = [
   {
     name: 'Theo',
-    email: 'theo@example.com',
+    email: 'theo@devlab.io',
     emailVerified: true,
     role: 'admin',
     phoneNumber: '+1234567890',
@@ -30,6 +30,19 @@ export const usersData: UserSeedData[] = [
     createdAt: new Date('2024-01-01T00:00:00Z'),
     updatedAt: new Date('2024-01-01T00:00:00Z'),
     password: 'theo123456',
+  },
+  {
+    name: 'Maxime',
+    email: 'maxime.camps@tallinpi.pf',
+    emailVerified: true,
+    role: 'admin',
+    phoneNumber: '+1234567890',
+    phoneNumberVerified: true,
+    username: 'maxime',
+    displayUsername: 'Maxime',
+    createdAt: new Date('2024-01-01T00:00:00Z'),
+    updatedAt: new Date('2024-01-01T00:00:00Z'),
+    password: 'maxime123456',
   },
   // {
   //   name: 'Marie Dubois',

@@ -114,7 +114,7 @@ async function upsertRawDocVente(docVente: DocVentePrismaInput) {
   if (existing) {
     // Update existing record
     return await prisma.docVente.update({
-      where: { piece: existing.piece },
+      where: { id: existing.id },
       data: docVente,
     });
   } else {
@@ -152,11 +152,13 @@ async function ensureClientExists(clientCode: string, clientName: string) {
 async function createCommandeWithLivraison(
   soapClient: any,
   docVente: DocVentePrismaInput,
+  docVenteId: string,
   clientId: string,
   stats: SyncStats,
 ) {
   const newCommande = await prisma.commande.create({
     data: {
+      docVenteId,
       bp_number: docVente.piece,
       ref: docVente.piece,
       name: `${docVente.piece}`,
@@ -199,7 +201,7 @@ async function processSingleDocVente(
 
   try {
     stats.processedCount++;
-    await upsertRawDocVente(docVente);
+    const docVenteDb = await upsertRawDocVente(docVente);
 
     const client = await ensureClientExists(docVente.tiers, docVente.tiers);
 
@@ -212,7 +214,7 @@ async function processSingleDocVente(
       stats.skippedCount++;
       return;
     } else {
-      await createCommandeWithLivraison(soapClient, docVente, client.id, stats);
+      await createCommandeWithLivraison(soapClient, docVente, docVenteDb.id, client.id, stats);
     }
   } catch (error) {
     logger.error(`${logPrefix} Error processing doc vente ${docVente.piece}:`, { error });
@@ -263,8 +265,8 @@ export const syncBonsFromSageScheduled = schedules.task({
       const soapClient = await initializeSoapClient();
 
       // Get today's date in Tahiti timezone
-      const today = formatDateForTahiti(new Date()) ?? '';
-      // const today = '06/11/2025';
+      // const today = formatDateForTahiti(new Date()) ?? '';
+      const today = '10/11/2025';
 
       // Fetch bons from SAGE
       const allDocVentes = await fetchDocVentesFromSage(today);

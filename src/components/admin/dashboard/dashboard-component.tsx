@@ -35,6 +35,7 @@ export default function DashboardComponent() {
             description: "Commandes reçues aujourd'hui",
             icon: <Package />,
             link: '/app/commandes',
+            className: 'bg-blue-500/10 border-blue-500/20 text-blue-600',
             // trend: { value: 10, isUp: true },
           },
           {
@@ -43,6 +44,7 @@ export default function DashboardComponent() {
             description: 'Livraisons en cours',
             icon: <Truck />,
             link: '/app/commandes?status=DELIVERING',
+            className: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-600',
             // trend: { value: 10, isUp: true },
           },
           {
@@ -51,6 +53,7 @@ export default function DashboardComponent() {
             description: 'Livraisons effectuées',
             icon: <CheckCircle />,
             link: '/app/commandes?status=DELIVERED',
+            className: 'bg-green-500/10 border-green-500/20 text-green-600',
             // trend: { value: 10, isUp: true },
           },
           {
@@ -59,6 +62,7 @@ export default function DashboardComponent() {
             description: 'Commandes en retard',
             icon: <Clock />,
             link: '/app/commandes?expectedDeliveryDatePassed=true',
+            className: 'bg-red-500/10 border-red-500/20 text-red-600',
             // trend: { value: 10, isUp: true },
           },
         ]}

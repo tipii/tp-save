@@ -9,7 +9,7 @@ import { APP_ALLOWED_ROLES, authRedirect } from '@/lib/auth-redirect';
 import BreadcrumbAdmin from '@/components/admin/shared/breadcrumb/breadcrumb';
 import { BreadcrumbProvider } from '@/components/admin/shared/breadcrumb/breadcrumb-context';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { CommandeProvider } from '@/components/admin/commandes/commande-context';
+import { CommandeProvider } from '@/components/admin/commandes/context/commande-context';
 
 export const dynamic = 'force-dynamic';
 

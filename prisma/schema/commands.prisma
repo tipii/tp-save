@@ -7,6 +7,8 @@ model Commande {
   status    Status   @default(PENDING)
 
   livraisons Livraison[]
+  docVente   DocVente?   @relation(fields: [docVenteId], references: [id], onDelete: Cascade)
+  docVenteId String?     @unique
 
   // Relations
   clientId String? // Foreign key to Client model

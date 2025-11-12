@@ -9,7 +9,7 @@ import { statusToBadge, priorityToBadge } from '@/components/ui/enum-to-ui';
 import { useRouter } from 'next/navigation';
 import { TrpcCommande } from '@/types/trpc-types';
 import { Badge } from '@/components/ui/badge';
-import { useCommande } from '../commande-context';
+import { useCommande } from '../../context/commande-context';
 import { formatDateForTahiti } from '@/lib/date-utils';
 import { toast } from 'sonner';
 
@@ -19,10 +19,10 @@ export interface CommandeRowProps {
 
 export function CommandeRow({ commande }: CommandeRowProps) {
   const router = useRouter();
-  const { selectedCommande, setSelectedCommande } = useCommande();
+  const { selectedCommandeId, setSelectedCommandeId } = useCommande();
 
   const handleRowClick = () => {
-    setSelectedCommande(commande);
+    setSelectedCommandeId(commande.id);
   };
 
   const handleCopyRef = (source: 'ref' | 'client') => async (e: React.MouseEvent) => {
@@ -41,7 +41,7 @@ export function CommandeRow({ commande }: CommandeRowProps) {
     }
   };
 
-  const isSelected = selectedCommande?.id === commande.id;
+  const isSelected = selectedCommandeId === commande.id;
 
   return (
     <TableRow

@@ -1,11 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { TrpcCommande } from '@/types/trpc-types';
 
 interface CommandeContextType {
-  selectedCommande: TrpcCommande | null;
-  setSelectedCommande: (commande: TrpcCommande | null) => void;
+  selectedCommandeId: string | null;
+  setSelectedCommandeId: (id: string | null) => void;
 }
 
 const CommandeContext = createContext<CommandeContextType | undefined>(undefined);
@@ -23,13 +22,13 @@ interface CommandeProviderProps {
 }
 
 export function CommandeProvider({ children }: CommandeProviderProps) {
-  const [selectedCommande, setSelectedCommande] = useState<TrpcCommande | null>(null);
+  const [selectedCommandeId, setSelectedCommandeId] = useState<string | null>(null);
 
   return (
     <CommandeContext.Provider
       value={{
-        selectedCommande,
-        setSelectedCommande,
+        selectedCommandeId,
+        setSelectedCommandeId,
       }}
     >
       {children}

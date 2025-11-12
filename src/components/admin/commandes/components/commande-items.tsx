@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCommande } from './commande-context';
+import { useCommande } from '../context/commande-context';
 import { Item } from '@/types/types';
 import {
   Table,
@@ -9,9 +9,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useTRPC } from '@/trpc/client';
+import { useQuery } from '@tanstack/react-query';
 
 export default function CommandeItems() {
-  const { selectedCommande } = useCommande();
+  const { selectedCommandeId } = useCommande();
+  const trpc = useTRPC();
+
+  // Fetch the commande data using React Query
+  const { data: selectedCommande } = useQuery({
+    ...trpc.commandes.getCommandeById.queryOptions({ id: selectedCommandeId ?? '' }),
+    enabled: !!selectedCommandeId,
+  });
 
   if (!selectedCommande) {
     return (

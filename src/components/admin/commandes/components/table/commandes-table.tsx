@@ -3,7 +3,7 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components
 import { EmptyState } from './empty-state';
 import { CommandeRow } from './commande-row';
 import { Pagination } from './pagination';
-import { CommandeFiltersActions } from '../use-commande-filters';
+import { CommandeFiltersActions } from '../../hooks/use-commande-filters';
 import { TrpcCommande } from '@/types/trpc-types';
 import { CommandesTableSkeleton } from './skeleton';
 

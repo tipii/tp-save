@@ -1,6 +1,7 @@
 model DocVente {
+  id      String @id @default(cuid())
   // Primary Key & Identifiers
-  piece   String @id @map("DO_Piece")
+  piece   String @map("DO_Piece")
   cbPiece String @map("cbDO_Piece")
   guid    String @map("DO_GUID")
 
@@ -191,6 +192,8 @@ model DocVente {
   cbHashVersion  Int?      @map("cbHashVersion")
   cbHashDate     DateTime? @map("cbHashDate")
   cbHashOrder    Int?      @map("cbHashOrder")
+
+  commande Commande?
 
   @@index([tiers])
   @@index([date])

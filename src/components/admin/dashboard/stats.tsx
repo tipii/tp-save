@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export type StatItem = {
   label: string;
@@ -13,6 +14,7 @@ export type StatItem = {
   trend?: { value: number; isUp: boolean };
   icon?: React.ReactNode;
   link?: string;
+  className?: string;
 };
 
 export default function Stats({
@@ -47,7 +49,7 @@ export default function Stats({
         <Card
           key={idx}
           onClick={() => (s.link ? router.push(s.link) : undefined)}
-          className={`${s.link ? 'cursor-pointer' : ''}`}
+          className={cn(`${s.link ? 'cursor-pointer' : ''}`, s.className)}
         >
           <CardHeader className="pb-2">
             <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm">
