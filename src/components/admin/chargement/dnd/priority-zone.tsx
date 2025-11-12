@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+import { Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TrpcLivraison } from '@/types/trpc-types';
 import DraggableLot from './draggable';
 import LivraisonModal from '@/components/modals/livraison-modal';
@@ -14,6 +14,8 @@ interface PriorityZoneProps {
   droppedItems: Record<string, string[]>;
 }
 
+const MAX_ITEMS = 5;
+
 export const PriorityZone = ({
   title,
   priority,
@@ -21,6 +23,8 @@ export const PriorityZone = ({
   livraisons,
   droppedItems,
 }: PriorityZoneProps) => {
+  const [currentPage, setCurrentPage] = useState(0);
+
   const { isOver, setNodeRef } = useDroppable({
     id: `priority-${priority}`,
   });
@@ -36,19 +40,56 @@ export const PriorityZone = ({
     });
   }, [livraisons, droppedItems, priority]);
 
+  const totalPages = Math.ceil(availableLots.length / MAX_ITEMS);
+  const startIndex = currentPage * MAX_ITEMS;
+  const endIndex = startIndex + MAX_ITEMS;
+  const paginatedLots = availableLots.slice(startIndex, endIndex);
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1));
+  };
+
   return (
     <div
       ref={setNodeRef}
       className={`flex flex-1 flex-col rounded-lg border ${backgroundColor} ${isOver ? 'ring-2 ring-blue-400' : ''}`}
     >
-      <div className="flex justify-between border-b p-4 text-2xl font-bold">
-        <div className="">{title}</div>
-        {/* <div className="text-sm text-gray-500">Filter zone</div> */}
+      <div className="flex items-center justify-between border-b p-4">
+        <div className="text-2xl font-bold">{title}</div>
+        {totalPages > 1 && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 0}
+            >
+              <ChevronLeft size={16} />
+            </Button>
+            <span className="text-sm text-gray-600">
+              {currentPage + 1} / {totalPages}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages - 1}
+            >
+              <ChevronRight size={16} />
+            </Button>
+          </div>
+        )}
       </div>
       <div className="max-h-80 flex-1 p-4">
         {availableLots.length > 0 ? (
           <div className="flex flex-col gap-1">
-            {availableLots.map((livraison) => (
+            {paginatedLots.map((livraison) => (
               <div key={livraison.id} className="flex items-center gap-2">
                 <DraggableLot livraison={livraison} />
                 <LivraisonModal livraison={livraison}>

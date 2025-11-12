@@ -103,8 +103,10 @@ export function CommandeRow({ commande }: CommandeRowProps) {
         )}
       </TableCell>
       <TableCell>
-        {commande.plannedDeliveryDate ? (
-          <Badge variant="blue">{formatDateForTahiti(commande.plannedDeliveryDate)}</Badge>
+        {commande.livraisons.length > 0 && commande.livraisons[0].expectedDeliveryDate ? (
+          <Badge variant="blue">
+            {formatDateForTahiti(commande.livraisons[0].expectedDeliveryDate)}
+          </Badge>
         ) : (
           <span className="text-muted-foreground">Non défini</span>
         )}

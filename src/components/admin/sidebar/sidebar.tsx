@@ -69,16 +69,6 @@ const items = [
     url: '/app/clients',
     icon: Building,
   },
-  {
-    title: 'Archives',
-    url: '/app/archives',
-    icon: Archive,
-  },
-  {
-    title: 'Retards',
-    url: '/app/retards',
-    icon: Clock,
-  },
 ];
 
 export function AppSidebar() {

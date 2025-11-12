@@ -305,7 +305,10 @@ export const commandesRouter = createTRPCRouter({
           },
         });
 
-        if (updatedCommande.livraisons.length > 0 && updateData.priority) {
+        if (
+          updatedCommande.livraisons.length > 0 &&
+          (updateData.priority || updateData.plannedDeliveryDate)
+        ) {
           for (const livraison of updatedCommande.livraisons) {
             await ctx.prisma.livraison.update({
               where: { id: livraison.id },

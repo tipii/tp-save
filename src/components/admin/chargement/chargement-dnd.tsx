@@ -125,13 +125,37 @@ export default function ChargementDnd() {
     // Extract the livraison id from the draggable id (remove 'draggable-' prefix)
     const livraisonId = activeId.replace('draggable-', '');
 
-    // Find the livraison to get its current priority
-    const livraison = livraisons?.find((l) => l.id === livraisonId);
+    // Determine if the item being dragged is from LATE zone
+    const isFromLateZone = !!livraisonsEnRetard?.find((l) => l.id === livraisonId);
 
     // Check if dropping on a priority zone
     if (overId.startsWith('priority-')) {
-      if (overId === 'priority-LATE') {
+      // Prevent dropping non-LATE items into LATE zone
+      if (overId === 'priority-LATE' && !isFromLateZone) {
         toast.error('Cette zone est réservée aux livraisons en retard');
+        return;
+      }
+
+      // Prevent dropping LATE items into other priority zones (but allow LATE -> LATE)
+      if (isFromLateZone && overId !== 'priority-LATE') {
+        toast.error('Les livraisons en retard ne peuvent être déposées que dans les zones de chargement');
+        return;
+      }
+
+      // If dropping LATE item back into LATE zone, just remove from droppable zones without changing priority
+      if (isFromLateZone && overId === 'priority-LATE') {
+        setDroppedItems((prev) => {
+          const newDroppedItems = { ...prev };
+
+          // Remove the livraison from all previous droppable zones
+          Object.keys(newDroppedItems).forEach((droppableId) => {
+            newDroppedItems[droppableId] = newDroppedItems[droppableId].filter(
+              (id) => id !== livraisonId,
+            );
+          });
+
+          return newDroppedItems;
+        });
         return;
       }
 
@@ -251,17 +275,17 @@ export default function ChargementDnd() {
 
           <div className="flex flex-col gap-4 border-b border-gray-200 px-4 pb-4">
             <div className="flex justify-between">
-              <h2 className="text-lg font-bold">Livreur Drop Zone</h2>
+              <h2 className="text-lg font-bold">Zône de chargement</h2>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleSort}
                   className="flex items-center gap-1"
-                  title={`Sort by name ${sortOrder === 'asc' ? '(A-Z)' : sortOrder === 'desc' ? '(Z-A)' : '(No sort)'}`}
+                  title={`Trier par nom ${sortOrder === 'asc' ? '(A-Z)' : sortOrder === 'desc' ? '(Z-A)' : '(Pas de tri)'}`}
                 >
                   {getSortIcon()}
-                  <span className="text-sm">Sort by name</span>
+                  <span className="text-sm">Trier par nom</span>
                 </Button>
               </div>
             </div>
