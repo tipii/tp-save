@@ -5,7 +5,6 @@ import { clientsRouter } from './clients';
 import { chargementsRouter } from './chargements';
 import { livraisonsRouter } from './livraisons';
 import { soapServiceRouter } from './soap-service';
-import { rawSageDataRouter } from './raw-sage-data';
 import { usersRouter } from './users';
 import { livreursChargementsRouter } from './livreurs/chargements';
 import { livreursLivraisonsRouter } from './livreurs/livraison';
@@ -21,7 +20,6 @@ export const appRouter = createTRPCRouter({
   users: usersRouter,
   livraisons: livraisonsRouter,
   soapService: soapServiceRouter,
-  rawSageData: rawSageDataRouter,
   dashboard: dashboardRouter,
   // Livreur only routes
   livreursChargements: livreursChargementsRouter,

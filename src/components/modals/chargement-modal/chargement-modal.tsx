@@ -128,7 +128,7 @@ export default function ChargementModal({
                           </div>
                         </div>
                         <div className="text-muted-foreground mt-1 text-xs">
-                          {livraison.commande.bl_number}
+                          {livraison.commande.ref}
                         </div>
 
                         <div className="mt-1 flex items-center justify-between text-sm">
