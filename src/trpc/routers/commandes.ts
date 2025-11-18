@@ -55,6 +55,9 @@ export const commandesRouter = createTRPCRouter({
       // Build where clause
       const where: Prisma.CommandeWhereInput = {};
 
+      where.docVente = {
+        statut: '1',
+      };
       // Search in ref and client name
       if (search) {
         where.OR = [
@@ -74,36 +77,6 @@ export const commandesRouter = createTRPCRouter({
           },
           {
             name: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            bp_number: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            bl_number: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            cf_bl_ou_rq_number: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            quote_number: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            facture_number: {
               contains: search,
               mode: 'insensitive',
             },

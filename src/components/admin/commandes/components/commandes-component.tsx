@@ -16,6 +16,8 @@ import { useDebounce } from '@uidotdev/usehooks';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import CommandeDetailsNew from './commande-details';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 export default function CommandesComponent() {
   const { setBreadcrumb } = useBreadcrumb();
@@ -67,6 +69,14 @@ export default function CommandesComponent() {
         <CardHeader className="mb-2 flex flex-row items-center justify-between">
           <CardTitle>Commandes</CardTitle>
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="yellow" asChild>
+                <Link href="/app/commandes?noExpectedDeliveryDate=true"> En attente</Link>
+              </Badge>
+              <Badge variant="orange" asChild>
+                <Link href="/app/commandes?expectedDeliveryDatePassed=true">En retard</Link>
+              </Badge>
+            </div>
             <Input
               type="text"
               placeholder="Rechercher"

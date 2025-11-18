@@ -38,10 +38,6 @@ model User {
   chargements       Chargement[]
   chargementHistory ChargementHistory[]
 
-  // Order relations
-  ordersReceived    Commande[] @relation("OrderReceivedBy")
-  ordersTransmitted Commande[] @relation("OrderTransmittedBy")
-
   // Delivery relations
   livraisonsDelivered Livraison[] @relation("Livreur")
 

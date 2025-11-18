@@ -4,24 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import React, { useState } from 'react';
 import { Item } from '@/types/types';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import {
-  ChevronDown,
-  MapPin,
-  Truck,
-  Package,
-  Phone,
-  User,
-  Hash,
-  Clock,
-  X,
-  Check,
-  PackageX,
-} from 'lucide-react';
+import { ChevronDown, MapPin, Package, Phone, User, Hash } from 'lucide-react';
 import { statusToBadge, statusToTailwindColor } from '@/components/ui/enum-to-ui';
 import { Status } from '@/generated/prisma';
 import ButtonPriseEnCharge from './action-buttons/button-prise-en-charge';
-import ButtonTransfert from './action-buttons/button-transfert';
-import { Button } from '@/components/ui/button';
 import ButtonLivraisonDeliver from './action-buttons/button-livraison-deliver';
 import ButtonLivraisonToReturn from './action-buttons/button-livraison-to-return';
 import ButtonLivraisonReturnDepot from './action-buttons/button-livraison-return-depot';
@@ -275,7 +261,6 @@ export default function ChargementCard({ chargement }: { chargement: TrpcLivreur
       {chargement.status === Status.READY && (
         <CardFooter className="flex flex-col gap-2 border-t p-4">
           <ButtonPriseEnCharge />
-          <ButtonTransfert />
         </CardFooter>
       )}
     </Card>

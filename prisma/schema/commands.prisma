@@ -15,29 +15,7 @@ model Commande {
   client   Client?           @relation(fields: [clientId], references: [id])
   history  CommandeHistory[]
 
-  // Non Functional Data
-  orderReceivedById    String?
-  orderReceivedBy      User?     @relation("OrderReceivedBy", fields: [orderReceivedById], references: [id])
-  orderTransmittedById String?
-  orderTransmittedBy   User?     @relation("OrderTransmittedBy", fields: [orderTransmittedById], references: [id])
-  orderReceptionMode   String?
-  orderReceptionDate   DateTime?
-
-  quote_number       String? // Quote number
-  bc_number          String? @unique // Bon Commande / bpa
-  bp_number          String? @unique // Bon de préparation
-  bl_number          String? @unique // Bon de livraison
-  cf_bl_ou_rq_number String? // CF BL or RQ number
-  facture_number     String? // Facture number
-
-  bonPrepaGesco         String? // Gesco preparation slip
-  docGesco              String? // Gesco document
-  docGescoImp           String? // Gesco printed document
-  receptionBlFactSignee String? // Reception BL or signed invoice
-  commercial            String? // Sales person
-  entreprises           String? // Company
-  lieu                  String? // Location
-  originalItems         Json?
+  originalItems Json?
 
   // delivery infos
   priority            Priority  @default(UNDEFINED)

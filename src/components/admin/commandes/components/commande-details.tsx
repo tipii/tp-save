@@ -15,8 +15,20 @@ import { toast } from 'sonner';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { FormControl } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { dateStringToTahitiDate, formatDateForTahiti } from '@/lib/date-utils';
+import {
+  dateStringToTahitiDate,
+  dateToTahitiDateString,
+  formatDateForTahiti,
+} from '@/lib/date-utils';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export default function CommandeDetailsNew({ refetch }: { refetch: () => void }) {
   const { selectedCommandeId } = useCommande();
@@ -40,7 +52,7 @@ export default function CommandeDetailsNew({ refetch }: { refetch: () => void })
       {
         onSuccess: () => {
           toast.success('Priorité modifiée avec succès');
-          refetch();
+          // refetch();
           refetchCommande();
         },
         onError: () => {
@@ -61,7 +73,7 @@ export default function CommandeDetailsNew({ refetch }: { refetch: () => void })
       {
         onSuccess: () => {
           toast.success('Date de livraison prévue modifiée avec succès');
-          refetch();
+          // refetch();
           refetchCommande();
         },
         onError: (error) => {
@@ -130,17 +142,114 @@ export default function CommandeDetailsNew({ refetch }: { refetch: () => void })
       </div>
       <div className="flex flex-col gap-2">
         {selectedCommande.docVente && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col space-y-2">
             <label className="text-sm font-medium">Infos</label>
-            <div className="flex flex-col gap-2">
-              <p>BC Client: {selectedCommande.docVente.bcClient}</p>
-              <p>Créneau: {selectedCommande.docVente.obs1}</p>
-              <p>Obs1: {selectedCommande.docVente.obs1}</p>
-              <p>Obs2: {selectedCommande.docVente.obs2}</p>
-              <p>Obs3: {selectedCommande.docVente.obs3}</p>
-              <p>Obs4: {selectedCommande.docVente.obs4}</p>
-              <p>Personne: {selectedCommande.docVente.personneContact}</p>
-            </div>
+            <Table className="w-full max-w-full table-fixed">
+              <TableHeader>
+                <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
+                  <TableHead className="w-1/3">Champ</TableHead>
+                  <TableHead>Valeur</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="border-b">
+                <TableRow>
+                  <TableCell className="font-medium">Date livraison</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {dateToTahitiDateString(selectedCommande.docVente.dateLivr)}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Expedition</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.expedit}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">BC Client</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.bcClient}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Créneau de livraison</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.creneauLivraison}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Personne</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.personneContact}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Adresse livraison</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.adresseLivraison}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Expe: Ile</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.expeIle}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Expe numero CSNT</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.expeNoCsnt}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Obs1</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.obs1}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Obs2</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.obs2}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Obs3</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.obs3}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Obs4</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.obs4}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Code saisi par</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.cdeSaisiePar}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Code transmise par</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.cdeTransmissePar}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Code mode reception</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.cdeModeReception}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Heure début</TableCell>
+                  <TableCell className="break-words whitespace-normal">
+                    {selectedCommande.docVente.heureDebut}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>

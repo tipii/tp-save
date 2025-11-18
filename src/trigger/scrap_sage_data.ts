@@ -159,7 +159,6 @@ async function createCommandeWithLivraison(
   const newCommande = await prisma.commande.create({
     data: {
       docVenteId,
-      bp_number: docVente.piece,
       ref: docVente.piece,
       name: `${docVente.piece}`,
       status: 'PENDING',

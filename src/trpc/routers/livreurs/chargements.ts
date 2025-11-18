@@ -56,12 +56,4 @@ export const livreursChargementsRouter = createTRPCRouter({
         });
       }
     }),
-  transferChargement: protectedProcedure
-    .input(z.object({ id: z.string(), livreurId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const chargement = await ctx.prisma.chargement.update({
-        where: { id: input.id },
-        data: { livreurId: input.livreurId, status: Status.READY },
-      });
-    }),
 });
