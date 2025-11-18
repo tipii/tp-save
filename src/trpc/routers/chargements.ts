@@ -1,5 +1,5 @@
 import z from 'zod';
-import { createTRPCRouter, protectedProcedure } from '../init';
+import { adminProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import { Status } from '@/generated/prisma';
 import { formatDateForTahiti, getTahitiNow } from '@/lib/date-utils';
 
@@ -38,7 +38,7 @@ export const chargementsRouter = createTRPCRouter({
       });
       return chargement;
     }),
-  createChargement: protectedProcedure
+  createChargement: adminProcedure
     .input(
       z.object({
         name: z.string().optional(),
@@ -95,6 +95,36 @@ export const chargementsRouter = createTRPCRouter({
       //   },
       //   data: { chargementId: chargement.id },
       // });
+      return {
+        success: true,
+        chargement,
+        error: null,
+      };
+    }),
+
+  deleteChargement: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const chargement = await ctx.prisma.chargement.findUnique({
+        where: { id: input.id },
+      });
+      if (!chargement) {
+        return {
+          success: false,
+          error: 'Chargement non trouvé',
+          chargement: null,
+        };
+      }
+
+      const updatedLivraisons = await ctx.prisma.livraison.updateMany({
+        where: { chargementId: input.id },
+        data: { chargementId: null, status: Status.PENDING },
+      });
+
+      await ctx.prisma.chargement.delete({
+        where: { id: input.id },
+      });
+
       return {
         success: true,
         chargement,

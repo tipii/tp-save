@@ -3,8 +3,17 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TrpcCommande, TrpcLivraison, TrpcLivreur } from '@/types/trpc-types';
 import { useDroppable } from '@dnd-kit/core';
 import DraggableCommande from './draggable';
-import { Check, CircleQuestionMark, Eye, EyeClosed, Truck, Warehouse, X } from 'lucide-react';
-import { useMemo } from 'react';
+import {
+  Check,
+  CircleQuestionMark,
+  Eye,
+  EyeClosed,
+  Trash,
+  Truck,
+  Warehouse,
+  X,
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
 import CommandeModal from '@/components/modals/commande-modal/commande-modal';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useTRPC } from '@/trpc/client';
@@ -16,6 +25,18 @@ import { statusToIcon, statusToTailwindColor } from '@/components/ui/enum-to-ui'
 import LivraisonModal from '@/components/modals/livraison-modal';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Status } from '@/generated/prisma';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export const DroppableLivreur = ({
   livreur,
@@ -54,6 +75,19 @@ export const DroppableLivreur = ({
     .map((name: string) => name.charAt(0))
     .join('');
 
+  const { mutate: deleteChargement } = useMutation(
+    trpc.chargements.deleteChargement.mutationOptions({
+      onSuccess: () => {
+        refetch();
+        refetchLots();
+        toast.success('Chargement supprimé avec succès');
+      },
+      onError: (error) => {
+        console.error(error);
+        toast.error('Erreur lors de la suppression du chargement');
+      },
+    }),
+  );
   const { mutate } = useMutation(
     trpc.chargements.createChargement.mutationOptions({
       onSuccess: (data) => {
@@ -128,11 +162,41 @@ export const DroppableLivreur = ({
               <p className="text-xs text-slate-500">{statusToIcon(chargement.status)}</p>
               <p className="text-sm">{chargement.name}</p>
             </div>
-            <ChargementModal chargementId={chargement.id}>
-              <Button variant="ghost" size="icon">
-                <Eye size={16} />
-              </Button>
-            </ChargementModal>
+            <div className="flex items-center">
+              {chargement.status === Status.READY && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Trash size={16} />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Êtes-vous sûr de vouloir supprimer le chargement "{chargement.name}" ? Cette
+                        action est irréversible.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          deleteChargement({ id: chargement.id });
+                        }}
+                      >
+                        Supprimer
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+              <ChargementModal chargementId={chargement.id}>
+                <Button variant="ghost" size="icon">
+                  <Eye size={16} />
+                </Button>
+              </ChargementModal>
+            </div>
           </div>
         ))}
       </div>

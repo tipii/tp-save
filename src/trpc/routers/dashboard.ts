@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from '../init';
 import z from 'zod';
 import { getTahitiToday, getTahitiDayEnd, toTahitiTime, TAHITI_TIMEZONE } from '@/lib/date-utils';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { baseWhereCommande } from '../utils/utils';
 
 export const dashboardRouter = createTRPCRouter({
   getLivraisonsByStatus: protectedProcedure
@@ -45,6 +46,7 @@ export const dashboardRouter = createTRPCRouter({
     ] = await Promise.all([
       ctx.prisma.commande.count({
         where: {
+          ...baseWhereCommande,
           createdAt: {
             gte: startOfToday,
             lte: endOfToday,
@@ -52,10 +54,10 @@ export const dashboardRouter = createTRPCRouter({
         },
       }),
       ctx.prisma.livraison.count({
-        where: { status: Status.DELIVERING },
+        where: { status: Status.DELIVERING, commande: { ...baseWhereCommande } },
       }),
       ctx.prisma.livraison.count({
-        where: { status: Status.DELIVERED },
+        where: { status: Status.DELIVERED, commande: { ...baseWhereCommande } },
       }),
       ctx.prisma.livraison.count({
         where: {
@@ -64,6 +66,9 @@ export const dashboardRouter = createTRPCRouter({
             { status: Status.RETURNED },
             { status: Status.CANCELLED },
           ],
+          commande: {
+            ...baseWhereCommande,
+          },
         },
       }),
       ctx.prisma.livraison.count({
@@ -74,6 +79,9 @@ export const dashboardRouter = createTRPCRouter({
             },
             status: {
               notIn: [Status.DELIVERED, Status.CANCELLED, Status.RETURNED],
+            },
+            commande: {
+              ...baseWhereCommande,
             },
           },
         },
@@ -115,6 +123,9 @@ export const dashboardRouter = createTRPCRouter({
       // Get all livraisons for the month
       const livraisons = await ctx.prisma.livraison.findMany({
         where: {
+          commande: {
+            ...baseWhereCommande,
+          },
           expectedDeliveryDate: {
             gte: startOfMonthTahiti,
             lte: endOfMonthTahiti,

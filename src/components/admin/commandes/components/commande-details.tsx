@@ -52,7 +52,7 @@ export default function CommandeDetailsNew({ refetch }: { refetch: () => void })
       {
         onSuccess: () => {
           toast.success('Priorité modifiée avec succès');
-          // refetch();
+          refetch();
           refetchCommande();
         },
         onError: () => {
@@ -73,7 +73,7 @@ export default function CommandeDetailsNew({ refetch }: { refetch: () => void })
       {
         onSuccess: () => {
           toast.success('Date de livraison prévue modifiée avec succès');
-          // refetch();
+          refetch();
           refetchCommande();
         },
         onError: (error) => {

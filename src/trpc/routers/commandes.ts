@@ -4,6 +4,7 @@ import { Priority, Status, Prisma } from '@/generated/prisma';
 import { SortOrder } from '@/types/enums';
 import { TRPCError } from '@trpc/server';
 import { createTahitiDateRange, getTahitiNow, getTahitiToday } from '@/lib/date-utils';
+import { baseWhereCommande } from '../utils/utils';
 
 export const commandesRouter = createTRPCRouter({
   getCommandes: protectedProcedure
@@ -53,11 +54,8 @@ export const commandesRouter = createTRPCRouter({
       } = input;
 
       // Build where clause
-      const where: Prisma.CommandeWhereInput = {};
+      const where: Prisma.CommandeWhereInput = baseWhereCommande;
 
-      where.docVente = {
-        statut: '1',
-      };
       // Search in ref and client name
       if (search) {
         where.OR = [
@@ -206,6 +204,7 @@ export const commandesRouter = createTRPCRouter({
         where: { id },
         include: {
           client: true,
+          docVente: true,
           history: {
             include: {
               user: true,
@@ -220,7 +219,6 @@ export const commandesRouter = createTRPCRouter({
               livreur: true,
             },
           },
-          docVente: true,
         },
       });
       return commande;
@@ -313,8 +311,11 @@ export const commandesRouter = createTRPCRouter({
       }
     }),
   getDashboardCommandes: protectedProcedure.query(async ({ ctx }) => {
+    const where: Prisma.CommandeWhereInput = baseWhereCommande;
+    where.status = Status.PENDING;
+
     const commandes = await ctx.prisma.commande.findMany({
-      where: { status: Status.PENDING },
+      where,
       orderBy: {
         createdAt: 'desc',
       },
