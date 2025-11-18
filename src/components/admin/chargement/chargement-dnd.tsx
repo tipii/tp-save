@@ -35,18 +35,13 @@ export default function ChargementDnd() {
   );
 
   const { data: livraisonsEnRetard, refetch: refetchLivraisonsEnRetard } = useQuery(
-    trpc.livraisons.getLivraisonsEnRetard.queryOptions(
-      {
-        expectedDeliveryDate: selectedDate ? selectedDate : undefined,
-      },
-      {
-        refetchOnMount: true,
-        refetchOnWindowFocus: true,
-        refetchOnReconnect: true,
-        refetchInterval: 1000 * 10, // 10 seconds
-        refetchIntervalInBackground: true,
-      },
-    ),
+    trpc.livraisons.getLivraisonsEnRetard.queryOptions(undefined, {
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      refetchInterval: 1000 * 10, // 10 seconds
+      refetchIntervalInBackground: true,
+    }),
   );
   const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
 
@@ -138,7 +133,9 @@ export default function ChargementDnd() {
 
       // Prevent dropping LATE items into other priority zones (but allow LATE -> LATE)
       if (isFromLateZone && overId !== 'priority-LATE') {
-        toast.error('Les livraisons en retard ne peuvent être déposées que dans les zones de chargement');
+        toast.error(
+          'Les livraisons en retard ne peuvent être déposées que dans les zones de chargement',
+        );
         return;
       }
 

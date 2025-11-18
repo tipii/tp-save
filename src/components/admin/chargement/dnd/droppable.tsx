@@ -37,6 +37,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { getTahitiToday } from '@/lib/date-utils';
 
 export const DroppableLivreur = ({
   livreur,
@@ -59,6 +60,16 @@ export const DroppableLivreur = ({
   );
   const { refetch: refetchLots } = useQuery(trpc.livraisons.getPendingLivraisons.queryOptions({}));
 
+  const { data: livraisonsEnRetard, refetch: refetchLivraisonsEnRetard } = useQuery(
+    trpc.livraisons.getLivraisonsEnRetard.queryOptions(undefined, {
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      refetchInterval: 1000 * 10, // 10 seconds
+      refetchIntervalInBackground: true,
+    }),
+  );
+
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-${livreur.id}`,
   });
@@ -78,13 +89,16 @@ export const DroppableLivreur = ({
   const { mutate: deleteChargement } = useMutation(
     trpc.chargements.deleteChargement.mutationOptions({
       onSuccess: () => {
-        refetch();
-        refetchLots();
         toast.success('Chargement supprimé avec succès');
       },
       onError: (error) => {
         console.error(error);
         toast.error('Erreur lors de la suppression du chargement');
+      },
+      onSettled: () => {
+        refetchLivraisonsEnRetard();
+        refetchLots();
+        refetch();
       },
     }),
   );
@@ -93,8 +107,7 @@ export const DroppableLivreur = ({
       onSuccess: (data) => {
         if (data.success) {
           toast.success('Chargement créé avec succès');
-          refetch();
-          refetchLots();
+
           // Only clear items from this droppable zone
           setDroppedItems((prev) => {
             const newItems = { ...prev };
@@ -107,6 +120,11 @@ export const DroppableLivreur = ({
       },
       onError: (error) => {
         console.error(error);
+      },
+      onSettled: () => {
+        refetchLivraisonsEnRetard();
+        refetchLots();
+        refetch();
       },
     }),
   );

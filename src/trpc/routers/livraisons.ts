@@ -67,37 +67,31 @@ export const livraisonsRouter = createTRPCRouter({
         });
       }
     }),
-  getLivraisonsEnRetard: protectedProcedure
-    .input(
-      z.object({
-        expectedDeliveryDate: z.date().nullish(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      try {
-        const livraisons = await ctx.prisma.livraison.findMany({
-          where: {
-            expectedDeliveryDate: { lt: getTahitiToday() },
-            status: { notIn: [Status.DELIVERED, Status.CANCELLED, Status.RETURNED] },
-          },
-          include: {
-            commande: {
-              include: {
-                client: true,
-                livraisons: true,
-              },
+  getLivraisonsEnRetard: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const livraisons = await ctx.prisma.livraison.findMany({
+        where: {
+          expectedDeliveryDate: { lt: getTahitiToday() },
+          status: Status.PENDING,
+        },
+        include: {
+          commande: {
+            include: {
+              client: true,
+              livraisons: true,
             },
           },
-        });
-        return livraisons;
-      } catch (error) {
-        console.error(error);
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Erreur lors de la récupération des livraisons en retard',
-        });
-      }
-    }),
+        },
+      });
+      return livraisons;
+    } catch (error) {
+      console.error(error);
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Erreur lors de la récupération des livraisons en retard',
+      });
+    }
+  }),
   changePriority: protectedProcedure
     .input(
       z.object({
