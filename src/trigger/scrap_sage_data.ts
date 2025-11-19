@@ -243,8 +243,8 @@ function logSyncSummary(startTime: number, stats: SyncStats) {
 export const syncBonsFromSageScheduled = schedules.task({
   id: 'tallin-pi-sync-commandes',
 
-  // Every minute
-  cron: '* * * * *',
+  // Every 30 s
+  cron: '0,30 * * * *',
 
   // Set an optional maxDuration to prevent tasks from running indefinitely
   maxDuration: 300, // Stop executing after 300 secs (5 mins) of compute

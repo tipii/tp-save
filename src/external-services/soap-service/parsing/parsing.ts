@@ -162,9 +162,26 @@ export type DocVentePrismaInput = {
 /**
  * Helper function to parse date strings from SOAP to Date objects
  * Handles empty strings by returning undefined
+ * Supports SOAP format: YYYYMMDDHHmmssSSS (e.g., 20251120000000000)
  */
 function parseDate(dateStr: string | undefined): Date | undefined {
   if (!dateStr || dateStr.trim() === '') return undefined;
+
+  // Check if it's a SOAP format date (17 characters: YYYYMMDDHHmmssSSS)
+  if (/^\d{17}$/.test(dateStr)) {
+    const year = parseInt(dateStr.substring(0, 4), 10);
+    const month = parseInt(dateStr.substring(4, 6), 10) - 1; // Month is 0-indexed
+    const day = parseInt(dateStr.substring(6, 8), 10);
+    const hour = parseInt(dateStr.substring(8, 10), 10);
+    const minute = parseInt(dateStr.substring(10, 12), 10);
+    const second = parseInt(dateStr.substring(12, 14), 10);
+    const millisecond = parseInt(dateStr.substring(14, 17), 10);
+
+    const parsed = new Date(year, month, day, hour, minute, second, millisecond);
+    return isNaN(parsed.getTime()) ? undefined : parsed;
+  }
+
+  // Try standard date parsing
   const parsed = new Date(dateStr);
   return isNaN(parsed.getTime()) ? undefined : parsed;
 }
@@ -409,6 +426,7 @@ export function parseSoapDocVenteList(soapResult: string): DocVente[] {
     });
 }
 
+// 0#;#6#;#FA25110343#;#   FA25110343#;#20251110000000000#;##;#TAHITINETTOYAGE#;#TAHITINETTOYAGE#;#15#;#15#;#1#;#0#;#0#;#1#;#1#;#2242#;#2242#;#TAHITINETTOYAGE#;#TAHITINETTOYAGE#;#1#;#1#;#0#;#0#;#0#;#1#;##;##;##;##;##;##;#0#;#20251120000000000#;#1#;#1#;#1#;#1#;#11#;#0#;#0#;#21#;#1#;#0#;#0#;#17530101000000000#;#17530101000000000#;#17530101000000000#;#17530101000000000#;#411000#;#411000#;#2#;#000112832#;#0#;#0#;#0#;#0#;#0#;#0#;##;#0#;#0#;##;#0#;#0#;#0#;#0#;#0#;#0#;#0#;#0#;#0#;#0#;#0#;#0#;#0#;#0#;#0#;#0#;#0#;##;##;##;##;#0#;#0#;#20251120000000000#;#17530101000000000#;##;##;##;#             #;#00000000-0000-0000-0000-000000000000#;#0#;#0#;#0#;#0#;#0#;#0#;##;##;##;#1936#;#0#;#0#;#6#;#0#;#00000000-0000-0000-0000-000000000000#;#1936#;#2246#;#2246#;#0#;#00000000-0000-0000-0000-000000000000#;##;#0#;#0#;#0#;#0#;#1377191#;#COLU#;#20251118142421000#;#0#;#0#;#20251110112832000#;#0db6891f-f072-4936-bc66-5bf9d778f7e4#;##;#1#;#00000000000000000#;#0#;#bc500#;#dès que possible#;#Pierre#;#Punaauia a coté du manguier#;#TAHITI#;#600#;#obs1#;#ob2#;#ob3#;#dessus le devis initiale#;#Christelle#;#Noémie#;#MP / SMS#;##;#0#;#0#;##;#0#;#0#;#0#;#0#;#0#;#
 /**
  * Parses SOAP DocVente data into Prisma-compatible format for database insertion
  * Handles proper type conversions for DateTime and Decimal fields
@@ -487,7 +505,7 @@ export function parseSoapDocVenteForPrisma(soapResult: string): DocVentePrismaIn
         // fields[31] - DO_Souche
         souche: fields[31] ?? '',
         // fields[32] - DO_DateLivr
-        dateLivr: parseDate(fields[32]),
+        dateLivr: parseDate(fields[32]) ?? new Date(),
         // fields[33] - DO_Condition
         condition: parseOptionalString(fields[33]),
         // fields[34] - DO_Tarif
