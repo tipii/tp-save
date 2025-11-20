@@ -19,11 +19,12 @@ import {
 import React from 'react';
 import { TrpcClient, TrpcCommande, TrpcLivraison } from '@/types/trpc-types';
 import ClientCard from '@/components/admin/clients/client-card';
-import { priorityToBadge } from '@/components/ui/enum-to-ui';
+import { priorityToBadge, statusToBadge } from '@/components/ui/enum-to-ui';
 import { Item } from '@/types/types';
-import CommandeItems from '../admin/commandes/components/commande-items';
+import CommandesDocVenteInfos from '../admin/shared/commandes-docvente-infos';
+import { DocVente } from '@/generated/prisma';
 
-export default function CommandeModal({
+export default function LivraisonModal({
   children,
   livraison,
 }: {
@@ -31,21 +32,15 @@ export default function CommandeModal({
   livraison: TrpcLivraison;
 }) {
   const commande = livraison.commande;
-  const items = livraison.items;
   return (
     <Dialog modal>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
+      <DialogContent className="max-h-[80vh] w-[900px] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Commande: {commande.ref}</DialogTitle>
-          <DialogDescription>
-            {commande.livraisons.length} livraison{commande.livraisons.length > 1 ? 's' : ''} -
-            Priorité:{' '}
-            <span className="space-x-1">
-              {commande.livraisons.map((livraison, index) => (
-                <span key={livraison.id}>{priorityToBadge(livraison.priority)}</span>
-              ))}
-            </span>
+          <DialogTitle>{commande.ref}</DialogTitle>
+          <DialogDescription className="flex items-center gap-2">
+            <span className="space-x-1">Priorité: {priorityToBadge(livraison.priority)}</span>
+            <span className="space-x-1">Statut: {statusToBadge(livraison.status)}</span>
           </DialogDescription>
         </DialogHeader>
 
@@ -64,38 +59,43 @@ export default function CommandeModal({
             </Card>
           )}
         </div>
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Items</h3>
-          <div className="flex h-full flex-col space-y-4">
-            {(livraison.items as Item[]).length > 0 ? (
-              <div className="flex flex-col space-y-2">
-                {/* <h3 className="mb-2 text-sm font-semibold text-slate-700">{livraison.name}</h3> */}
-                <Table className="w-full max-w-full table-fixed">
-                  <TableHeader>
-                    <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-                      <TableHead className="w-24">Ref</TableHead>
-                      <TableHead>Designation</TableHead>
-                      <TableHead className="w-24">Quantité</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody className="border-b">
-                    {(livraison.items as Item[])?.map((item: Item, itemIndex: number) => (
-                      <TableRow key={itemIndex}>
-                        <TableCell className="w-24">{item.AR_REF}</TableCell>
-                        <TableCell className="break-words whitespace-normal">
-                          {item.DL_Design}
-                        </TableCell>
-                        <TableCell className="w-24">{item.DL_QTEBL}</TableCell>
+        <div className="flex gap-8">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Items</h3>
+            <div className="flex h-full flex-col space-y-4">
+              {(livraison.items as Item[]).length > 0 ? (
+                <div className="flex flex-col space-y-2">
+                  {/* <h3 className="mb-2 text-sm font-semibold text-slate-700">{livraison.name}</h3> */}
+                  <Table className="w-full max-w-full table-fixed">
+                    <TableHeader>
+                      <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
+                        <TableHead className="w-24">Ref</TableHead>
+                        <TableHead>Designation</TableHead>
+                        <TableHead className="w-24">Quantité</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-muted-foreground flex items-center justify-center">
-                <span className="text-sm">Aucun article dans cette livraison</span>
-              </div>
-            )}
+                    </TableHeader>
+                    <TableBody className="border-b">
+                      {(livraison.items as Item[])?.map((item: Item, itemIndex: number) => (
+                        <TableRow key={itemIndex}>
+                          <TableCell className="w-24">{item.AR_REF}</TableCell>
+                          <TableCell className="break-words whitespace-normal">
+                            {item.DL_Design}
+                          </TableCell>
+                          <TableCell className="w-24">{item.DL_QTEBL}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-muted-foreground flex items-center justify-center">
+                  <span className="text-sm">Aucun article dans cette livraison</span>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="space-y-4">
+            <CommandesDocVenteInfos docVente={commande.docVente as DocVente} />
           </div>
         </div>
       </DialogContent>

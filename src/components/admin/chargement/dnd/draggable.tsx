@@ -33,8 +33,7 @@ export default function DraggableLot({ livraison }: { livraison: TrpcLivraison }
       )}
     >
       <div className="flex items-center justify-between">
-        <div className="text-sm font-bold">{livraison.commande.name} </div>
-        <div className="text-sm font-bold">{livraison.commande.ref}</div>
+        <div className="text-sm font-bold">{livraison.commande.ref} </div>
         {priorityToBadge(livraison.priority)}
       </div>
       <div className="flex items-center justify-between">

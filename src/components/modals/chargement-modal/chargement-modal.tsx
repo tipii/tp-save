@@ -13,6 +13,9 @@ import { statusToBadge, priorityToBadge, statusToTailwindColor } from '@/compone
 import { Package, User, MapPin, Calendar, Clock, Building, Building2 } from 'lucide-react';
 import React from 'react';
 import Link from 'next/link';
+import { Item } from '@/types/types';
+import { TrpcChargement, TrpcLivraison } from '@/types/trpc-types';
+import { Livraison } from '@/generated/prisma';
 
 export default function ChargementModal({
   children,
@@ -23,7 +26,16 @@ export default function ChargementModal({
 }) {
   const trpc = useTRPC();
   const { data: chargement } = useQuery(
-    trpc.chargements.getChargementById.queryOptions({ id: chargementId }),
+    trpc.chargements.getChargementById.queryOptions(
+      { id: chargementId },
+      {
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
+        refetchOnReconnect: true,
+        refetchInterval: 1000 * 10, // 10 seconds
+        refetchIntervalInBackground: false,
+      },
+    ),
   );
 
   if (!chargement) return null;
@@ -41,6 +53,16 @@ export default function ChargementModal({
     (l) => l.status === 'READY' || l.status === 'DELIVERING',
   ).length;
   const returnedLivraisons = chargement.livraisons.filter((l) => l.status === 'RETURNED');
+
+  //group livraison by reference
+  const livraisonsByReference = chargement.livraisons.reduce(
+    (acc, livraison) => {
+      acc[livraison.commande.ref] = acc[livraison.commande.ref] || [];
+      acc[livraison.commande.ref].push(livraison);
+      return acc;
+    },
+    {} as Record<string, TrpcChargement['livraisons'][0][]>,
+  );
 
   return (
     <Dialog modal>
@@ -98,61 +120,51 @@ export default function ChargementModal({
           <div className="space-y-3">
             <h3 className="text-lg font-semibold">Livraisons ({totalLivraisons})</h3>
             <div className="flex flex-col gap-2">
-              {chargement.livraisons.map((livraison) => {
-                const items =
-                  typeof livraison.items === 'string'
-                    ? JSON.parse(livraison.items)
-                    : livraison.items;
-                const itemCount = Array.isArray(items) ? items.length : 0;
-
+              {Object.entries(livraisonsByReference).map(([reference, livraisons]) => {
                 return (
-                  <Link
-                    href={`/app/commandes/${livraison.commande.id}`}
-                    key={livraison.id}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Card
-                      key={livraison.id}
-                      className={`border ${statusToTailwindColor(livraison.status).border} p-0`}
-                    >
-                      <CardContent className="py-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            {livraison.commande.client!.name}
-                            {priorityToBadge(livraison.priority)}
-                            {statusToBadge(livraison.status)}
-                          </div>
-                          <div className="text-muted-foreground text-xs">
-                            {itemCount} article{itemCount > 1 ? 's' : ''}
-                          </div>
-                        </div>
-                        <div className="text-muted-foreground mt-1 text-xs">
-                          {livraison.commande.ref}
-                        </div>
+                  <div key={reference} className="">
+                    <h4 className="text-lg font-semibold">{livraisons[0].commande.client?.name}</h4>
+                    {livraisons.map((livraison) => {
+                      const items: Item[] =
+                        typeof livraison.items === 'string'
+                          ? JSON.parse(livraison.items)
+                          : livraison.items;
+                      const itemCount = items.reduce(
+                        (total, item) => total + Number(item.DL_QTEBL),
+                        0,
+                      );
 
-                        <div className="mt-1 flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="font-mono text-xs">
-                              {livraison.commande.name}
-                            </Badge>
-                            {livraison.commande.client?.city && (
-                              <span className="text-muted-foreground text-xs">
-                                • {livraison.commande.client.city}
-                              </span>
-                            )}
-                          </div>
+                      return (
+                        <Link
+                          href={`/app/commandes/${livraison.commandeId}`}
+                          key={livraison.id}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Card
+                            key={livraison.id}
+                            className={`mb-2 border ${statusToTailwindColor(livraison.status).border} ${statusToTailwindColor(livraison.status).background} p-0`}
+                          >
+                            <CardContent className="py-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  {/* {livraison.commande.client?.name} */}
+                                  {livraison.commande.ref}
 
-                          {livraison.deliveryDate && (
-                            <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                              <Calendar className="h-3 w-3" />
-                              {new Date(livraison.deliveryDate).toLocaleDateString('fr-FR')}
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                                  {priorityToBadge(livraison.priority)}
+                                  {statusToBadge(livraison.status)}
+                                </div>
+                                <div className="text-muted-foreground text-xs">
+                                  {itemCount} article{itemCount > 1 ? 's' : ''}
+                                </div>
+                              </div>
+                              <div className="text-muted-foreground mt-1 text-xs"></div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 );
               })}
             </div>

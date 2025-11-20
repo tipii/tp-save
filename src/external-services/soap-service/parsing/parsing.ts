@@ -1,5 +1,6 @@
-import { DocVente, BonLivraison, LigneBonLivraison } from '../types/types';
+import { DocVente, LigneBonLivraison } from '../types/types';
 import { Decimal } from '@prisma/client/runtime/library';
+import { getTahitiToday } from '@/lib/date-utils';
 
 /**
  * Type definition for DocVente Prisma insertion
@@ -165,8 +166,11 @@ export type DocVentePrismaInput = {
  * Supports SOAP format: YYYYMMDDHHmmssSSS (e.g., 20251120000000000)
  */
 function parseDate(dateStr: string | undefined): Date | undefined {
+  // console.log('dateStr', dateStr);
   if (!dateStr || dateStr.trim() === '') return undefined;
-
+  // check if date is not only 0s, if so, return undefined
+  // if (dateStr.trim() === '00000000000000000' || dateStr.trim() === '17530101000000000')
+  //   return undefined;
   // Check if it's a SOAP format date (17 characters: YYYYMMDDHHmmssSSS)
   if (/^\d{17}$/.test(dateStr)) {
     const year = parseInt(dateStr.substring(0, 4), 10);
@@ -178,6 +182,10 @@ function parseDate(dateStr: string | undefined): Date | undefined {
     const millisecond = parseInt(dateStr.substring(14, 17), 10);
 
     const parsed = new Date(year, month, day, hour, minute, second, millisecond);
+
+    // if date < 2022-01-01, return undefined
+    // console.log('parsed', parsed, parsed < new Date('2022-01-01'));
+    if (parsed < new Date('2022-01-01')) return undefined;
     return isNaN(parsed.getTime()) ? undefined : parsed;
   }
 
@@ -215,31 +223,6 @@ function parseInt(value: string | undefined, defaultValue = 0): number {
  */
 function parseOptionalString(value: string | undefined): string | undefined {
   return value && value.trim() !== '' ? value : undefined;
-}
-
-export function parseSoapLivraisonList(soapResult: string): BonLivraison[] {
-  return soapResult
-    .split('\r')
-    .filter(Boolean)
-    .map((line) => {
-      const fields = line.split('#;#');
-      return {
-        DO_Piece: fields[0].replace('\n', ''),
-        DO_DateLiv: fields[1],
-        DO_Tiers: fields[2],
-        DO_Ref: fields[3],
-        DO_Coord01: fields[4],
-        DE_No: fields[5],
-        DO_Imprim: fields[6],
-        DO_TotalTTC: fields[9],
-        DO_NetAPayer: fields[10],
-        BCClient: fields[11],
-        Creneau: fields[12],
-        Personne: fields[13],
-        Obs1: fields[14],
-        Obs2: fields[15],
-      };
-    });
 }
 
 export function parseSoapLivraisonLignes(soapResult: string): LigneBonLivraison[] {
@@ -505,7 +488,7 @@ export function parseSoapDocVenteForPrisma(soapResult: string): DocVentePrismaIn
         // fields[31] - DO_Souche
         souche: fields[31] ?? '',
         // fields[32] - DO_DateLivr
-        dateLivr: parseDate(fields[32]) ?? new Date(),
+        dateLivr: parseDate(fields[32]) ?? getTahitiToday(),
         // fields[33] - DO_Condition
         condition: parseOptionalString(fields[33]),
         // fields[34] - DO_Tarif

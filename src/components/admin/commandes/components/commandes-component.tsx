@@ -45,7 +45,15 @@ export default function CommandesComponent() {
     data: commandesData,
     isPending,
     refetch,
-  } = useQuery(trpc.commandes.getCommandes.queryOptions(getQueryParams(filters)));
+  } = useQuery(
+    trpc.commandes.getCommandes.queryOptions(getQueryParams(filters), {
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      refetchInterval: 1000 * 10, // 10 seconds
+      refetchIntervalInBackground: true,
+    }),
+  );
 
   const { mutate: syncBonsFromSage, isPending: isSyncingBonsFromSage } = useMutation(
     trpc.trigger.syncBonsFromSage.mutationOptions({

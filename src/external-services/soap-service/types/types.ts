@@ -12,23 +12,6 @@ export type LigneBonLivraison = {
   Famille_ART: string;
 };
 
-export type BonLivraison = {
-  DO_Piece: string; // Numéro du BL
-  DO_DateLiv: string; // Date au format brut (ex: "20250612000000000")
-  DO_Tiers: string; // Code client
-  DO_Ref: string; // Référence externe / livreur
-  DO_Coord01: string; // Nom/Raison client
-  DE_No: string; // Dépôt
-  DO_Imprim: string; // 0 ou 1
-  DO_TotalTTC: string;
-  DO_NetAPayer: string;
-  BCClient: string;
-  Creneau: string;
-  Personne: string;
-  Obs1: string;
-  Obs2: string;
-};
-
 export type DocVente = {
   DO_Domaine: string;
   DO_Type: string;

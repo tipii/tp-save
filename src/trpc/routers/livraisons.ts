@@ -50,6 +50,7 @@ export const livraisonsRouter = createTRPCRouter({
           include: {
             commande: {
               include: {
+                docVente: true,
                 client: true,
                 livraisons: true,
               },
@@ -77,6 +78,7 @@ export const livraisonsRouter = createTRPCRouter({
         include: {
           commande: {
             include: {
+              docVente: true,
               client: true,
               livraisons: true,
             },

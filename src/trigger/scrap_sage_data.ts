@@ -3,14 +3,13 @@ import { createClientAsync } from '@/external-services/soap-service/generated/we
 import {
   DocVentePrismaInput,
   parseSoapDocVenteForPrisma,
-  parseSoapDocVenteList,
   parseSoapLivraisonLignes,
-  parseSoapLivraisonList,
 } from '@/external-services/soap-service/parsing/parsing';
 import prisma from '@/lib/prisma';
 import { logger, schedules, wait } from '@trigger.dev/sdk/v3';
 import { wsdl } from './wsdl';
-import { formatDateForTahiti } from '@/lib/date-utils';
+import { formatDateForTahiti, getTahitiToday } from '@/lib/date-utils';
+import { Priority } from '@/generated/prisma';
 
 // ==================== TYPES ====================
 interface SyncStats {
@@ -177,6 +176,8 @@ async function createCommandeWithLivraison(
       commandeId: newCommande.id,
       items: parsedLignes,
       name: 'Livraison 1',
+      expectedDeliveryDate: docVente.dateLivr,
+      priority: Priority.NORMAL,
     },
   });
 
@@ -228,14 +229,14 @@ async function processSingleDocVente(
  */
 function logSyncSummary(startTime: number, stats: SyncStats) {
   const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-  logger.log('=====================================');
+  logger.log('======================================');
   logger.log('Sync completed!');
   logger.log(`Duration: ${duration}s`);
   logger.log(`Total processed: ${stats.processedCount}`);
   logger.log(`Created: ${stats.createdCount}`);
   logger.log(`Skipped: ${stats.skippedCount}`);
   logger.log(`Errors: ${stats.errorCount}`);
-  logger.log('=====================================');
+  logger.log('======================================');
 }
 
 // ==================== MAIN TASK ====================
@@ -243,8 +244,8 @@ function logSyncSummary(startTime: number, stats: SyncStats) {
 export const syncBonsFromSageScheduled = schedules.task({
   id: 'tallin-pi-sync-commandes',
 
-  // Every 30 s
-  cron: '0,30 * * * *',
+  // Every minute
+  cron: '* * * * *',
 
   // Set an optional maxDuration to prevent tasks from running indefinitely
   maxDuration: 300, // Stop executing after 300 secs (5 mins) of compute
@@ -264,8 +265,8 @@ export const syncBonsFromSageScheduled = schedules.task({
       const soapClient = await initializeSoapClient();
 
       // Get today's date in Tahiti timezone
-      // const today = formatDateForTahiti(new Date()) ?? '';
-      const today = '10/11/2025';
+      const today = formatDateForTahiti(new Date()) ?? '';
+      // const today = '10/11/2025';
 
       // Fetch bons from SAGE
       const allDocVentes = await fetchDocVentesFromSage(today);

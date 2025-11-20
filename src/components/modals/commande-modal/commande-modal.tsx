@@ -23,7 +23,7 @@ export default function CommandeModal({
   return (
     <Dialog modal>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
+      <DialogContent className="max-h-[80vh] w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Commande: {commande.ref}</DialogTitle>
           <DialogDescription>

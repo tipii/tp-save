@@ -1,9 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Phone, Mail, User, Building, FileText, Pencil, SquarePen } from 'lucide-react';
+import {
+  MapPin,
+  Phone,
+  Mail,
+  User,
+  Building,
+  FileText,
+  Pencil,
+  SquarePen,
+  ExternalLink,
+} from 'lucide-react';
 import React from 'react';
 import { TrpcClient } from '@/types/trpc-types';
+import Link from 'next/link';
 
 export default function ClientCard({ client }: { client: TrpcClient }) {
   return (
@@ -14,16 +25,17 @@ export default function ClientCard({ client }: { client: TrpcClient }) {
             <Building className="h-5 w-5" />
             Informations Client
           </div>
-          <a
+          <Link
             href={`/app/clients/${client.id}`}
             className="ml-auto flex items-center gap-2 text-sm hover:underline"
-            title="Edit client"
+            title="Voir le client"
+            target="_blank"
           >
-            <SquarePen className="h-4 w-4" />
-          </a>
+            <ExternalLink className="h-4 w-4" />
+          </Link>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex justify-between space-y-4">
         {/* Client Basic Info */}
         <div className="flex items-center justify-between">
           <div>
@@ -33,8 +45,6 @@ export default function ClientCard({ client }: { client: TrpcClient }) {
             </div>
           </div>
         </div>
-
-        <Separator />
 
         {/* Contact Information */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
