@@ -88,8 +88,23 @@ export const DroppableLivreur = ({
 
   const { mutate: deleteChargement } = useMutation(
     trpc.chargements.deleteChargement.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (_data, variables) => {
         toast.success('Chargement supprimé avec succès');
+
+        // Find the deleted chargement to get its livraisons
+        const deletedChargement = livreur.chargements.find((c) => c.id === variables.id);
+        if (deletedChargement && deletedChargement.livraisons.length > 0) {
+          // Add the livraisons back to the drop zone
+          setDroppedItems((prev) => {
+            const livraisonIds = deletedChargement.livraisons.map((l) => l.id);
+            const existingIds = prev[`droppable-${livreur.id}`] || [];
+
+            return {
+              ...prev,
+              [`droppable-${livreur.id}`]: [...existingIds, ...livraisonIds],
+            };
+          });
+        }
       },
       onError: (error) => {
         console.error(error);

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { TrpcLivraison } from '@/types/trpc-types';
 import DraggableLot from './draggable';
 import LivraisonModal from '@/components/modals/livraison-modal';
 import { useDroppable } from '@dnd-kit/core';
+import { Input } from '@/components/ui/input';
 
 interface PriorityZoneProps {
   title: string;
@@ -24,6 +25,7 @@ export const PriorityZone = ({
   droppedItems,
 }: PriorityZoneProps) => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { isOver, setNodeRef } = useDroppable({
     id: `priority-${priority}`,
@@ -33,12 +35,27 @@ export const PriorityZone = ({
     return livraisons.filter((livraison) => {
       // Check if this command is already dropped in any livreur zone
       const isDropped = Object.values(droppedItems).some((items) => items.includes(livraison.id));
+
+      // Filter by priority
+      let matchesPriority = false;
       if (priority === 'LATE') {
-        return !isDropped;
+        matchesPriority = !isDropped;
+      } else {
+        matchesPriority = !isDropped && livraison.priority === priority;
       }
-      return !isDropped && livraison.priority === priority;
+
+      if (!matchesPriority) return false;
+
+      // Filter by search query
+      if (searchQuery.trim() === '') return true;
+
+      const query = searchQuery.toLowerCase();
+      const matchesRef = livraison.commande.ref.toLowerCase().includes(query);
+      const matchesClient = livraison.commande.client?.name?.toLowerCase().includes(query) ?? false;
+
+      return matchesRef || matchesClient;
     });
-  }, [livraisons, droppedItems, priority]);
+  }, [livraisons, droppedItems, priority, searchQuery]);
 
   const totalPages = Math.ceil(availableLots.length / MAX_ITEMS);
   const startIndex = currentPage * MAX_ITEMS;
@@ -58,33 +75,45 @@ export const PriorityZone = ({
       ref={setNodeRef}
       className={`flex flex-1 flex-col rounded-lg border ${backgroundColor} ${isOver ? 'ring-2 ring-blue-400' : ''}`}
     >
-      <div className="flex items-center justify-between border-b p-4">
-        <div className="text-2xl font-bold">{title}</div>
-        {totalPages > 1 && (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={handlePreviousPage}
-              disabled={currentPage === 0}
-            >
-              <ChevronLeft size={16} />
-            </Button>
-            <span className="text-sm text-gray-600">
-              {currentPage + 1} / {totalPages}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages - 1}
-            >
-              <ChevronRight size={16} />
-            </Button>
-          </div>
-        )}
+      <div className="flex flex-col gap-2 border-b p-4">
+        <div className="flex items-center justify-between">
+          <div className="text-2xl font-bold">{title}</div>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 0}
+              >
+                <ChevronLeft size={16} />
+              </Button>
+              <span className="text-sm text-gray-600">
+                {currentPage + 1} / {totalPages}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages - 1}
+              >
+                <ChevronRight size={16} />
+              </Button>
+            </div>
+          )}
+        </div>
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Rechercher par référence ou client..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
+          />
+        </div>
       </div>
       <div className="max-h-80 flex-1 p-4">
         {availableLots.length > 0 ? (

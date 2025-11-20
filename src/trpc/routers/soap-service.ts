@@ -1,9 +1,6 @@
 import { createClientAsync } from '@/external-services/soap-service/generated/webserveasytablet/client';
 import { createTRPCRouter, protectedProcedure } from '../init';
-import {
-  parseSoapLivraisonLignes,
-  parseSoapLivraisonList,
-} from '@/external-services/soap-service/parsing/parsing';
+import { parseSoapLivraisonLignes } from '@/external-services/soap-service/parsing/parsing';
 
 /**
  * Data gathering flow

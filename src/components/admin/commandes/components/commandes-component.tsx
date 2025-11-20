@@ -28,7 +28,8 @@ export default function CommandesComponent() {
   // Update the URL search parameter when debounced value changes
   useEffect(() => {
     filters.setSearch(debouncedSearch);
-  }, [debouncedSearch, filters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
 
   useEffect(() => {
     setBreadcrumb([], 'Commandes');
