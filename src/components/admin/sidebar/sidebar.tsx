@@ -29,11 +29,13 @@ import Link from 'next/link';
 import SidebarButton from './sidebar-button';
 import RefreshButton from './refresh-button';
 import Image from 'next/image';
+import { getCurrentUser, hasRole } from '@/lib/auth-redirect';
+import { Role } from '@/lib/constants';
 
 const adminItems = [
   {
     title: 'Utilisateurs',
-    url: '#',
+    url: '/app/utilisateurs',
     icon: UserPlus,
   },
 ];
@@ -71,7 +73,9 @@ const items = [
   },
 ];
 
-export function AppSidebar() {
+export async function AppSidebar() {
+  const isAdmin = await hasRole(Role.ADMIN);
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="bg-clip-text text-xl font-bold">
@@ -94,28 +98,32 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Admin */}
-        <SidebarSeparator className="my-4" />
-        <SidebarGroup>
-          <SidebarGroupLabel>Administration</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {adminItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+        {isAdmin && (
+          <>
+            <SidebarSeparator className="my-4" />
+            <SidebarGroup>
+              <SidebarGroupLabel>Administration</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {adminItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <a href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
 
-              <SidebarMenuItem>
-                <RefreshButton />
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                  <SidebarMenuItem>
+                    <RefreshButton />
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

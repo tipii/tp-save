@@ -1,3 +1,5 @@
+import { Role } from '@/lib/constants';
+
 export interface UserSeedData {
   name: string;
   email: string;
@@ -22,7 +24,7 @@ export const usersData: UserSeedData[] = [
     name: 'Theo',
     email: 'theo@devlab.io',
     emailVerified: true,
-    role: 'admin',
+    role: Role.ADMIN,
     phoneNumber: '+1234567890',
     phoneNumberVerified: true,
     username: 'theo',
@@ -35,7 +37,7 @@ export const usersData: UserSeedData[] = [
     name: 'Maxime',
     email: 'maxime.camps@tallinpi.pf',
     emailVerified: true,
-    role: 'admin',
+    role: Role.ADMIN,
     phoneNumber: '+1234567890',
     phoneNumberVerified: true,
     username: 'maxime',
@@ -115,7 +117,7 @@ export const usersData: UserSeedData[] = [
     name: 'Julien Rouleur',
     email: 'julien.rouleur@example.com',
     emailVerified: true,
-    role: 'livreur',
+    role: Role.LIVREUR,
     phoneNumber: '+1234567896',
     phoneNumberVerified: true,
     username: 'julienrouleur',
@@ -128,7 +130,7 @@ export const usersData: UserSeedData[] = [
     name: 'Thomas Coursier',
     email: 'thomas.coursier@example.com',
     emailVerified: true,
-    role: 'livreur',
+    role: Role.LIVREUR,
     phoneNumber: '+1234567897',
     phoneNumberVerified: true,
     username: 'thomascoursier',

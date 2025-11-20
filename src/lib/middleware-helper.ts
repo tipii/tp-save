@@ -1,4 +1,5 @@
 import { Session } from '@/external-services/better-auth/auth-client';
+import { Role } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Helper function to get session
@@ -26,7 +27,7 @@ export function requireAuth(request: NextRequest, session: Session | null, redir
 
 // Helper function: Redirect if not admin
 export function requireAdmin(request: NextRequest, session: Session | null, redirectTo = '/') {
-  if (!session?.user || session.user.role !== 'admin') {
+  if (!session?.user || session.user.role !== Role.ADMIN) {
     return NextResponse.redirect(new URL(redirectTo, request.url));
   }
   return null; // Continue
@@ -36,10 +37,10 @@ export function requireAdmin(request: NextRequest, session: Session | null, redi
 export function requireUserType(
   request: NextRequest,
   session: Session | null,
-  allowedTypes: string[],
+  allowedTypes: Role[],
   redirectTo = '/',
 ) {
-  if (!session?.user || !allowedTypes.includes(session.user.role || '')) {
+  if (!session?.user || !allowedTypes.includes(session.user.role as Role)) {
     return NextResponse.redirect(new URL(redirectTo, request.url));
   }
   return null; // Continue

@@ -1,9 +1,11 @@
 import { auth } from '@/external-services/better-auth/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { Role } from './constants';
 
-export const APP_ALLOWED_ROLES = ['admin', 'commerciaux', 'secretaire'];
-export const APP_LIVRAISON_ALLOWED_ROLES = ['livreur'];
+export const APP_ALLOWED_ROLES = [Role.ADMIN, Role.SECRETAIRE];
+export const APP_LIVRAISON_ALLOWED_ROLES = [Role.LIVREUR];
+export const APP_ADMIN_ALLOWED_ROLES = [Role.ADMIN];
 
 /**
  * Server-side authentication redirect with role-based access control
@@ -15,7 +17,7 @@ export async function authRedirect({
   allowedRoles,
   unauthorizedRedirect = '/auth/login',
 }: {
-  allowedRoles: string[];
+  allowedRoles: Role[];
   unauthorizedRedirect?: string;
 }): Promise<void> {
   try {
@@ -35,9 +37,8 @@ export async function authRedirect({
 
     // Check if user has required role
     const userRole = session.user.role;
-    if (!userRole || !allowedRoles.includes(userRole)) {
+    if (!userRole || !allowedRoles.includes(userRole as Role)) {
       redirect(unauthorizedRedirect);
-      return;
     }
 
     // Access granted
@@ -73,7 +74,7 @@ export async function getCurrentUser() {
 /**
  * Check if current user has specific role
  */
-export async function hasRole(requiredRole: string): Promise<boolean> {
+export async function hasRole(requiredRole: Role): Promise<boolean> {
   try {
     const user = await getCurrentUser();
     return user?.role === requiredRole;
@@ -86,10 +87,10 @@ export async function hasRole(requiredRole: string): Promise<boolean> {
 /**
  * Check if current user has any of the specified roles
  */
-export async function hasAnyRole(requiredRoles: string[]): Promise<boolean> {
+export async function hasAnyRole(requiredRoles: Role[]): Promise<boolean> {
   try {
     const user = await getCurrentUser();
-    return user?.role ? requiredRoles.includes(user.role) : false;
+    return user?.role ? requiredRoles.includes(user.role as Role) : false;
   } catch (error) {
     console.error('Error checking user roles:', error);
     return false;
