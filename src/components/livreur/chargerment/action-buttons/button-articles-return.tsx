@@ -34,6 +34,9 @@ export default function ButtonArticlesReturn({
     trpc.livreursLivraisons.returnItems.mutationOptions(),
   );
 
+  // Filter items to only include those with AR_REF
+  const returnableItems = items.filter((item) => item.AR_REF);
+
   const [checkedItems, setCheckedItems] = useState<number[]>([]);
   const [open, setOpen] = useState(false);
 
@@ -46,7 +49,7 @@ export default function ButtonArticlesReturn({
   };
 
   const handleValidation = () => {
-    const selectedItems = checkedItems.map((index) => items[index]);
+    const selectedItems = checkedItems.map((index) => returnableItems[index]);
     returnItems(
       {
         id: livraisonId,
@@ -75,13 +78,13 @@ export default function ButtonArticlesReturn({
           Retourner des articles
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="top-[10%] max-w-md translate-y-0 sm:top-[50%] sm:-translate-y-1/2">
         <DialogHeader>
           <DialogTitle>Retourner des articles</DialogTitle>
         </DialogHeader>
 
         <div className="max-h-96 space-y-3 overflow-y-auto">
-          {items.map((item, index) => (
+          {returnableItems.map((item, index) => (
             <div key={index} className="flex items-center space-x-3 rounded-lg border p-3">
               <Checkbox
                 id={`item-${index}`}

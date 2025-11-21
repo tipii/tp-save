@@ -62,7 +62,7 @@ export default function ButtonLivraisonDeliver({
           Valider la livraison
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="top-[10%] translate-y-0 sm:top-[50%] sm:-translate-y-1/2">
         <DialogHeader>
           <DialogTitle>Valider la livraison</DialogTitle>
         </DialogHeader>

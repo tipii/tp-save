@@ -57,7 +57,7 @@ export default function ButtonLivraisonToReturn({
           Retourner la livraison
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="top-[10%] translate-y-0 sm:top-[50%] sm:-translate-y-1/2">
         <DialogHeader>
           <DialogTitle>Retourner la livraison</DialogTitle>
         </DialogHeader>
