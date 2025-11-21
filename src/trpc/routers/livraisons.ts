@@ -20,6 +20,9 @@ export const itemSchema = z.object({
   Famille_ART: z.string(),
   Commentaires: z.string(),
   DL_MontantHT: z.string(),
+  Commentaires2: z.string(),
+  QTE_DIFF_CMDE: z.string(),
+  DL_PrixUnitaire: z.string(),
 });
 
 export const livraisonsRouter = createTRPCRouter({
@@ -371,6 +374,9 @@ export const livraisonsRouter = createTRPCRouter({
           Famille_ART: '',
           Commentaires: '',
           DL_MontantHT: '',
+          Commentaires2: '',
+          QTE_DIFF_CMDE: '',
+          DL_PrixUnitaire: '',
         });
       } else {
         updatedTargetItems[targetItemIndex].DL_QTEBL = (

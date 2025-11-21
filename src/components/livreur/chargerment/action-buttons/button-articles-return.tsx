@@ -7,10 +7,9 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Item } from '@/types/types';
-import { ArrowLeftIcon, PackageX } from 'lucide-react';
+import { PackageX } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTRPC } from '@/trpc/client';
 import { useMutation } from '@tanstack/react-query';
@@ -37,19 +36,34 @@ export default function ButtonArticlesReturn({
   // Filter items to only include those with AR_REF
   const returnableItems = items.filter((item) => item.AR_REF);
 
-  const [checkedItems, setCheckedItems] = useState<number[]>([]);
+  const [itemQuantities, setItemQuantities] = useState<Record<number, string>>({});
   const [open, setOpen] = useState(false);
 
-  const handleItemCheck = (itemIndex: number, checked: boolean) => {
-    if (checked) {
-      setCheckedItems((prev) => [...prev, itemIndex]);
-    } else {
-      setCheckedItems((prev) => prev.filter((index) => index !== itemIndex));
+  const handleQuantityChange = (itemIndex: number, quantity: string) => {
+    const numQuantity = Number(quantity);
+    const maxQuantity = Number(returnableItems[itemIndex].DL_QTEBL);
+
+    if (quantity === '' || (numQuantity >= 0 && numQuantity <= maxQuantity)) {
+      setItemQuantities((prev) => ({
+        ...prev,
+        [itemIndex]: quantity,
+      }));
     }
   };
 
   const handleValidation = () => {
-    const selectedItems = checkedItems.map((index) => returnableItems[index]);
+    const selectedItems = Object.entries(itemQuantities)
+      .filter(([_, quantity]) => quantity !== '' && Number(quantity) > 0)
+      .map(([index, quantity]) => ({
+        ...returnableItems[Number(index)],
+        returnQuantity: quantity,
+      }));
+
+    if (selectedItems.length === 0) {
+      toast.error('Veuillez sélectionner au moins un article avec une quantité valide');
+      return;
+    }
+
     returnItems(
       {
         id: livraisonId,
@@ -60,7 +74,7 @@ export default function ButtonArticlesReturn({
         onSuccess: () => {
           toast.success('Articles retournés avec succès');
           setOpen(false);
-          setCheckedItems([]);
+          setItemQuantities({});
           refetchChargement();
         },
         onError: () => {
@@ -85,33 +99,48 @@ export default function ButtonArticlesReturn({
 
         <div className="max-h-96 space-y-3 overflow-y-auto">
           {returnableItems.map((item, index) => (
-            <div key={index} className="flex items-center space-x-3 rounded-lg border p-3">
-              <Checkbox
-                id={`item-${index}`}
-                checked={checkedItems.includes(index)}
-                onCheckedChange={(checked) => handleItemCheck(index, !!checked)}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium text-gray-900">{item.DL_Design}</div>
-                <div className="font-mono text-xs text-gray-500">{item.AR_REF}</div>
+            <div key={index} className="flex flex-col gap-2 rounded-lg border p-3">
+              <div className="flex items-start justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium text-gray-900">{item.DL_Design}</div>
+                  <div className="font-mono text-xs text-gray-500">{item.AR_REF}</div>
+                </div>
+                <div className="text-xs text-gray-500">Max: {item.DL_QTEBL}</div>
               </div>
-              <Badge variant="outline" className="text-xs">
-                {item.DL_QTEBL}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-700">Quantité à retourner:</label>
+                <Input
+                  type="number"
+                  min="0"
+                  max={item.DL_QTEBL}
+                  placeholder="0"
+                  value={itemQuantities[index] || ''}
+                  onChange={(e) => handleQuantityChange(index, e.target.value)}
+                  className="h-10 flex-1 text-center text-base"
+                />
+              </div>
             </div>
           ))}
         </div>
 
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => setOpen(false)}>
+        <DialogFooter className="flex-col gap-2 sm:flex-row">
+          <Button
+            variant="outline"
+            onClick={() => setOpen(false)}
+            className="w-full sm:w-auto"
+          >
             Annuler
           </Button>
           <Button
             onClick={handleValidation}
-            disabled={checkedItems.length === 0 || isPending}
-            className="bg-orange-500 hover:bg-orange-600"
+            disabled={
+              Object.values(itemQuantities).filter((q) => q !== '' && Number(q) > 0).length === 0 ||
+              isPending
+            }
+            className="w-full bg-orange-500 hover:bg-orange-600 sm:w-auto"
           >
-            Valider ({checkedItems.length})
+            Valider (
+            {Object.values(itemQuantities).filter((q) => q !== '' && Number(q) > 0).length})
           </Button>
         </DialogFooter>
       </DialogContent>

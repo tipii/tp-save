@@ -113,7 +113,13 @@ export const livreursLivraisonsRouter = createTRPCRouter({
       }
     }),
   returnItems: protectedProcedure
-    .input(z.object({ id: z.string(), chargementId: z.string(), items: z.array(itemSchema) }))
+    .input(
+      z.object({
+        id: z.string(),
+        chargementId: z.string(),
+        items: z.array(itemSchema.extend({ returnQuantity: z.string() })),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const livraison = await ctx.prisma.livraison.findUnique({
         where: { id: input.id },
@@ -125,24 +131,75 @@ export const livreursLivraisonsRouter = createTRPCRouter({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Livraison non trouvée' });
       }
 
-      // create a new livraison with the items
-      const newLivraison = await ctx.prisma.livraison.create({
-        data: {
+      // Prepare items for the return livraison with specified quantities
+      const itemsToReturn = input.items.map((item) => {
+        const { returnQuantity, ...itemData } = item;
+        return { ...itemData, DL_QTEBL: returnQuantity };
+      });
+
+      // Check if there's already a return livraison for this commande in the same chargement
+      const existingReturnLivraison = await ctx.prisma.livraison.findFirst({
+        where: {
           commandeId: livraison.commandeId,
-          name: `Retour ${livraison.name}`,
-          status: Status.TO_RETURN,
           chargementId: input.chargementId,
-          items: input.items,
+          status: Status.TO_RETURN,
         },
       });
 
-      if (newLivraison) {
-        // remove the items from the original livraison
-        const itemsToRemove = input.items.map((item) => item.AR_REF);
+      let returnLivraison;
 
-        const firstLivraisonItems = livraisonItems.filter(
-          (item) => !itemsToRemove.includes(item.AR_REF),
-        );
+      if (existingReturnLivraison) {
+        // Add items to existing return livraison
+        const existingItems = (existingReturnLivraison.items as Item[]) || [];
+
+        // Merge items: if item exists, add quantities; otherwise add new item
+        const mergedItems = [...existingItems];
+
+        for (const newItem of itemsToReturn) {
+          const existingItemIndex = mergedItems.findIndex((item) => item.AR_REF === newItem.AR_REF);
+
+          if (existingItemIndex !== -1) {
+            // Item exists, add quantities
+            mergedItems[existingItemIndex].DL_QTEBL = (
+              Number(mergedItems[existingItemIndex].DL_QTEBL) + Number(newItem.DL_QTEBL)
+            ).toString();
+          } else {
+            // New item, add to array
+            mergedItems.push(newItem);
+          }
+        }
+
+        returnLivraison = await ctx.prisma.livraison.update({
+          where: { id: existingReturnLivraison.id },
+          data: { items: mergedItems },
+        });
+      } else {
+        // Create a new return livraison
+        returnLivraison = await ctx.prisma.livraison.create({
+          data: {
+            commandeId: livraison.commandeId,
+            name: `Retour ${livraison.name}`,
+            status: Status.TO_RETURN,
+            chargementId: input.chargementId,
+            items: itemsToReturn,
+          },
+        });
+      }
+
+      if (returnLivraison) {
+        // Update quantities in the original livraison
+        const updatedItems = livraisonItems.map((item) => {
+          const returnedItem = input.items.find((i) => i.AR_REF === item.AR_REF);
+          if (returnedItem) {
+            const newQuantity = Number(item.DL_QTEBL) - Number(returnedItem.returnQuantity);
+            return { ...item, DL_QTEBL: newQuantity.toString() };
+          }
+          return item;
+        });
+
+        // Remove items with 0 quantity
+        const firstLivraisonItems = updatedItems.filter((item) => Number(item.DL_QTEBL) > 0);
+
         await ctx.prisma.livraison.update({
           where: { id: input.id },
           data: { items: firstLivraisonItems },
@@ -154,6 +211,6 @@ export const livreursLivraisonsRouter = createTRPCRouter({
         });
       }
 
-      return newLivraison;
+      return returnLivraison;
     }),
 });

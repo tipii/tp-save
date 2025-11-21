@@ -25,6 +25,8 @@ model Livraison {
   bonLivraison         String?
 
   receptionInfo String?
+  returnComment String?
+  depotComment  String?
 
   @@index([commandeId])
   @@index([livreurId])
