@@ -5,12 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useTRPC } from '@/trpc/client';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UsersTable } from '@/components/admin/utilisateurs/components/users-table';
 import { UserDialog } from '@/components/admin/utilisateurs/components/user-dialog';
 import { PasswordDialog } from '@/components/admin/utilisateurs/components/password-dialog';
+import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 
 export default function UtilisateursPageComponent() {
+  const { setBreadcrumb } = useBreadcrumb();
+  useEffect(() => {
+    setBreadcrumb([], 'Utilisateurs');
+  }, [setBreadcrumb]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);

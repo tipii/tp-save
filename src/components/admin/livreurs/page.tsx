@@ -1,15 +1,20 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTRPC } from '@/trpc/client';
 import { LivreursTable } from './table/livreur-table';
 import { Loader2 } from 'lucide-react';
+import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 
 export default function LivreursPageComponent() {
   const trpc = useTRPC();
   const { data: livreurs, isPending } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
 
+  const { setBreadcrumb } = useBreadcrumb();
+  useEffect(() => {
+    setBreadcrumb([], 'Livreurs');
+  }, [setBreadcrumb]);
   return (
     <div>
       <div className="p-4">

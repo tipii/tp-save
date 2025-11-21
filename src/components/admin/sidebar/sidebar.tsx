@@ -115,10 +115,6 @@ export async function AppSidebar() {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
-
-                  <SidebarMenuItem>
-                    <RefreshButton />
-                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>

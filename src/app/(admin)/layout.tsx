@@ -38,7 +38,7 @@ export default async function AdminLayout({
                     />
                     <BreadcrumbAdmin />
                   </div>
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     <Button variant="outline" size="icon">
                       <Search />
                       <span className="sr-only">Rechercher</span>
@@ -47,7 +47,7 @@ export default async function AdminLayout({
                       <Bell />
                       <span className="sr-only">Notifications</span>
                     </Button>
-                  </div>
+                  </div> */}
                 </header>
                 <main className="flex-1 overflow-auto bg-slate-50">{children}</main>
               </SidebarInset>

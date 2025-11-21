@@ -24,7 +24,8 @@ export default function ChargementCard({ chargement }: { chargement: TrpcLivreur
 
   const totalItems = chargement.livraisons.reduce((total, livraison) => {
     const items = (livraison.items as Item[]) || [];
-    return total + items.length;
+    const itemsCount = items.reduce((total, item) => total + Number(item.DL_QTEBL), 0);
+    return total + itemsCount;
   }, 0);
 
   // Priority-based sorting for delivery workflow
@@ -90,7 +91,7 @@ export default function ChargementCard({ chargement }: { chargement: TrpcLivreur
             const items = (livraison.items as Item[]) || [];
             const statusColors = statusToTailwindColor(livraison.status);
             const isOpen = openLivraisons.includes(livraison.id);
-
+            const itemsCount = items.reduce((total, item) => total + Number(item.DL_QTEBL), 0);
             return (
               <div key={livraison.id} className="border-b border-gray-100 bg-white last:border-b-0">
                 {/* Livraison Header */}
@@ -111,7 +112,7 @@ export default function ChargementCard({ chargement }: { chargement: TrpcLivreur
                         <div className="flex items-center gap-1">
                           <Package className="h-3 w-3" />
                           <span>
-                            {items.length} article{items.length > 1 ? 's' : ''}
+                            {itemsCount} article{itemsCount > 1 ? 's' : ''}
                           </span>
                         </div>
                         {livraison.commande?.ref && (
@@ -194,7 +195,7 @@ export default function ChargementCard({ chargement }: { chargement: TrpcLivreur
                           <div className="mb-3 flex items-center gap-2">
                             <Package className="h-4 w-4 text-gray-500" />
                             <span className="text-sm font-medium text-gray-700">
-                              Articles ({items.length})
+                              Articles ({itemsCount})
                             </span>
                           </div>
 
