@@ -7,5 +7,5 @@ export default async function LivreurLayout({ children }: { children: React.Reac
   await authRedirect({
     allowedRoles: APP_LIVRAISON_ALLOWED_ROLES,
   });
-  return <main className="flex h-screen w-full flex-col bg-slate-100">{children}</main>;
+  return <main className="flex min-h-screen w-full flex-col bg-slate-100 pb-40">{children}</main>;
 }

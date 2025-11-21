@@ -75,12 +75,21 @@ export const livreursLivraisonsRouter = createTRPCRouter({
       }
     }),
   returnLivraisonToDepot: protectedProcedure
-    .input(z.object({ id: z.string(), chargementId: z.string() }))
+    .input(
+      z.object({
+        id: z.string(),
+        chargementId: z.string(),
+        depotComment: z.string().min(1, 'Le commentaire est obligatoire'),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         const livraison = await ctx.prisma.livraison.update({
           where: { id: input.id },
-          data: { status: Status.RETURNED },
+          data: {
+            status: Status.RETURNED,
+            depotComment: input.depotComment,
+          },
         });
 
         const chargement = await ctx.prisma.chargement.findUnique({
@@ -118,6 +127,7 @@ export const livreursLivraisonsRouter = createTRPCRouter({
         id: z.string(),
         chargementId: z.string(),
         items: z.array(itemSchema.extend({ returnQuantity: z.string() })),
+        returnComment: z.string().min(1, 'Le commentaire de retour est obligatoire'),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -169,9 +179,17 @@ export const livreursLivraisonsRouter = createTRPCRouter({
           }
         }
 
+        // Append new comment to existing comments
+        const updatedComment = existingReturnLivraison.returnComment
+          ? `${existingReturnLivraison.returnComment}\n---\n${input.returnComment}`
+          : input.returnComment;
+
         returnLivraison = await ctx.prisma.livraison.update({
           where: { id: existingReturnLivraison.id },
-          data: { items: mergedItems },
+          data: {
+            items: mergedItems,
+            returnComment: updatedComment,
+          },
         });
       } else {
         // Create a new return livraison
@@ -182,6 +200,7 @@ export const livreursLivraisonsRouter = createTRPCRouter({
             status: Status.TO_RETURN,
             chargementId: input.chargementId,
             items: itemsToReturn,
+            returnComment: input.returnComment,
           },
         });
       }

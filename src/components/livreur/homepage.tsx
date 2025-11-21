@@ -28,7 +28,7 @@ export default function Homepage() {
             <Card className="border-dashed">
               <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-8">
                 <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
-                <p className="text-center text-muted-foreground">Chargement en cours...</p>
+                <p className="text-muted-foreground text-center">Chargement en cours...</p>
               </CardContent>
             </Card>
           )}
@@ -40,7 +40,7 @@ export default function Homepage() {
                 </div>
                 <div className="space-y-2 text-center">
                   <h3 className="text-lg font-semibold text-gray-900">Aucun chargement</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Pas de chargement attribué pour le moment
                   </p>
                 </div>
