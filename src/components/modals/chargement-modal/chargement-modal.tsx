@@ -10,12 +10,22 @@ import {
 import { useTRPC } from '@/trpc/client';
 import { useQuery } from '@tanstack/react-query';
 import { statusToBadge, priorityToBadge, statusToTailwindColor } from '@/components/ui/enum-to-ui';
-import { Package, User, MapPin, Calendar, Clock, Building, Building2 } from 'lucide-react';
+import {
+  Package,
+  User,
+  MapPin,
+  Calendar,
+  Clock,
+  Building,
+  Building2,
+  UserPlus,
+} from 'lucide-react';
 import React from 'react';
 import Link from 'next/link';
 import { Item } from '@/types/types';
 import { TrpcChargement, TrpcLivraison } from '@/types/trpc-types';
 import { Livraison } from '@/generated/prisma';
+import Documentation from './documentation';
 
 export default function ChargementModal({
   children,
@@ -25,7 +35,7 @@ export default function ChargementModal({
   chargementId: string;
 }) {
   const trpc = useTRPC();
-  const { data: chargement } = useQuery(
+  const { data: chargement, refetch: refetchChargement } = useQuery(
     trpc.chargements.getChargementById.queryOptions(
       { id: chargementId },
       {
@@ -75,12 +85,17 @@ export default function ChargementModal({
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              {chargement.livreur?.name || 'Aucun livreur assigné'}
+              Assigné à : {chargement.livreur?.name || 'Aucun livreur assigné'}
             </div>
+            {chargement.history.length > 0 && (
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-4 w-4" />
+                Créé par : {chargement.history[0].user.name}
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <Package className="h-4 w-4" />
-              {totalLivraisons} livraison{totalLivraisons > 1 ? 's' : ''} • {totalItems} article
-              {totalItems > 1 ? 's' : ''}
+              {totalLivraisons} livraison{totalLivraisons > 1 ? 's' : ''}
             </div>
 
             <div className="flex items-center gap-2">
@@ -135,33 +150,43 @@ export default function ChargementModal({
                       );
 
                       return (
-                        <Link
-                          href={`/app/commandes/${livraison.commandeId}`}
-                          key={livraison.id}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Card
+                        <div key={livraison.id} className="flex items-center gap-2">
+                          <Link
+                            href={`/app/commandes/${livraison.commandeId}`}
                             key={livraison.id}
-                            className={`mb-2 border ${statusToTailwindColor(livraison.status).border} ${statusToTailwindColor(livraison.status).background} p-0`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full"
                           >
-                            <CardContent className="py-3">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  {/* {livraison.commande.client?.name} */}
-                                  {livraison.commande.ref}
+                            <Card
+                              key={livraison.id}
+                              className={`mb-2 border ${statusToTailwindColor(livraison.status).border} ${statusToTailwindColor(livraison.status).background} p-0`}
+                            >
+                              <CardContent className="py-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    {/* {livraison.commande.client?.name} */}
+                                    {livraison.commande.ref}
 
-                                  {priorityToBadge(livraison.priority)}
-                                  {statusToBadge(livraison.status)}
+                                    {priorityToBadge(livraison.priority)}
+                                    {statusToBadge(livraison.status)}
+                                  </div>
+                                  <div className="text-muted-foreground text-xs">
+                                    {itemCount} article{itemCount > 1 ? 's' : ''}
+                                  </div>
                                 </div>
-                                <div className="text-muted-foreground text-xs">
-                                  {itemCount} article{itemCount > 1 ? 's' : ''}
-                                </div>
-                              </div>
-                              <div className="text-muted-foreground mt-1 text-xs"></div>
-                            </CardContent>
-                          </Card>
-                        </Link>
+                                <div className="text-muted-foreground mt-1 text-xs"></div>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                          {livraison.status === 'DELIVERED' && (
+                            <Documentation
+                              livraisonId={livraison.id}
+                              documentation={livraison.documentation}
+                              refetch={refetchChargement}
+                            />
+                          )}
+                        </div>
                       );
                     })}
                   </div>

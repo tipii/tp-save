@@ -27,6 +27,7 @@ model Livraison {
   receptionInfo String?
   returnComment String?
   depotComment  String?
+  documentation Boolean @default(false)
 
   @@index([commandeId])
   @@index([livreurId])

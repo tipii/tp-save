@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from '../init';
+import { createTRPCRouter, protectedProcedure, secretariatOrAdminProcedure } from '../init';
 import { Priority, Status, Prisma } from '@/generated/prisma';
 import { SortOrder } from '@/types/enums';
 import { TRPCError } from '@trpc/server';

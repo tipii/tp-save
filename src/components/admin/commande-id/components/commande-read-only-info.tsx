@@ -33,8 +33,6 @@ export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) 
           <CardTitle>Informations système</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-2">{statusToBadge(commande.status)}</div>
-
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />

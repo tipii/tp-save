@@ -6,12 +6,13 @@ import { useCommandeEdit } from './hooks/use-commande-edit';
 import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 import { LivraisonReadOnlyInfo } from './components/livraison-read-only-info';
 import CommandeDetails from './components/commande-details';
+import Documentation from './components/documentation';
 interface CommandeIdPageProps {
   id: string;
 }
 
 export default function CommandeIdPage({ id }: CommandeIdPageProps) {
-  const { commande, isLoading } = useCommandeEdit(id);
+  const { commande, isLoading, refetchCommande } = useCommandeEdit(id);
   const { setBreadcrumb } = useBreadcrumb();
 
   useEffect(() => {
@@ -40,7 +41,8 @@ export default function CommandeIdPage({ id }: CommandeIdPageProps) {
         </div>
 
         {/* Read-only Information */}
-        <div>
+        <div className="space-y-6">
+          <Documentation commandeId={id} />
           <CommandeReadOnlyInfo commandeId={id} />
         </div>
       </div>

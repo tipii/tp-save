@@ -416,4 +416,22 @@ export const livraisonsRouter = createTRPCRouter({
 
       return { success: true };
     }),
+  setDocumentation: secretariatOrAdminProcedure
+    .input(z.object({ livraisonId: z.string(), documentation: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { livraisonId, documentation } = input;
+      try {
+        const livraison = await ctx.prisma.livraison.update({
+          where: { id: livraisonId },
+          data: { documentation },
+        });
+        return livraison;
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Erreur lors de la mise à jour de la documentation',
+        });
+      }
+    }),
 });

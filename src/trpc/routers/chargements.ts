@@ -28,6 +28,16 @@ export const chargementsRouter = createTRPCRouter({
       const chargement = await ctx.prisma.chargement.findUnique({
         where: { id: input.id },
         include: {
+          history: {
+            include: {
+              user: true,
+            },
+            where: {
+              action: {
+                in: ['create'],
+              },
+            },
+          },
           livreur: true,
           livraisons: {
             include: {
