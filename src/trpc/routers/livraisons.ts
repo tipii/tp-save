@@ -1,6 +1,6 @@
 import z from 'zod';
 import { Priority, Prisma, Status } from '@/generated/prisma';
-import { createTRPCRouter, protectedProcedure } from '../init';
+import { createTRPCRouter, protectedProcedure, secretariatOrAdminProcedure } from '../init';
 import { TRPCError } from '@trpc/server';
 import {
   getTahitiDayStart,
@@ -9,6 +9,7 @@ import {
   getTahitiNow,
   getTahitiToday,
 } from '@/lib/date-utils';
+import { baseWhereCommande } from '../utils/utils';
 
 export const itemSchema = z.object({
   AR_REF: z.string(),
@@ -22,7 +23,7 @@ export const itemSchema = z.object({
 });
 
 export const livraisonsRouter = createTRPCRouter({
-  getPendingLivraisons: protectedProcedure
+  getPendingLivraisons: secretariatOrAdminProcedure
     .input(
       z.object({
         expectedDeliveryDate: z.date().nullish(),
@@ -42,6 +43,10 @@ export const livraisonsRouter = createTRPCRouter({
           where.expectedDeliveryDate = {
             gte: dayStart,
             lte: dayEnd,
+          };
+
+          where.commande = {
+            ...baseWhereCommande,
           };
         }
 
@@ -68,12 +73,15 @@ export const livraisonsRouter = createTRPCRouter({
         });
       }
     }),
-  getLivraisonsEnRetard: protectedProcedure.query(async ({ ctx }) => {
+  getLivraisonsEnRetard: secretariatOrAdminProcedure.query(async ({ ctx }) => {
     try {
       const livraisons = await ctx.prisma.livraison.findMany({
         where: {
           expectedDeliveryDate: { lt: getTahitiToday() },
           status: Status.PENDING,
+          commande: {
+            ...baseWhereCommande,
+          },
         },
         include: {
           commande: {
@@ -94,7 +102,7 @@ export const livraisonsRouter = createTRPCRouter({
       });
     }
   }),
-  changePriority: protectedProcedure
+  changePriority: secretariatOrAdminProcedure
     .input(
       z.object({
         livraisonId: z.string(),
@@ -111,7 +119,7 @@ export const livraisonsRouter = createTRPCRouter({
       return livraison;
     }),
 
-  changeStatus: protectedProcedure
+  changeStatus: secretariatOrAdminProcedure
     .input(
       z.object({
         livraisonId: z.string(),
@@ -128,7 +136,7 @@ export const livraisonsRouter = createTRPCRouter({
       return livraison;
     }),
 
-  createLivraison: protectedProcedure
+  createLivraison: secretariatOrAdminProcedure
     .input(
       z.object({
         commandeId: z.string(),
@@ -152,7 +160,7 @@ export const livraisonsRouter = createTRPCRouter({
       return livraison;
     }),
 
-  updateLivraisonInfos: protectedProcedure
+  updateLivraisonInfos: secretariatOrAdminProcedure
     .input(
       z.object({
         livraisonId: z.string(),
@@ -385,7 +393,7 @@ export const livraisonsRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  deleteLivraison: protectedProcedure
+  deleteLivraison: secretariatOrAdminProcedure
     .input(z.object({ livraisonId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { livraisonId } = input;

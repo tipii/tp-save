@@ -24,7 +24,9 @@ export function CommandeReadOnlyInfo({ commandeId }: CommandeReadOnlyInfoProps) 
       {/* System Information */}
 
       {/* Client Information */}
-      {commande.client && <ClientCard client={{ ...commande.client, commandes: [] }} />}
+      {commande.client && (
+        <ClientCard client={{ ...commande.client, commandes: [] }} orientation="vertical" />
+      )}
 
       <Card>
         <CardHeader>

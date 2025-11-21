@@ -15,8 +15,15 @@ import {
 import React from 'react';
 import { TrpcClient } from '@/types/trpc-types';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
-export default function ClientCard({ client }: { client: TrpcClient }) {
+export default function ClientCard({
+  client,
+  orientation = 'horizontal',
+}: {
+  client: TrpcClient;
+  orientation?: 'horizontal' | 'vertical';
+}) {
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -35,9 +42,14 @@ export default function ClientCard({ client }: { client: TrpcClient }) {
           </Link>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex justify-between space-y-4">
+      <CardContent
+        className={cn(
+          'flex justify-between space-y-4',
+          orientation === 'vertical' ? 'flex-col' : '',
+        )}
+      >
         {/* Client Basic Info */}
-        <div className="flex items-center justify-between">
+        <div>
           <div>
             <h3 className="text-lg font-semibold">{client.name}</h3>
             <div className="text-muted-foreground flex items-center gap-2 text-sm">

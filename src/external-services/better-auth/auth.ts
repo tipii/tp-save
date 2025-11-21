@@ -1,10 +1,25 @@
 import { betterAuth, z } from 'better-auth';
 import { nextCookies } from 'better-auth/next-js';
-import { admin, phoneNumber, username } from 'better-auth/plugins';
+import { admin as adminPlugin, phoneNumber, username } from 'better-auth/plugins';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import prisma from '@/lib/prisma';
 // import { sendEmail } from '@/external-services/email/email-service';
 import { clientEnv } from '@/external-services/env/client';
+import { Role } from '@/lib/constants';
+import { createAccessControl } from 'better-auth/plugins/access';
+
+// ROLES STATEMENTS
+export const statement = {
+  user: ['create', 'list', 'set-role', 'ban', 'impersonate', 'delete', 'set-password'],
+} as const;
+
+const ac = createAccessControl(statement);
+
+export const secretariat = ac.newRole({ user: [] });
+export const admin = ac.newRole({
+  user: ['create', 'list', 'set-role', 'ban', 'impersonate', 'delete', 'set-password'],
+});
+export const livreur = ac.newRole({ user: [] });
 
 export const auth = betterAuth({
   trustedOrigins: [clientEnv.NEXT_PUBLIC_APP_URL],
@@ -15,38 +30,15 @@ export const auth = betterAuth({
   user: {
     // add more user fields here
   },
-  plugins: [nextCookies(), admin(), username(), phoneNumber()],
+  plugins: [
+    nextCookies(),
+    adminPlugin({ roles: { secretariat, admin, livreur } }),
+    username(),
+    phoneNumber(),
+  ],
   emailAndPassword: {
     enabled: true,
-    sendResetPassword: async ({ user, url }) => {
-      // await sendEmail({
-      //   to: user.email,
-      //   subject: 'Réinitialisation de votre mot de passe',
-      //   emailType: 'reset-password',
-      //   emailProps: {
-      //     userName: user.name || undefined,
-      //     resetUrl: url,
-      //   },
-      // });
-    },
   },
-  // emailVerification: {
-  //   sendOnSignUp: true,
-  //   autoSignInAfterVerification: true,
-  //   expiresIn: 60 * 60 * 24, // 1 day
-
-  //   sendVerificationEmail: async ({ user, url, token }) => {
-  //     await sendEmail({
-  //       to: user.email,
-  //       subject: 'Vérification de votre adresse e-mail',
-  //       emailType: 'verify-email',
-  //       emailProps: {
-  //         userName: user.name || undefined,
-  //         verificationUrl: `${url}?token=${token}`,
-  //       },
-  //     });
-  //   },
-  // },
 });
 
 export type Session = typeof auth.$Infer.Session;

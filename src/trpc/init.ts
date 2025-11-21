@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { cache } from 'react';
 import superjson from 'superjson';
 import prisma from '@/lib/prisma';
+import { Role } from '@/lib/constants';
 
 export const createTRPCContext = cache(async () => {
   /**
@@ -40,7 +41,7 @@ export const protectedProcedure = t.procedure.use(async ({ next }) => {
     if (!session?.user) {
       throw new TRPCError({
         code: 'UNAUTHORIZED',
-        message: 'You must be logged in to access this resource',
+        message: 'Vous devez être connecté pour accéder à cette ressource',
       });
     }
 
@@ -54,7 +55,7 @@ export const protectedProcedure = t.procedure.use(async ({ next }) => {
     // If session retrieval fails, throw unauthorized error
     throw new TRPCError({
       code: 'UNAUTHORIZED',
-      message: 'Authentication failed',
+      message: 'Authentification échouée',
     });
   }
 });
@@ -65,10 +66,10 @@ export const adminProcedure = t.procedure.use(async ({ next }) => {
       headers: await headers(),
     });
 
-    if (session?.user.role !== 'admin') {
+    if (session?.user.role !== Role.ADMIN) {
       throw new TRPCError({
         code: 'UNAUTHORIZED',
-        message: 'You must be an admin to access this resource',
+        message: 'Vous devez être un administrateur pour accéder à cette ressource',
       });
     }
 
@@ -77,6 +78,33 @@ export const adminProcedure = t.procedure.use(async ({ next }) => {
         prisma,
         user: session.user,
       },
+    });
+  } catch (error) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'Authentification échouée',
+    });
+  }
+});
+
+export const secretariatOrAdminProcedure = t.procedure.use(async ({ next }) => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (session?.user.role == Role.ADMIN || session?.user.role == Role.SECRETAIRE) {
+      return next({
+        ctx: {
+          prisma,
+          user: session.user,
+        },
+      });
+    }
+
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'Vous devez être un administrateur ou un secrétaire pour accéder à cette ressource',
     });
   } catch (error) {
     throw new TRPCError({
