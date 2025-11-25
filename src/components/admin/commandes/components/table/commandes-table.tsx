@@ -42,7 +42,8 @@ export function CommandesTable({ commandes, filters, pagination, isPending }: Co
             <TableHead>Client</TableHead>
             <TableHead>Priorité</TableHead>
             <TableHead>Statut</TableHead>
-            <TableHead>Date livraison</TableHead>
+            <TableHead>Date livraison prévue</TableHead>
+            <TableHead>Date livraison réelle</TableHead>
             <TableHead>Date création</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>

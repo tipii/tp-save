@@ -15,11 +15,12 @@ export function CommandesTableSkeleton() {
       <Table className="min-h-0 flex-1 overflow-y-auto">
         <TableHeader className="sticky top-0 z-10">
           <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-            <TableHead>Nom</TableHead>
+            <TableHead>Ref</TableHead>
             <TableHead>Client</TableHead>
-            <TableHead>Priorité BP</TableHead>
-            <TableHead>Statut BP</TableHead>
-            <TableHead>Date livraison</TableHead>
+            <TableHead>Priorité</TableHead>
+            <TableHead>Statut</TableHead>
+            <TableHead>Date livraison prévue</TableHead>
+            <TableHead>Date livraison réelle</TableHead>
             <TableHead>Date création</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -51,6 +52,10 @@ export function CommandesTableSkeleton() {
                 <Skeleton className="h-6 w-20 rounded-full" />
               </TableCell>
               {/* Date livraison */}
+              <TableCell>
+                <Skeleton className="h-6 w-24 rounded-full" />
+              </TableCell>
+              {/* Date livraison réelle */}
               <TableCell>
                 <Skeleton className="h-6 w-24 rounded-full" />
               </TableCell>

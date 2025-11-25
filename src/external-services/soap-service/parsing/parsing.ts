@@ -1,6 +1,6 @@
 import { DocVente, LigneBonLivraison } from '../types/types';
 import { Decimal } from '@prisma/client/runtime/library';
-import { getTahitiToday } from '@/lib/date-utils';
+import { getTahitiToday, normalizeToTahitiDay } from '@/lib/date-utils';
 
 /**
  * Type definition for DocVente Prisma insertion
@@ -488,7 +488,9 @@ export function parseSoapDocVenteForPrisma(soapResult: string): DocVentePrismaIn
         // fields[31] - DO_Souche
         souche: fields[31] ?? '',
         // fields[32] - DO_DateLivr
-        dateLivr: parseDate(fields[32]) ?? getTahitiToday(),
+        dateLivr: parseDate(fields[32])
+          ? normalizeToTahitiDay(parseDate(fields[32])!)
+          : getTahitiToday(),
         // fields[33] - DO_Condition
         condition: parseOptionalString(fields[33]),
         // fields[34] - DO_Tarif

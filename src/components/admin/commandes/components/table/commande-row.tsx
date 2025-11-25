@@ -111,6 +111,13 @@ export function CommandeRow({ commande }: CommandeRowProps) {
           <span className="text-muted-foreground">Non défini</span>
         )}
       </TableCell>
+      <TableCell>
+        {commande.livraisons.length > 0 && commande.livraisons[0].deliveryDate ? (
+          <Badge variant="blue">{formatDateForTahiti(commande.livraisons[0].deliveryDate)}</Badge>
+        ) : (
+          <span className="text-muted-foreground">Non défini</span>
+        )}
+      </TableCell>
 
       <TableCell>
         <div className="text-muted-foreground flex items-center gap-2 text-sm">
