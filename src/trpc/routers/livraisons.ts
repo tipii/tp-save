@@ -1,6 +1,11 @@
 import z from 'zod';
 import { Priority, Prisma, Status } from '@/generated/prisma';
-import { createTRPCRouter, protectedProcedure, secretariatOrAdminProcedure } from '../init';
+import {
+  adminProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+  secretariatOrAdminProcedure,
+} from '../init';
 import { TRPCError } from '@trpc/server';
 import {
   getTahitiDayStart,
@@ -183,7 +188,34 @@ export const livraisonsRouter = createTRPCRouter({
 
       return livraison;
     }),
+  redeliverLivraison: protectedProcedure
+    .input(z.object({ livraisonId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { livraisonId } = input;
+      try {
+        const livraison = await ctx.prisma.livraison.findUnique({
+          where: { id: livraisonId },
+        });
+        if (!livraison) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Livraison non trouvée' });
+        }
+        if (livraison.status !== Status.RETURNED) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: "La livraison n'est pas en retour" });
+        }
 
+        const livraisonupdated = await ctx.prisma.livraison.update({
+          where: { id: livraisonId },
+          data: { status: Status.PENDING, expectedDeliveryDate: getTahitiNow() },
+        });
+        return livraisonupdated;
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Erreur lors de la ré-livraison de la livraison',
+        });
+      }
+    }),
   updateLivraisonItems: protectedProcedure
     .input(
       z.object({
@@ -400,7 +432,7 @@ export const livraisonsRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  deleteLivraison: secretariatOrAdminProcedure
+  deleteLivraison: adminProcedure
     .input(z.object({ livraisonId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { livraisonId } = input;

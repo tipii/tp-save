@@ -22,9 +22,16 @@ export interface CommandesTableProps {
     hasPrevPage: boolean;
   };
   isPending: boolean;
+  refetch: () => void;
 }
 
-export function CommandesTable({ commandes, filters, pagination, isPending }: CommandesTableProps) {
+export function CommandesTable({
+  commandes,
+  filters,
+  pagination,
+  isPending,
+  refetch,
+}: CommandesTableProps) {
   if (isPending) {
     return <CommandesTableSkeleton />;
   }
@@ -50,7 +57,7 @@ export function CommandesTable({ commandes, filters, pagination, isPending }: Co
         </TableHeader>
         <TableBody className="border-b">
           {commandes.map((commande) => (
-            <CommandeRow key={commande.id} commande={commande} />
+            <CommandeRow key={commande.id} commande={commande} refetch={refetch} />
           ))}
         </TableBody>
       </Table>

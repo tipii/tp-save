@@ -117,6 +117,7 @@ export default function CommandesComponent() {
             filters={filters}
             pagination={pagination}
             isPending={isPending}
+            refetch={refetch}
           />
         </CardContent>
       </Card>

@@ -1,7 +1,16 @@
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { FileText, Building, Package, Clock, AlertCircle, Pencil } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  FileText,
+  Building,
+  Package,
+  Clock,
+  AlertCircle,
+  Pencil,
+  ClockArrowUp,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getTotalItems } from './utils';
 import Link from 'next/link';
@@ -12,14 +21,22 @@ import { Badge } from '@/components/ui/badge';
 import { useCommande } from '../../context/commande-context';
 import { formatDateForTahiti } from '@/lib/date-utils';
 import { toast } from 'sonner';
+import { Status } from '@/generated/prisma';
+import { useTRPC } from '@/trpc/client';
+import { useMutation } from '@tanstack/react-query';
 
 export interface CommandeRowProps {
   commande: TrpcCommande;
+  refetch: () => void;
 }
 
-export function CommandeRow({ commande }: CommandeRowProps) {
+export function CommandeRow({ commande, refetch }: CommandeRowProps) {
   const router = useRouter();
   const { selectedCommandeId, setSelectedCommandeId } = useCommande();
+  const trpc = useTRPC();
+  const redeliverLivraisonMutation = useMutation(
+    trpc.livraisons.redeliverLivraison.mutationOptions(),
+  );
 
   const handleRowClick = () => {
     setSelectedCommandeId(commande.id);
@@ -39,6 +56,25 @@ export function CommandeRow({ commande }: CommandeRowProps) {
         });
       }
     }
+  };
+
+  const handleRedeliverLivraison = () => {
+    redeliverLivraisonMutation.mutate(
+      { livraisonId: commande.livraisons[0].id },
+      {
+        onSuccess: () => {
+          toast.success('Livraison ré-livrée avec succès');
+        },
+        onError: (error) => {
+          toast.error('Erreur', {
+            description: error.message,
+          });
+        },
+        onSettled: () => {
+          refetch();
+        },
+      },
+    );
   };
 
   const isSelected = selectedCommandeId === commande.id;
@@ -125,7 +161,19 @@ export function CommandeRow({ commande }: CommandeRowProps) {
           <span>{formatDateForTahiti(commande.createdAt)}</span>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="flex items-center gap-2">
+        {commande.livraisons.length === 1 && commande.livraisons[0].status === Status.RETURNED && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon" onClick={handleRedeliverLivraison}>
+                <ClockArrowUp className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Remettre en livraison</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
         <Button variant="outline" size="icon" asChild>
           <Link href={`/app/commandes/${commande.id}`}>
             <Pencil className="h-4 w-4" />
