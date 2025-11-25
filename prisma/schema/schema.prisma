@@ -40,6 +40,7 @@ model User {
 
   // Delivery relations
   livraisonsDelivered Livraison[] @relation("Livreur")
+  livraisonsDocs      Livraison[]
 
   @@unique([email])
   @@unique([username])

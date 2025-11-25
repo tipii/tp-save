@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Status } from '@/generated/prisma';
 import { TrpcLivreur } from '@/types/trpc-types';
+import { getUserInitials } from '@/lib/utils';
 
 interface LivreurInfoProps {
   livreur: TrpcLivreur;
@@ -22,14 +23,6 @@ export function LivreurInfo({ livreur }: LivreurInfoProps) {
   const totalLivraisons =
     livreur.chargements?.reduce((sum, c) => sum + c.livraisons.length, 0) || 0;
 
-  // Get initials for avatar
-  const initials = livreur.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-
   return (
     <Card>
       <CardHeader>
@@ -41,7 +34,7 @@ export function LivreurInfo({ livreur }: LivreurInfoProps) {
         <div className="flex flex-col items-center space-y-2">
           <Avatar className="h-20 w-20">
             <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-              {initials}
+              {getUserInitials(livreur.name)}
             </AvatarFallback>
           </Avatar>
           <div className="text-center">

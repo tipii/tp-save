@@ -6,7 +6,7 @@ import { useCommandeEdit } from './hooks/use-commande-edit';
 import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 import { LivraisonReadOnlyInfo } from './components/livraison-read-only-info';
 import CommandeDetails from './components/commande-details';
-import Documentation from './components/documentation';
+import Documentation from './components/commande-documentation';
 interface CommandeIdPageProps {
   id: string;
 }

@@ -10,6 +10,7 @@ import {
   getTahitiToday,
 } from '@/lib/date-utils';
 import { baseWhereCommande } from '../utils/utils';
+import { Role } from '@/lib/constants';
 
 export const itemSchema = z.object({
   AR_REF: z.string(),
@@ -420,10 +421,24 @@ export const livraisonsRouter = createTRPCRouter({
     .input(z.object({ livraisonId: z.string(), documentation: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const { livraisonId, documentation } = input;
+      const user = ctx.user;
       try {
+        const liv = await ctx.prisma.livraison.findUnique({
+          where: { id: livraisonId },
+          select: { userDocId: true },
+        });
+
+        // Only admins can change documentation to a livraison that already has documentation
+        if (liv && liv.userDocId && user.role !== Role.ADMIN) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'La documentation a déjà été ajoutée',
+          });
+        }
+
         const livraison = await ctx.prisma.livraison.update({
           where: { id: livraisonId },
-          data: { documentation },
+          data: { documentation, userDocId: documentation ? user.id : null },
         });
         return livraison;
       } catch (error) {

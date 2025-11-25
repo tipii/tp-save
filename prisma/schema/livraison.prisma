@@ -28,6 +28,8 @@ model Livraison {
   returnComment String?
   depotComment  String?
   documentation Boolean @default(false)
+  userDocId     String?
+  userDoc       User?   @relation(fields: [userDocId], references: [id])
 
   @@index([commandeId])
   @@index([livreurId])

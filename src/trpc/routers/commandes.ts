@@ -215,6 +215,7 @@ export const commandesRouter = createTRPCRouter({
               createdAt: 'asc',
             },
             include: {
+              userDoc: true,
               chargement: true,
               livreur: true,
             },

@@ -24,7 +24,7 @@ import DraggableLot from './draggable';
 import { statusToIcon, statusToTailwindColor } from '@/components/ui/enum-to-ui';
 import LivraisonModal from '@/components/modals/livraison-modal';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, getUserInitials } from '@/lib/utils';
 import { Status } from '@/generated/prisma';
 import {
   AlertDialog,
@@ -80,11 +80,6 @@ export const DroppableLivreur = ({
       .map((lotId) => livraisons.find((c) => c.id === lotId))
       .filter((lot): lot is TrpcLivraison => lot !== undefined);
   }, [droppedItems, livreur.id, livraisons]);
-
-  const livreurInitials = livreur.name
-    .split(' ')
-    .map((name: string) => name.charAt(0))
-    .join('');
 
   const { mutate: deleteChargement } = useMutation(
     trpc.chargements.deleteChargement.mutationOptions({
@@ -170,7 +165,7 @@ export const DroppableLivreur = ({
         <div className="flex items-center gap-2">
           <Avatar className="h-10 w-10">
             <AvatarFallback className="bg-slate-100 text-slate-700">
-              {livreurInitials}
+              {getUserInitials(livreur.name)}
             </AvatarFallback>
           </Avatar>
           <p className="font-bold text-slate-900">{livreur.name}</p>

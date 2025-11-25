@@ -25,7 +25,7 @@ import Link from 'next/link';
 import { Item } from '@/types/types';
 import { TrpcChargement, TrpcLivraison } from '@/types/trpc-types';
 import { Livraison } from '@/generated/prisma';
-import Documentation from './documentation';
+import Documentation from '../../admin/shared/documentation';
 
 export default function ChargementModal({
   children,
@@ -52,16 +52,9 @@ export default function ChargementModal({
 
   // Calculate totals
   const totalLivraisons = chargement.livraisons.length;
-  const totalItems = chargement.livraisons.reduce((total, livraison) => {
-    const items =
-      typeof livraison.items === 'string' ? JSON.parse(livraison.items) : livraison.items;
-    return total + (Array.isArray(items) ? items.length : 0);
-  }, 0);
 
   const deliveredCount = chargement.livraisons.filter((l) => l.status === 'DELIVERED').length;
-  const readyCount = chargement.livraisons.filter(
-    (l) => l.status === 'READY' || l.status === 'DELIVERING',
-  ).length;
+
   const returnedLivraisons = chargement.livraisons.filter((l) => l.status === 'RETURNED');
 
   //group livraison by reference
@@ -183,6 +176,7 @@ export default function ChargementModal({
                             <Documentation
                               livraisonId={livraison.id}
                               documentation={livraison.documentation}
+                              userName={livraison.userDoc ? livraison.userDoc.name : undefined}
                               refetch={refetchChargement}
                             />
                           )}

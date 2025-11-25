@@ -9,8 +9,9 @@ import { Label } from '@/components/ui/label';
 import { FileText } from 'lucide-react';
 import { useCommandeEdit } from '../hooks/use-commande-edit';
 import { Status } from '@/generated/prisma';
+import Documentation from '../../shared/documentation';
 
-export default function Documentation({ commandeId }: { commandeId: string }) {
+export default function CommandeDocumentation({ commandeId }: { commandeId: string }) {
   const trpc = useTRPC();
   const setDocumentationMutation = useMutation(trpc.livraisons.setDocumentation.mutationOptions());
   const { commande, isLoading, refetchCommande } = useCommandeEdit(commandeId);
@@ -47,13 +48,12 @@ export default function Documentation({ commandeId }: { commandeId: string }) {
           deliveredLivraisons.map((livraison) => (
             <div key={livraison.id} className="flex items-center gap-2">
               <p>{livraison.name}</p>
-              <Switch
-                checked={livraison.documentation}
-                onCheckedChange={() =>
-                  handleSetDocumentation(livraison.id, !livraison.documentation)
-                }
+              <Documentation
+                livraisonId={livraison.id}
+                documentation={livraison.documentation}
+                userName={livraison.userDoc?.name}
+                refetch={refetchCommande}
               />
-              <Label htmlFor="documentation">Documentation receptionnée</Label>
             </div>
           ))}
       </CardContent>
