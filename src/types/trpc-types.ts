@@ -13,3 +13,5 @@ export type TrpcClient = RouterOutput['clients']['getClients'][0];
 export type TrpcChargement = RouterOutput['chargements']['getChargements'][0];
 export type TrpcLivraison = RouterOutput['livraisons']['getPendingLivraisons'][0];
 export type TrpcLivreurChargmenent = RouterOutput['chargements']['getChargementsByLivreur'][0];
+export type TrpcArchivedChargement = RouterOutput['chargements']['getArchivedChargements']['chargements'][0];
+export type TrpcArchivedChargementsPagination = RouterOutput['chargements']['getArchivedChargements']['pagination'];

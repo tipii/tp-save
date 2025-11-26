@@ -1,7 +1,12 @@
 import z from 'zod';
 import { adminProcedure, createTRPCRouter, protectedProcedure } from '../init';
-import { Status } from '@/generated/prisma';
-import { formatDateForTahiti, getTahitiNow } from '@/lib/date-utils';
+import { Prisma, Status } from '@/generated/prisma';
+import {
+  formatDateForTahiti,
+  getTahitiNow,
+  getTahitiDayStart,
+  getTahitiDayEnd,
+} from '@/lib/date-utils';
 
 export const chargementsRouter = createTRPCRouter({
   getChargements: protectedProcedure.query(async ({ ctx }) => {
@@ -54,6 +59,103 @@ export const chargementsRouter = createTRPCRouter({
         },
       });
       return chargement;
+    }),
+  getArchivedChargements: protectedProcedure
+    .input(
+      z.object({
+        search: z.string().optional(),
+        livreurId: z.string().optional(),
+        dateFrom: z.string().optional(),
+        dateTo: z.string().optional(),
+        limit: z.number().min(1).max(100).default(20),
+        page: z.number().min(1).default(1),
+        sortBy: z.enum(['name', 'createdAt', 'updatedAt']).default('updatedAt'),
+        sortOrder: z.enum(['asc', 'desc']).default('desc'),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { search, livreurId, dateFrom, dateTo, limit, page, sortBy, sortOrder } = input;
+
+      // Build where clause
+      const where: Prisma.ChargementWhereInput = {
+        status: Status.DELIVERED,
+      };
+
+      // Search filter (by name, livreur name, commande ref, or client name)
+      if (search) {
+        where.OR = [
+          { name: { contains: search, mode: 'insensitive' } },
+          { livreur: { name: { contains: search, mode: 'insensitive' } } },
+          {
+            livraisons: { some: { commande: { ref: { contains: search, mode: 'insensitive' } } } },
+          },
+          {
+            livraisons: {
+              some: { commande: { client: { name: { contains: search, mode: 'insensitive' } } } },
+            },
+          },
+        ];
+      }
+
+      // Livreur filter
+      if (livreurId) {
+        where.livreurId = livreurId;
+      }
+
+      // Date range filter (updatedAt - when it was marked as delivered)
+      if (dateFrom || dateTo) {
+        where.updatedAt = {};
+        if (dateFrom) {
+          where.updatedAt.gte = getTahitiDayStart(new Date(dateFrom));
+        }
+        if (dateTo) {
+          where.updatedAt.lte = getTahitiDayEnd(new Date(dateTo));
+        }
+      }
+
+      // Get total count for pagination
+      const totalCount = await ctx.prisma.chargement.count({ where });
+
+      // Build orderBy
+      const orderBy: Prisma.ChargementOrderByWithRelationInput = {
+        [sortBy]: sortOrder,
+      };
+
+      // Get paginated results
+      const chargements = await ctx.prisma.chargement.findMany({
+        where,
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          livreur: true,
+          livraisons: {
+            include: {
+              userDoc: true,
+              commande: {
+                include: {
+                  client: true,
+                  livraisons: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Calculate pagination metadata
+      const totalPages = Math.ceil(totalCount / limit);
+
+      return {
+        chargements,
+        pagination: {
+          totalCount,
+          totalPages,
+          currentPage: page,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1,
+        },
+      };
     }),
   createChargement: adminProcedure
     .input(

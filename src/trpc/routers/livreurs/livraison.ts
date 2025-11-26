@@ -39,7 +39,12 @@ export const livreursLivraisonsRouter = createTRPCRouter({
         });
 
         let allLivraisonsDelivered = false;
-        if (chargement?.livraisons.every((livraison) => livraison.status === Status.DELIVERED)) {
+        if (
+          chargement?.livraisons.every(
+            (livraison) =>
+              livraison.status === Status.DELIVERED || livraison.status === Status.RETURNED,
+          )
+        ) {
           await ctx.prisma.chargement.update({
             where: { id: input.chargementId },
             data: { status: Status.DELIVERED },

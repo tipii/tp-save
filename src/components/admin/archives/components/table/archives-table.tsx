@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState } from './empty-state';
-import { CommandeRow } from './commande-row';
+import { ArchiveRow } from './archive-row';
 import { Pagination } from './pagination';
-import { CommandeFiltersActions } from '../../hooks/use-commande-filters';
-import { TrpcCommande } from '@/types/trpc-types';
-import { CommandesTableSkeleton } from './skeleton';
-import { FileText, User, Flag, Activity, Calendar, Check } from 'lucide-react';
+import { ArchiveFiltersActions } from '../../hooks/use-archive-filters';
+import { TrpcArchivedChargement } from '@/types/trpc-types';
+import { ArchivesTableSkeleton } from './skeleton';
+import { Calendar, Package, Truck, User } from 'lucide-react';
 
-export interface CommandesTableProps {
-  commandes: TrpcCommande[];
-  filters: CommandeFiltersActions & {
+export interface ArchivesTableProps {
+  chargements: TrpcArchivedChargement[];
+  filters: ArchiveFiltersActions & {
     hasActiveFilters: boolean;
     page: number;
     limit: number;
@@ -26,18 +26,18 @@ export interface CommandesTableProps {
   refetch: () => void;
 }
 
-export function CommandesTable({
-  commandes,
+export function ArchivesTable({
+  chargements,
   filters,
   pagination,
   isPending,
   refetch,
-}: CommandesTableProps) {
+}: ArchivesTableProps) {
   if (isPending) {
-    return <CommandesTableSkeleton />;
+    return <ArchivesTableSkeleton />;
   }
 
-  if (commandes.length === 0) {
+  if (chargements.length === 0) {
     return <EmptyState hasActiveFilters={filters.hasActiveFilters} />;
   }
 
@@ -46,62 +46,50 @@ export function CommandesTable({
       <div className="min-h-0 flex-1 overflow-y-auto">
         <Table>
           <TableHeader className="sticky top-0 z-10">
-            <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
+            <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-green-50">
               <TableHead>
                 <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-blue-600" />
-                  <span>Ref</span>
+                  <Package className="h-4 w-4 text-green-600" />
+                  <span>Nom</span>
                 </div>
               </TableHead>
               <TableHead>
                 <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-indigo-600" />
-                  <span>Client</span>
+                  <User className="h-4 w-4 text-blue-600" />
+                  <span>Livreur</span>
                 </div>
               </TableHead>
               <TableHead>
                 <div className="flex items-center gap-2">
-                  <Flag className="h-4 w-4 text-red-600" />
-                  <span>Priorité</span>
-                </div>
-              </TableHead>
-              <TableHead>
-                <div className="flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-purple-600" />
-                  <span>Statut</span>
+                  <Truck className="h-4 w-4 text-purple-600" />
+                  <span>Livraisons</span>
                 </div>
               </TableHead>
               <TableHead>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-orange-600" />
-                  <span>Date livr. prévue</span>
-                </div>
-              </TableHead>
-              <TableHead>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span>Date livr. réelle</span>
-                </div>
-              </TableHead>
-              <TableHead>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-slate-600" />
                   <span>Date création</span>
+                </div>
+              </TableHead>
+              <TableHead>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-green-600" />
+                  <span>Date livraison</span>
                 </div>
               </TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="border-b">
-            {commandes.map((commande) => (
-              <CommandeRow key={commande.id} commande={commande} refetch={refetch} />
+            {chargements.map((chargement) => (
+              <ArchiveRow key={chargement.id} chargement={chargement} refetch={refetch} />
             ))}
           </TableBody>
         </Table>
       </div>
 
       {pagination && (
-        <div className="bg-background border-t p-4">
+        <div className="border-t bg-background p-4">
           <Pagination
             pagination={pagination}
             filters={{

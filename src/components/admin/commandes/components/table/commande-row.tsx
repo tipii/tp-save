@@ -149,7 +149,7 @@ export function CommandeRow({ commande, refetch }: CommandeRowProps) {
       </TableCell>
       <TableCell>
         {commande.livraisons.length > 0 && commande.livraisons[0].deliveryDate ? (
-          <Badge variant="blue">{formatDateForTahiti(commande.livraisons[0].deliveryDate)}</Badge>
+          <Badge variant="green">{formatDateForTahiti(commande.livraisons[0].deliveryDate)}</Badge>
         ) : (
           <span className="text-muted-foreground">Non défini</span>
         )}

@@ -62,6 +62,11 @@ const items = [
     icon: Truck,
   },
   {
+    title: 'Archives',
+    url: '/app/archives',
+    icon: Archive,
+  },
+  {
     title: 'Livreurs',
     url: '/app/livreurs',
     icon: Users,
