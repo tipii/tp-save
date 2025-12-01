@@ -35,29 +35,25 @@ export const livraisonsRouter = createTRPCRouter({
   getPendingLivraisons: secretariatOrAdminProcedure
     .input(
       z.object({
-        expectedDeliveryDate: z.date().nullish(),
+        expectedDeliveryDate: z.date(),
       }),
     )
     .query(async ({ ctx, input }) => {
       try {
         const where: Prisma.LivraisonWhereInput = {
           status: Status.PENDING,
+          commande: {
+            ...baseWhereCommande,
+          },
         };
 
-        // If a date is provided, filter by date range (entire day in Tahiti timezone)
-        if (input.expectedDeliveryDate != null) {
-          const dayStart = getTahitiDayStart(input.expectedDeliveryDate);
-          const dayEnd = getTahitiDayEnd(input.expectedDeliveryDate);
+        const dayStart = getTahitiDayStart(input.expectedDeliveryDate);
+        const dayEnd = getTahitiDayEnd(input.expectedDeliveryDate);
 
-          where.expectedDeliveryDate = {
-            gte: dayStart,
-            lte: dayEnd,
-          };
-
-          where.commande = {
-            ...baseWhereCommande,
-          };
-        }
+        where.expectedDeliveryDate = {
+          gte: dayStart,
+          lte: dayEnd,
+        };
 
         const livraisons = await ctx.prisma.livraison.findMany({
           where,
@@ -84,9 +80,12 @@ export const livraisonsRouter = createTRPCRouter({
     }),
   getLivraisonsEnRetard: secretariatOrAdminProcedure.query(async ({ ctx }) => {
     try {
+      // Get all pending livraisons with expected delivery date before today (start of today)
+      const todayStart = getTahitiToday();
+
       const livraisons = await ctx.prisma.livraison.findMany({
         where: {
-          expectedDeliveryDate: { lt: getTahitiToday() },
+          expectedDeliveryDate: { lt: todayStart },
           status: Status.PENDING,
           commande: {
             ...baseWhereCommande,

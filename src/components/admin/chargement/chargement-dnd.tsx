@@ -22,7 +22,7 @@ export default function ChargementDnd() {
   const { data: livraisons, refetch: refetchLivraisons } = useQuery(
     trpc.livraisons.getPendingLivraisons.queryOptions(
       {
-        expectedDeliveryDate: selectedDate ? selectedDate : undefined,
+        expectedDeliveryDate: selectedDate,
       },
       {
         refetchOnMount: true,
@@ -30,6 +30,7 @@ export default function ChargementDnd() {
         refetchOnReconnect: true,
         refetchInterval: 1000 * 10, // 10 seconds
         refetchIntervalInBackground: true,
+        enabled: !!selectedDate, // Only fetch when a date is selected
       },
     ),
   );
@@ -295,6 +296,7 @@ export default function ChargementDnd() {
                   livraisons={[...(livraisons ?? []), ...(livraisonsEnRetard ?? [])]}
                   onRemoveLivraison={handleRemoveLivraison}
                   setDroppedItems={setDroppedItems}
+                  selectedDate={selectedDate}
                 />
               ))}
             </div>

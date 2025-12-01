@@ -45,12 +45,14 @@ export const DroppableLivreur = ({
   livraisons,
   onRemoveLivraison,
   setDroppedItems,
+  selectedDate,
 }: {
   livreur: TrpcLivreur;
   droppedItems: Record<string, string[]>;
   livraisons: TrpcLivraison[];
   onRemoveLivraison: (livraisonId: string) => void;
   setDroppedItems: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
+  selectedDate: Date;
 }) => {
   const trpc = useTRPC();
   const { refetch } = useQuery(
@@ -58,7 +60,21 @@ export const DroppableLivreur = ({
       refetchInterval: 1000 * 10, // 30 seconds
     }),
   );
-  const { refetch: refetchLots } = useQuery(trpc.livraisons.getPendingLivraisons.queryOptions({}));
+  const { data: allLivraisons, refetch: refetchLivraisons } = useQuery(
+    trpc.livraisons.getPendingLivraisons.queryOptions(
+      {
+        expectedDeliveryDate: selectedDate,
+      },
+      {
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+        refetchInterval: 1000 * 10, // 10 seconds
+        refetchIntervalInBackground: true,
+        enabled: !!selectedDate, // Only fetch when a date is selected
+      },
+    ),
+  );
 
   const { data: livraisonsEnRetard, refetch: refetchLivraisonsEnRetard } = useQuery(
     trpc.livraisons.getLivraisonsEnRetard.queryOptions(undefined, {
@@ -107,7 +123,7 @@ export const DroppableLivreur = ({
       },
       onSettled: () => {
         refetchLivraisonsEnRetard();
-        refetchLots();
+        refetchLivraisons();
         refetch();
       },
     }),
@@ -133,7 +149,7 @@ export const DroppableLivreur = ({
       },
       onSettled: () => {
         refetchLivraisonsEnRetard();
-        refetchLots();
+        refetchLivraisons();
         refetch();
       },
     }),
@@ -147,7 +163,7 @@ export const DroppableLivreur = ({
       {
         onSuccess: () => {
           refetch();
-          refetchLots();
+          refetchLivraisons();
         },
         onError: (error) => {
           console.error(error);
