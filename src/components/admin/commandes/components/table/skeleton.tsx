@@ -8,7 +8,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, User, Flag, Activity, Calendar, Check } from 'lucide-react';
+import { FileText, User, Flag, Activity, Calendar, Check, Ship } from 'lucide-react';
 
 export function CommandesTableSkeleton() {
   return (
@@ -55,8 +55,8 @@ export function CommandesTableSkeleton() {
               </TableHead>
               <TableHead>
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-slate-600" />
-                  <span>Date création</span>
+                  <Ship className="h-4 w-4 text-cyan-600" />
+                  <span>Expé. Île</span>
                 </div>
               </TableHead>
               <TableHead>Actions</TableHead>
@@ -96,12 +96,9 @@ export function CommandesTableSkeleton() {
                 <TableCell>
                   <Skeleton className="h-6 w-24 rounded-full" />
                 </TableCell>
-                {/* Date création */}
+                {/* Expé. Île */}
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-3 w-3" />
-                    <Skeleton className="h-4 w-20" />
-                  </div>
+                  <Skeleton className="h-6 w-20 rounded-md" />
                 </TableCell>
                 {/* Actions */}
                 <TableCell>

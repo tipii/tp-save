@@ -6,7 +6,7 @@ import { Pagination } from './pagination';
 import { CommandeFiltersActions } from '../../hooks/use-commande-filters';
 import { TrpcCommande } from '@/types/trpc-types';
 import { CommandesTableSkeleton } from './skeleton';
-import { FileText, User, Flag, Activity, Calendar, Check } from 'lucide-react';
+import { FileText, User, Flag, Activity, Calendar, Check, Ship } from 'lucide-react';
 
 export interface CommandesTableProps {
   commandes: TrpcCommande[];
@@ -85,8 +85,8 @@ export function CommandesTable({
               </TableHead>
               <TableHead>
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-slate-600" />
-                  <span>Date création</span>
+                  <Ship className="h-4 w-4 text-cyan-600" />
+                  <span>Expé. Île</span>
                 </div>
               </TableHead>
               <TableHead>Actions</TableHead>

@@ -169,8 +169,8 @@ export const commandesRouter = createTRPCRouter({
                 chargement: true,
               },
             },
-
             client: true,
+            docVente: true,
           },
           orderBy,
           take: limit,
@@ -225,7 +225,7 @@ export const commandesRouter = createTRPCRouter({
       return commande;
     }),
 
-  updateCommande: protectedProcedure
+  updateCommande: secretariatOrAdminProcedure
     .input(
       z.object({
         id: z.string(),

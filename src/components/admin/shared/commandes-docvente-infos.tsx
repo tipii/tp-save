@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { dateToTahitiDateString } from '@/lib/date-utils';
+import { formatDateForTahiti } from '@/lib/date-utils';
 
 export default function CommandesDocVenteInfos({ docVente }: { docVente: DocVente }) {
   return (
@@ -25,7 +25,7 @@ export default function CommandesDocVenteInfos({ docVente }: { docVente: DocVent
           <TableRow>
             <TableCell className="font-medium">Date livraison</TableCell>
             <TableCell className="break-words whitespace-normal">
-              {dateToTahitiDateString(docVente.dateLivr)}
+              {formatDateForTahiti(docVente.dateLivr)}
             </TableCell>
           </TableRow>
           <TableRow>

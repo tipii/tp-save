@@ -6,7 +6,6 @@ import {
   FileText,
   Building,
   Package,
-  Clock,
   AlertCircle,
   Pencil,
   ClockArrowUp,
@@ -156,10 +155,13 @@ export function CommandeRow({ commande, refetch }: CommandeRowProps) {
       </TableCell>
 
       <TableCell>
-        <div className="text-muted-foreground flex items-center gap-2 text-sm">
-          <Clock className="h-3 w-3" />
-          <span>{formatDateForTahiti(commande.createdAt)}</span>
-        </div>
+        {commande.docVente?.expeIle ? (
+          <Badge variant="outline" className="bg-cyan-50 text-cyan-700 border-cyan-200">
+            {commande.docVente.expeIle}
+          </Badge>
+        ) : (
+          <span className="text-muted-foreground">Non défini</span>
+        )}
       </TableCell>
       <TableCell className="flex items-center gap-2">
         {commande.livraisons.length === 1 && commande.livraisons[0].status === Status.RETURNED && (

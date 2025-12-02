@@ -79,9 +79,6 @@ export default function CommandesComponent() {
           <CardTitle>Commandes</CardTitle>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
-              <Badge variant="yellow" asChild>
-                <Link href="/app/commandes?noExpectedDeliveryDate=true"> En attente</Link>
-              </Badge>
               <Badge variant="orange" asChild>
                 <Link href="/app/commandes?expectedDeliveryDatePassed=true">En retard</Link>
               </Badge>
