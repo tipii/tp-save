@@ -1,11 +1,7 @@
 import z from 'zod';
 import { createTRPCRouter, secretariatOrAdminProcedure } from '../init';
 import { Prisma, Status } from '@/generated/prisma';
-import {
-  formatDateForTahiti,
-  getTahitiDayStart,
-  getTahitiDayEnd,
-} from '@/lib/date-utils';
+import { formatDateForTahiti, getTahitiDayStart, getTahitiDayEnd } from '@/lib/date-utils';
 import { TRPCError } from '@trpc/server';
 
 export const chargementsRouter = createTRPCRouter({
@@ -167,70 +163,53 @@ export const chargementsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const dayStart = getTahitiDayStart(input.dateLivraison);
-        const dayEnd = getTahitiDayEnd(input.dateLivraison);
+        // Get livreur info first for the name
+        const livreur = await ctx.prisma.user.findUnique({
+          where: { id: input.livreurId },
+        });
 
-        const existingTmpChargement = await ctx.prisma.chargement.findFirst({
+        if (!livreur) {
+          return {
+            success: false,
+            message: 'Livreur non trouvé',
+            chargement: null,
+            error: 'Livreur non trouvé',
+          };
+        }
+
+        // Use upsert to atomically create or update tmp chargement
+        // The unique constraint on [livreurId, status, dateLivraison] ensures no duplicates
+        const chargement = await ctx.prisma.chargement.upsert({
           where: {
             livreurId: input.livreurId,
             status: Status.PENDING,
-            dateLivraison: {
-              gte: dayStart,
-              lte: dayEnd,
+            dateLivraison: input.dateLivraison,
+          },
+          create: {
+            name: 'Tmp Chargement ' + livreur.name,
+            livreurId: input.livreurId,
+            status: Status.PENDING,
+            dateLivraison: input.dateLivraison,
+            livraisons: {
+              connect: { id: input.livraisonId },
+            },
+          },
+          update: {
+            livraisons: {
+              connect: { id: input.livraisonId },
             },
           },
         });
 
-        if (existingTmpChargement) {
-          await ctx.prisma.chargement.update({
-            where: { id: existingTmpChargement.id },
-            data: {
-              livraisons: {
-                connect: { id: input.livraisonId },
-              },
-            },
-          });
-          return {
-            success: true,
-            chargement: existingTmpChargement,
-            error: null,
-            message: 'Livraison ajoutée au chargement temporaire',
-          };
-        } else {
-          const livreur = await ctx.prisma.user.findUnique({
-            where: {
-              id: input.livreurId,
-            },
-          });
-
-          if (!livreur) {
-            return {
-              success: false,
-              message: 'Livreur non trouvé',
-              chargement: null,
-              error: 'Livreur non trouvé',
-            };
-          }
-
-          const chargement = await ctx.prisma.chargement.create({
-            data: {
-              name: 'Tmp Chargement ' + livreur.name,
-              livreurId: input.livreurId,
-              status: Status.PENDING,
-              dateLivraison: input.dateLivraison,
-              livraisons: {
-                connect: { id: input.livraisonId },
-              },
-            },
-          });
-
-          return {
-            success: true,
-            chargement,
-            message: 'Chargement temporaire créé avec succès',
-            error: null,
-          };
-        }
+        return {
+          success: true,
+          chargement,
+          message:
+            chargement.createdAt.getTime() === chargement.updatedAt.getTime()
+              ? 'Chargement temporaire créé avec succès'
+              : 'Livraison ajoutée au chargement temporaire',
+          error: null,
+        };
       } catch (error) {
         console.error(error);
         throw new TRPCError({

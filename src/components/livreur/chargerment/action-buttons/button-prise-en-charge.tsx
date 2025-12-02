@@ -1,32 +1,18 @@
 import { Button } from '@/components/ui/button';
 import { Status } from '@/generated/prisma';
-import { useTRPC } from '@/trpc/client';
-import { useMutation } from '@tanstack/react-query';
 import { Truck } from 'lucide-react';
 import React from 'react';
-import { toast } from 'sonner';
-import { useCurrentChargement } from '../../hooks/queries';
+import { useAvailableChargements } from '../../hooks/queries';
+import { useUpdateChargementStatusMutation } from '../../hooks/mutations';
 
 export default function ButtonPriseEnCharge() {
-  const trpc = useTRPC();
-  const { data: chargement, refetch } = useCurrentChargement();
-  const { mutate: updateChargementStatus, isPending } = useMutation(
-    trpc.livreursChargements.updateChargementStatus.mutationOptions(),
-  );
+  const { data: chargements } = useAvailableChargements();
+  const chargement = chargements?.[0]; // Get first available chargement
+  const { mutate: updateChargementStatus, isPending } = useUpdateChargementStatusMutation();
 
   const handleClick = () => {
-    updateChargementStatus(
-      { id: chargement?.id ?? '', status: Status.DELIVERING },
-      {
-        onSuccess: () => {
-          toast.success('Chargement pris en charge');
-          refetch();
-        },
-        onError: () => {
-          toast.error('Erreur lors de la prise en charge du chargement');
-        },
-      },
-    );
+    if (!chargement?.id) return;
+    updateChargementStatus({ id: chargement.id, status: Status.DELIVERING });
   };
 
   return (

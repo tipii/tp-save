@@ -8,12 +8,11 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { useMutation } from '@tanstack/react-query';
 import { PackageX } from 'lucide-react';
 import React, { useState } from 'react';
-import { useCurrentChargement } from '../../hooks/queries';
-import { useTRPC } from '@/trpc/client';
 import { toast } from 'sonner';
+import { useActiveChargement } from '../../hooks/queries';
+import { useReturnLivraisonToDepotMutation } from '../../hooks/mutations';
 
 export default function ButtonLivraisonReturnDepot({
   livraisonId,
@@ -24,16 +23,11 @@ export default function ButtonLivraisonReturnDepot({
 }) {
   const [open, setOpen] = useState(false);
   const [depotComment, setDepotComment] = useState<string>('');
-  const trpc = useTRPC();
-  const { data: chargement, refetch: refetchChargement } = useCurrentChargement();
-  const { mutate: returnLivraison, isPending } = useMutation(
-    trpc.livreursLivraisons.returnLivraisonToDepot.mutationOptions(),
-  );
+  const { data: chargement } = useActiveChargement();
+  const { mutate: returnLivraison, isPending } = useReturnLivraisonToDepotMutation();
 
   const handleReturn = () => {
-    if (!chargement?.id) {
-      return;
-    }
+    if (!chargement?.id) return;
 
     if (!depotComment || depotComment.trim() === '') {
       toast.error('Veuillez saisir un commentaire');
@@ -43,23 +37,14 @@ export default function ButtonLivraisonReturnDepot({
     returnLivraison(
       {
         id: livraisonId,
-        chargementId: chargement?.id,
+        chargementId: chargement.id,
         depotComment: depotComment.trim(),
       },
       {
-        onSuccess: ({ allLivraisonsToReturn }) => {
-          refetchChargement();
-          if (allLivraisonsToReturn) {
-            toast.success('Chargement terminé');
-          } else {
-            toast.success('Livraison retournée au dépôt');
-          }
+        onSuccess: () => {
           setOpen(false);
           setDepotComment('');
           toggleLivraison();
-        },
-        onError: (error) => {
-          toast.error(error.message);
         },
       },
     );

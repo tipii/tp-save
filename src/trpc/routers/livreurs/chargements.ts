@@ -4,8 +4,8 @@ import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
 import { z } from 'zod';
 
 export const livreursChargementsRouter = createTRPCRouter({
-  getCurrentChargementByLivreur: protectedProcedure.query(async ({ ctx }) => {
-    const currentChargement = await ctx.prisma.chargement.findFirst({
+  getActiveChargement: protectedProcedure.query(async ({ ctx }) => {
+    const activeChargement = await ctx.prisma.chargement.findFirst({
       where: { livreurId: ctx.user.id, status: Status.DELIVERING },
       include: {
         livraisons: {
@@ -21,14 +21,13 @@ export const livreursChargementsRouter = createTRPCRouter({
       },
     });
 
-    if (currentChargement) {
-      return [currentChargement];
-    }
-
+    return activeChargement;
+  }),
+  getAvailableChargements: protectedProcedure.query(async ({ ctx }) => {
     const dayStart = getTahitiDayStart(getTahitiNow());
     const dayEnd = getTahitiDayEnd(getTahitiNow());
 
-    const availableChargement = await ctx.prisma.chargement.findMany({
+    const availableChargements = await ctx.prisma.chargement.findMany({
       where: {
         livreurId: ctx.user.id,
         status: Status.READY,
@@ -51,7 +50,7 @@ export const livreursChargementsRouter = createTRPCRouter({
       },
     });
 
-    return availableChargement;
+    return availableChargements;
   }),
   updateChargementStatus: protectedProcedure
     .input(z.object({ id: z.string(), status: z.enum(Status) }))

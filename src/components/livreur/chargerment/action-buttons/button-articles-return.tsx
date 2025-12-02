@@ -12,10 +12,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Item } from '@/types/types';
 import { PackageX } from 'lucide-react';
 import React, { useState } from 'react';
-import { useTRPC } from '@/trpc/client';
-import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useCurrentChargement } from '../../hooks/queries';
+import { useActiveChargement } from '../../hooks/queries';
+import { useReturnItemsMutation } from '../../hooks/mutations';
 
 export default function ButtonArticlesReturn({
   livraisonId,
@@ -28,11 +27,8 @@ export default function ButtonArticlesReturn({
   chargementId: string;
   toggleLivraison: () => void;
 }) {
-  const trpc = useTRPC();
-  const { refetch: refetchChargement } = useCurrentChargement();
-  const { mutate: returnItems, isPending } = useMutation(
-    trpc.livreursLivraisons.returnItems.mutationOptions(),
-  );
+  const { refetch: refetchChargement } = useActiveChargement();
+  const { mutate: returnItems, isPending } = useReturnItemsMutation();
 
   // Filter items to only include those with AR_REF
   const returnableItems = items.filter((item) => item.AR_REF);
@@ -80,14 +76,10 @@ export default function ButtonArticlesReturn({
       },
       {
         onSuccess: () => {
-          toast.success('Articles retournés avec succès');
           setOpen(false);
           setItemQuantities({});
           setReturnComment('');
           refetchChargement();
-        },
-        onError: () => {
-          toast.error('Erreur lors du retour des articles');
         },
       },
     );
@@ -148,11 +140,7 @@ export default function ButtonArticlesReturn({
         </div>
 
         <DialogFooter className="flex-col gap-2 sm:flex-row">
-          <Button
-            variant="outline"
-            onClick={() => setOpen(false)}
-            className="w-full sm:w-auto"
-          >
+          <Button variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">
             Annuler
           </Button>
           <Button
@@ -165,8 +153,8 @@ export default function ButtonArticlesReturn({
             }
             className="w-full bg-orange-500 hover:bg-orange-600 sm:w-auto"
           >
-            Valider (
-            {Object.values(itemQuantities).filter((q) => q !== '' && Number(q) > 0).length})
+            Valider ({Object.values(itemQuantities).filter((q) => q !== '' && Number(q) > 0).length}
+            )
           </Button>
         </DialogFooter>
       </DialogContent>

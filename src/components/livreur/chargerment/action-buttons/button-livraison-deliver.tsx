@@ -7,13 +7,11 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { useTRPC } from '@/trpc/client';
-import { useMutation } from '@tanstack/react-query';
 
 import { Check } from 'lucide-react';
 import React, { useState } from 'react';
-import { toast } from 'sonner';
-import { useCurrentChargement } from '../../hooks/queries';
+import { useActiveChargement } from '../../hooks/queries';
+import { useDeliverLivraisonMutation } from '../../hooks/mutations';
 
 export default function ButtonLivraisonDeliver({
   livraisonId,
@@ -24,31 +22,18 @@ export default function ButtonLivraisonDeliver({
 }) {
   const [open, setOpen] = useState(false);
   const [receptionInfo, setReceptionInfo] = useState<string>('');
-  const trpc = useTRPC();
-  const { data: chargement, refetch: refetchChargement } = useCurrentChargement();
-  const { mutate: deliverLivraison, isPending } = useMutation(
-    trpc.livreursLivraisons.deliverLivraison.mutationOptions(),
-  );
+  const { data: chargement } = useActiveChargement();
+  const { mutate: deliverLivraison, isPending } = useDeliverLivraisonMutation();
+
   const handleDeliver = () => {
-    if (!chargement?.id) {
-      return;
-    }
+    if (!chargement?.id) return;
 
     deliverLivraison(
-      { id: livraisonId, receptionInfo, chargementId: chargement?.id },
+      { id: livraisonId, receptionInfo, chargementId: chargement.id },
       {
-        onSuccess: ({ allLivraisonsDelivered }) => {
-          refetchChargement();
-          if (allLivraisonsDelivered) {
-            toast.success('Chargement terminé');
-          } else {
-            toast.success('Livraison validée avec succès');
-          }
+        onSuccess: () => {
           setOpen(false);
           toggleLivraison();
-        },
-        onError: (error) => {
-          toast.error(error.message);
         },
       },
     );

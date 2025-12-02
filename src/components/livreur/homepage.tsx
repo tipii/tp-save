@@ -4,13 +4,18 @@ import React from 'react';
 import LogoutBtn from './logout-btn';
 import { useUser } from '@/hooks/use-user';
 import ChargementCard from './chargerment/chargement-card';
-import { useCurrentChargement } from './hooks/queries';
-import { PackageOpen, Loader2 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { useActiveChargement, useAvailableChargements } from './hooks/queries';
+import { PackageOpen, Loader2, Truck, Package } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Homepage() {
-  const { data: chargements, isLoading, refetch } = useCurrentChargement();
+  const { data: activeChargement, isLoading: isLoadingActive } = useActiveChargement();
+  const { data: availableChargements, isLoading: isLoadingAvailable } = useAvailableChargements();
   const { user } = useUser();
+
+  const isLoading = isLoadingActive || isLoadingAvailable;
+  const hasActiveChargement = !!activeChargement;
+  const hasAvailableChargements = !!availableChargements && availableChargements.length > 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -21,37 +26,59 @@ export default function Homepage() {
         </div>
       </header>
 
-      <div className="flex flex-col gap-2 px-2">
-        {/* <h1 className="text-2xl font-bold">Chargement</h1> */}
-        <div className="flex min-h-[300px] flex-col gap-2">
-          {isLoading && (
-            <Card className="border-dashed">
-              <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-8">
-                <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
-                <p className="text-muted-foreground text-center">Chargement en cours...</p>
-              </CardContent>
-            </Card>
-          )}
-          {!isLoading && !chargements && (
-            <Card className="border-dashed">
-              <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-8">
-                <div className="rounded-full bg-blue-50 p-4">
-                  <PackageOpen className="h-12 w-12 text-blue-500" />
-                </div>
-                <div className="space-y-2 text-center">
-                  <h3 className="text-lg font-semibold text-gray-900">Aucun chargement</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Pas de chargement attribué pour le moment
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {chargements &&
-            chargements.map((chargement) => (
+      <div className="flex flex-col gap-4 px-2">
+        {/* Loading State */}
+        {isLoading && (
+          <Card className="border-dashed">
+            <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-8">
+              <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+              <p className="text-muted-foreground text-center">Chargement en cours...</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Active Chargement Section */}
+        {!isLoading && hasActiveChargement && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 px-2">
+              <Truck className="h-5 w-5 text-green-600" />
+              <h2 className="text-lg font-semibold text-green-700">Chargement en cours</h2>
+            </div>
+            <ChargementCard chargement={activeChargement} />
+          </div>
+        )}
+
+        {/* Available Chargements Section - Only show if NO active chargement */}
+        {!isLoading && !hasActiveChargement && hasAvailableChargements && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 px-2">
+              <Package className="h-5 w-5 text-blue-600" />
+              <h2 className="text-lg font-semibold text-blue-700">
+                Chargements disponibles ({availableChargements.length})
+              </h2>
+            </div>
+            {availableChargements.map((chargement) => (
               <ChargementCard key={chargement.id} chargement={chargement} />
             ))}
-        </div>
+          </div>
+        )}
+
+        {/* Empty State - No active and no available chargements */}
+        {!isLoading && !hasActiveChargement && !hasAvailableChargements && (
+          <Card className="border-dashed">
+            <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-8">
+              <div className="rounded-full bg-blue-50 p-4">
+                <PackageOpen className="h-12 w-12 text-blue-500" />
+              </div>
+              <div className="space-y-2 text-center">
+                <h3 className="text-lg font-semibold text-gray-900">Aucun chargement</h3>
+                <p className="text-muted-foreground text-sm">
+                  Pas de chargement attribué pour le moment
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

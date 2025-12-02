@@ -9,10 +9,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { PackageX, X } from 'lucide-react';
 import React, { useState } from 'react';
-import { useCurrentChargement } from '../../hooks/queries';
-import { useMutation } from '@tanstack/react-query';
-import { useTRPC } from '@/trpc/client';
-import { toast } from 'sonner';
+import { useActiveChargement } from '../../hooks/queries';
+import { useReturnLivraisonMutation } from '../../hooks/mutations';
 
 export default function ButtonLivraisonToReturn({
   livraisonId,
@@ -23,27 +21,18 @@ export default function ButtonLivraisonToReturn({
 }) {
   const [open, setOpen] = useState(false);
   const [returnInfo, setReturnInfo] = useState<string>('');
-  const trpc = useTRPC();
-  const { data: chargement, refetch: refetchChargement } = useCurrentChargement();
-  const { mutate: returnLivraison, isPending } = useMutation(
-    trpc.livreursLivraisons.returnLivraison.mutationOptions(),
-  );
+  const { data: chargement } = useActiveChargement();
+  const { mutate: returnLivraison, isPending } = useReturnLivraisonMutation();
+
   const handleReturn = () => {
-    if (!chargement?.id) {
-      return;
-    }
+    if (!chargement?.id) return;
 
     returnLivraison(
-      { id: livraisonId, returnInfo, chargementId: chargement?.id },
+      { id: livraisonId, returnInfo, chargementId: chargement.id },
       {
         onSuccess: () => {
-          refetchChargement();
-          toast.success('Livraison à retourner au depot');
           setOpen(false);
           toggleLivraison();
-        },
-        onError: (error) => {
-          toast.error(error.message);
         },
       },
     );
