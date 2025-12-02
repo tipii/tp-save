@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { DndContext } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { useQueryState, parseAsIsoDateTime, parseAsStringEnum } from 'nuqs';
 import { DroppableLivreur } from './dnd/droppable';
 import { PriorityZone } from './dnd/priority-zone';
 import { Priority } from '@/generated/prisma';
@@ -17,21 +18,32 @@ import {
 } from './hooks/use-chargement-queries';
 import { useRemoveFromTmpMutation } from './hooks/use-chargement-mutations';
 import { useChargementDrag } from './hooks/use-chargement-drag';
+import { PriorityZonesSkeleton, LivreurCardsSkeleton } from './skeletons';
 
 export default function ChargementDnd() {
-  const [selectedDate, setSelectedDate] = useState<Date>(() => getTahitiToday());
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'none'>('none');
+  // Use URL state for date with shallow routing to prevent full page reload
+  const [dateFromUrl] = useQueryState(
+    'date',
+    parseAsIsoDateTime.withDefault(getTahitiToday()).withOptions({ shallow: false }),
+  );
+  const selectedDate = normalizeToTahitiDay(dateFromUrl);
 
-  // Queries
-  const { data: livraisons } = usePendingLivraisons(selectedDate);
-  const { data: livraisonsEnRetard } = useLivraisonsEnRetard();
-  const { data: livreurs } = useLivreurs(selectedDate);
+  // Use URL state for sort order
+  const [sortOrder, setSortOrder] = useQueryState(
+    'sort',
+    parseAsStringEnum<'asc' | 'desc' | 'none'>(['asc', 'desc', 'none']).withDefault('none'),
+  );
+
+  // Queries with loading states
+  const { data: livraisons, isLoading: isLoadingLivraisons } = usePendingLivraisons(selectedDate);
+  const { data: livraisonsEnRetard, isLoading: isLoadingEnRetard } = useLivraisonsEnRetard();
+  const { data: livreurs, isLoading: isLoadingLivreurs } = useLivreurs(selectedDate);
 
   // Mutations
   const removeFromTmpMutation = useRemoveFromTmpMutation(selectedDate);
 
   // Drag and drop logic
-  const { isDragging, handleDragStart, handleDragEnd } = useChargementDrag(
+  const { handleDragStart, handleDragEnd } = useChargementDrag(
     selectedDate,
     livraisons,
     livraisonsEnRetard,
@@ -76,46 +88,48 @@ export default function ChargementDnd() {
     return <ArrowUpDown className="h-4 w-4" />;
   }
 
-  if (!livraisons || !livreurs) return null;
+  const isLoading = isLoadingLivraisons || isLoadingEnRetard || isLoadingLivreurs;
 
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex flex-col gap-4">
-        <DateNavigation
-          selectedDate={selectedDate}
-          onDateChange={(date) => !isDragging && setSelectedDate(normalizeToTahitiDay(date))}
-          className="bg-card flex w-full justify-between border-b border-gray-200 p-4"
-        />
+        <DateNavigation className="bg-card flex w-full justify-between border-b border-gray-200 p-4" />
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-4 border-b border-gray-200 px-4 pb-4">
             <div className="flex justify-between">
               <h2 className="text-lg font-bold">Commande Drag Zone</h2>
             </div>
             <div className="m-0 flex h-full min-h-64 gap-x-4">
-              <PriorityZone
-                title="Urgent"
-                priority={Priority.URGENT}
-                backgroundColor="bg-red-50 shadow-none border-red-200"
-                livraisons={livraisons}
-              />
-              <PriorityZone
-                title="Normal"
-                priority={Priority.NORMAL}
-                backgroundColor="bg-yellow-50 shadow-none border-yellow-300"
-                livraisons={livraisons}
-              />
-              <PriorityZone
-                title="Îles"
-                priority={Priority.ILES}
-                backgroundColor="bg-blue-50 shadow-none border-blue-200"
-                livraisons={livraisons}
-              />
-              <PriorityZone
-                title="En retard"
-                priority={'LATE'}
-                backgroundColor="bg-orange-50 shadow-none border-orange-300"
-                livraisons={livraisonsEnRetard ?? []}
-              />
+              {isLoading ? (
+                <PriorityZonesSkeleton />
+              ) : (
+                <>
+                  <PriorityZone
+                    title="Urgent"
+                    priority={Priority.URGENT}
+                    backgroundColor="bg-red-50 shadow-none border-red-200"
+                    livraisons={livraisons ?? []}
+                  />
+                  <PriorityZone
+                    title="Normal"
+                    priority={Priority.NORMAL}
+                    backgroundColor="bg-yellow-50 shadow-none border-yellow-300"
+                    livraisons={livraisons ?? []}
+                  />
+                  <PriorityZone
+                    title="Îles"
+                    priority={Priority.ILES}
+                    backgroundColor="bg-blue-50 shadow-none border-blue-200"
+                    livraisons={livraisons ?? []}
+                  />
+                  <PriorityZone
+                    title="En retard"
+                    priority={'LATE'}
+                    backgroundColor="bg-orange-50 shadow-none border-orange-300"
+                    livraisons={livraisonsEnRetard ?? []}
+                  />
+                </>
+              )}
             </div>
           </div>
 
@@ -136,21 +150,27 @@ export default function ChargementDnd() {
               </div>
             </div>
             <div className="grid min-h-64 grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-              {sortedLivreurs?.map((livreur) => (
-                <DroppableLivreur
-                  key={livreur.id}
-                  livreur={livreur}
-                  livraisons={[...(livraisons ?? []), ...(livraisonsEnRetard ?? [])]}
-                  selectedDate={selectedDate}
-                  onRemove={(livraisonId) => {
-                    removeFromTmpMutation.mutate({
-                      livraisonId,
-                      livreurId: livreur.id,
-                      dateLivraison: selectedDate,
-                    });
-                  }}
-                />
-              ))}
+              {isLoading ? (
+                <LivreurCardsSkeleton count={8} />
+              ) : (
+                <>
+                  {sortedLivreurs?.map((livreur) => (
+                    <DroppableLivreur
+                      key={livreur.id}
+                      livreur={livreur}
+                      livraisons={[...(livraisons ?? []), ...(livraisonsEnRetard ?? [])]}
+                      selectedDate={selectedDate}
+                      onRemove={(livraisonId) => {
+                        removeFromTmpMutation.mutate({
+                          livraisonId,
+                          livreurId: livreur.id,
+                          dateLivraison: selectedDate,
+                        });
+                      }}
+                    />
+                  ))}
+                </>
+              )}
             </div>
           </div>
         </div>

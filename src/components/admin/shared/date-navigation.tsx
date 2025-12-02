@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { format, addDays, subDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Calendar, ChevronLeft, ChevronRight, CalendarIcon } from 'lucide-react';
+import { useQueryState, parseAsIsoDateTime } from 'nuqs';
 
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -12,36 +13,27 @@ import { cn } from '@/lib/utils';
 import { getTahitiToday, toTahitiTime, normalizeToTahitiDay } from '@/lib/date-utils';
 
 interface DateNavigationProps {
-  selectedDate?: Date;
-  onDateChange?: (date: Date) => void;
   className?: string;
 }
 
-export function DateNavigation({
-  selectedDate = getTahitiToday(),
-  onDateChange,
-  className,
-}: DateNavigationProps) {
-  // Normalize selectedDate to Tahiti timezone day
-  const normalizedSelectedDate = selectedDate
-    ? normalizeToTahitiDay(selectedDate)
-    : getTahitiToday();
+export function DateNavigation({ className }: DateNavigationProps) {
+  // Use URL state for the selected date, defaulting to today
+  // shallow: false prevents full page navigation, keeping the layout mounted
+  const [dateFromUrl, setDateInUrl] = useQueryState(
+    'date',
+    parseAsIsoDateTime.withDefault(getTahitiToday()).withOptions({ shallow: false }),
+  );
 
-  const [date, setDate] = useState<Date>(normalizedSelectedDate);
+  // Normalize the date from URL
+  const date = normalizeToTahitiDay(dateFromUrl);
+
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  // Sync internal state when selectedDate prop changes
-  useEffect(() => {
-    if (selectedDate) {
-      setDate(normalizeToTahitiDay(selectedDate));
-    }
-  }, [selectedDate]);
-
   const handleDateChange = (newDate: Date) => {
-    // Normalize to Tahiti timezone day before setting
+    // Normalize to Tahiti timezone day before setting in URL
     const normalized = normalizeToTahitiDay(newDate);
-    setDate(normalized);
-    onDateChange?.(normalized);
+    // Use startTransition to make the update non-blocking
+    setDateInUrl(normalized, { scroll: false });
   };
 
   const goToPreviousDay = () => {
