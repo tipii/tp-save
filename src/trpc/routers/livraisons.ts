@@ -42,6 +42,7 @@ export const livraisonsRouter = createTRPCRouter({
       try {
         const where: Prisma.LivraisonWhereInput = {
           status: Status.PENDING,
+          chargementId: null, // Exclude livraisons already in tmp chargements
           commande: {
             ...baseWhereCommande,
           },
@@ -87,6 +88,7 @@ export const livraisonsRouter = createTRPCRouter({
         where: {
           expectedDeliveryDate: { lt: todayStart },
           status: Status.PENDING,
+          chargementId: null, // Exclude livraisons already in tmp chargements
           commande: {
             ...baseWhereCommande,
           },

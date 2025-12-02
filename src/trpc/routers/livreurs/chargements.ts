@@ -1,4 +1,5 @@
 import { Status } from '@/generated/prisma';
+import { getTahitiDayEnd, getTahitiNow, getTahitiDayStart } from '@/lib/date-utils';
 import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
 import { z } from 'zod';
 
@@ -12,6 +13,7 @@ export const livreursChargementsRouter = createTRPCRouter({
             commande: {
               include: {
                 client: true,
+                livraisons: true,
               },
             },
           },
@@ -20,17 +22,28 @@ export const livreursChargementsRouter = createTRPCRouter({
     });
 
     if (currentChargement) {
-      return currentChargement;
+      return [currentChargement];
     }
 
-    const availableChargement = await ctx.prisma.chargement.findFirst({
-      where: { livreurId: ctx.user.id, status: Status.READY },
+    const dayStart = getTahitiDayStart(getTahitiNow());
+    const dayEnd = getTahitiDayEnd(getTahitiNow());
+
+    const availableChargement = await ctx.prisma.chargement.findMany({
+      where: {
+        livreurId: ctx.user.id,
+        status: Status.READY,
+        dateLivraison: {
+          gte: dayStart,
+          lte: dayEnd,
+        },
+      },
       include: {
         livraisons: {
           include: {
             commande: {
               include: {
                 client: true,
+                livraisons: true,
               },
             },
           },

@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
-import { useTRPC } from '@/trpc/client';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { DndContext } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { DroppableLivreur } from './dnd/droppable';
@@ -12,48 +10,41 @@ import { Priority } from '@/generated/prisma';
 import { useBreadcrumb } from '../shared/breadcrumb/breadcrumb-context';
 import { getTahitiToday, normalizeToTahitiDay } from '@/lib/date-utils';
 import { DateNavigation } from '../shared/date-navigation';
-import { toast } from 'sonner';
+import {
+  usePendingLivraisons,
+  useLivraisonsEnRetard,
+  useLivreurs,
+} from './hooks/use-chargement-queries';
+import { useRemoveFromTmpMutation } from './hooks/use-chargement-mutations';
+import { useChargementDrag } from './hooks/use-chargement-drag';
 
 export default function ChargementDnd() {
   const [selectedDate, setSelectedDate] = useState<Date>(() => getTahitiToday());
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'none'>('none');
 
-  const { data: livraisons, refetch: refetchLivraisons } = useQuery(
-    trpc.livraisons.getPendingLivraisons.queryOptions(
-      {
-        expectedDeliveryDate: selectedDate,
-      },
-      {
-        refetchOnMount: true,
-        refetchOnWindowFocus: true,
-        refetchOnReconnect: true,
-        refetchInterval: 1000 * 10, // 10 seconds
-        refetchIntervalInBackground: true,
-        enabled: !!selectedDate, // Only fetch when a date is selected
-      },
-    ),
+  // Queries
+  const { data: livraisons } = usePendingLivraisons(selectedDate);
+  const { data: livraisonsEnRetard } = useLivraisonsEnRetard();
+  const { data: livreurs } = useLivreurs(selectedDate);
+
+  // Mutations
+  const removeFromTmpMutation = useRemoveFromTmpMutation(selectedDate);
+
+  // Drag and drop logic
+  const { isDragging, handleDragStart, handleDragEnd } = useChargementDrag(
+    selectedDate,
+    livraisons,
+    livraisonsEnRetard,
+    livreurs,
   );
 
-  const { data: livraisonsEnRetard, refetch: refetchLivraisonsEnRetard } = useQuery(
-    trpc.livraisons.getLivraisonsEnRetard.queryOptions(undefined, {
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-      refetchInterval: 1000 * 10, // 10 seconds
-      refetchIntervalInBackground: true,
-    }),
-  );
-  const { data: livreurs } = useQuery(trpc.livreurs.getLivreurs.queryOptions());
-
+  // Breadcrumb
   const { setBreadcrumb } = useBreadcrumb();
   useEffect(() => {
     setBreadcrumb([], 'Chargement');
   }, [setBreadcrumb]);
 
-  const [droppedItems, setDroppedItems] = useState<Record<string, string[]>>({});
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'none'>('none');
-
+  // Sort livreurs
   const sortedLivreurs = useMemo(() => {
     if (!livreurs || sortOrder === 'none') return livreurs;
 
@@ -70,145 +61,6 @@ export default function ChargementDnd() {
 
     return sorted;
   }, [livreurs, sortOrder]);
-
-  const changePriorityMutation = useMutation(
-    trpc.livraisons.changePriority.mutationOptions({
-      onMutate: async (variables) => {
-        const queryKey = trpc.livraisons.getPendingLivraisons.queryKey({
-          expectedDeliveryDate: selectedDate ? selectedDate : undefined,
-        });
-
-        await queryClient.cancelQueries({ queryKey: queryKey });
-
-        const previousLivraisons = queryClient.getQueryData(queryKey);
-
-        queryClient.setQueryData(queryKey, (old) => {
-          return old?.map((livraison) => {
-            if (livraison.id === variables.livraisonId) {
-              return { ...livraison, priority: variables.priority };
-            }
-            return livraison;
-          });
-        });
-
-        return { previousLivraisons: previousLivraisons };
-      },
-      onSuccess: () => {
-        toast.success('Priorité modifiée avec succès');
-      },
-      onError: (error, variables, context) => {
-        toast.error('Erreur lors de la modification de la priorité');
-        console.error(error);
-      },
-      onSettled: () => {
-        refetchLivraisons();
-      },
-    }),
-  );
-
-  function handlePriorityChange(livraisonId: string, newPriority: Priority) {
-    changePriorityMutation.mutate({ livraisonId, priority: newPriority });
-  }
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-
-    if (!over) return;
-
-    const activeId = String(active.id);
-    const overId = String(over.id);
-
-    // Extract the livraison id from the draggable id (remove 'draggable-' prefix)
-    const livraisonId = activeId.replace('draggable-', '');
-
-    // Determine if the item being dragged is from LATE zone
-    const isFromLateZone = !!livraisonsEnRetard?.find((l) => l.id === livraisonId);
-
-    // Check if dropping on a priority zone
-    if (overId.startsWith('priority-')) {
-      // Prevent dropping non-LATE items into LATE zone
-      if (overId === 'priority-LATE' && !isFromLateZone) {
-        toast.error('Cette zone est réservée aux livraisons en retard');
-        return;
-      }
-
-      // Prevent dropping LATE items into other priority zones (but allow LATE -> LATE)
-      if (isFromLateZone && overId !== 'priority-LATE') {
-        toast.error(
-          'Les livraisons en retard ne peuvent être déposées que dans les zones de chargement',
-        );
-        return;
-      }
-
-      // If dropping LATE item back into LATE zone, just remove from droppable zones without changing priority
-      if (isFromLateZone && overId === 'priority-LATE') {
-        setDroppedItems((prev) => {
-          const newDroppedItems = { ...prev };
-
-          // Remove the livraison from all previous droppable zones
-          Object.keys(newDroppedItems).forEach((droppableId) => {
-            newDroppedItems[droppableId] = newDroppedItems[droppableId].filter(
-              (id) => id !== livraisonId,
-            );
-          });
-
-          return newDroppedItems;
-        });
-        return;
-      }
-
-      const newPriority = overId.replace('priority-', '') as Priority;
-
-      handlePriorityChange(livraisonId, newPriority);
-
-      // Remove the livraison from all livreur droppable zones
-      setDroppedItems((prev) => {
-        const newDroppedItems = { ...prev };
-
-        // Remove the livraison from all previous droppable zones
-        Object.keys(newDroppedItems).forEach((droppableId) => {
-          newDroppedItems[droppableId] = newDroppedItems[droppableId].filter(
-            (id) => id !== livraisonId,
-          );
-        });
-
-        return newDroppedItems;
-      });
-
-      return;
-    }
-
-    // Check if dropping on a livreur droppable zone
-    if (overId.startsWith('droppable-')) {
-      setDroppedItems((prev) => {
-        const newDroppedItems = { ...prev };
-
-        // Remove the livraison from all previous droppable zones
-        Object.keys(newDroppedItems).forEach((droppableId) => {
-          newDroppedItems[droppableId] = newDroppedItems[droppableId].filter(
-            (id) => id !== livraisonId,
-          );
-        });
-
-        // Add the livraison to the new droppable zone
-        newDroppedItems[overId] = [...(newDroppedItems[overId] || []), livraisonId];
-
-        return newDroppedItems;
-      });
-    }
-  }
-
-  function handleRemoveLivraison(livraisonId: string) {
-    setDroppedItems((prev) => {
-      const newDroppedItems = { ...prev };
-      Object.keys(newDroppedItems).forEach((droppableId) => {
-        newDroppedItems[droppableId] = newDroppedItems[droppableId].filter(
-          (id) => id !== livraisonId,
-        );
-      });
-      return newDroppedItems;
-    });
-  }
 
   function handleSort() {
     setSortOrder((prev) => {
@@ -227,11 +79,11 @@ export default function ChargementDnd() {
   if (!livraisons || !livreurs) return null;
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
+    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex flex-col gap-4">
         <DateNavigation
           selectedDate={selectedDate}
-          onDateChange={(date) => setSelectedDate(normalizeToTahitiDay(date))}
+          onDateChange={(date) => !isDragging && setSelectedDate(normalizeToTahitiDay(date))}
           className="bg-card flex w-full justify-between border-b border-gray-200 p-4"
         />
         <div className="flex flex-col gap-4">
@@ -245,28 +97,24 @@ export default function ChargementDnd() {
                 priority={Priority.URGENT}
                 backgroundColor="bg-red-50 shadow-none border-red-200"
                 livraisons={livraisons}
-                droppedItems={droppedItems}
               />
               <PriorityZone
                 title="Normal"
                 priority={Priority.NORMAL}
                 backgroundColor="bg-yellow-50 shadow-none border-yellow-300"
                 livraisons={livraisons}
-                droppedItems={droppedItems}
               />
               <PriorityZone
                 title="Îles"
                 priority={Priority.ILES}
                 backgroundColor="bg-blue-50 shadow-none border-blue-200"
                 livraisons={livraisons}
-                droppedItems={droppedItems}
               />
               <PriorityZone
                 title="En retard"
                 priority={'LATE'}
                 backgroundColor="bg-orange-50 shadow-none border-orange-300"
                 livraisons={livraisonsEnRetard ?? []}
-                droppedItems={droppedItems}
               />
             </div>
           </div>
@@ -288,15 +136,19 @@ export default function ChargementDnd() {
               </div>
             </div>
             <div className="grid min-h-64 grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-              {sortedLivreurs?.map((livreur, index) => (
+              {sortedLivreurs?.map((livreur) => (
                 <DroppableLivreur
                   key={livreur.id}
                   livreur={livreur}
-                  droppedItems={droppedItems}
                   livraisons={[...(livraisons ?? []), ...(livraisonsEnRetard ?? [])]}
-                  onRemoveLivraison={handleRemoveLivraison}
-                  setDroppedItems={setDroppedItems}
                   selectedDate={selectedDate}
+                  onRemove={(livraisonId) => {
+                    removeFromTmpMutation.mutate({
+                      livraisonId,
+                      livreurId: livreur.id,
+                      dateLivraison: selectedDate,
+                    });
+                  }}
                 />
               ))}
             </div>

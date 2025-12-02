@@ -12,7 +12,6 @@ interface PriorityZoneProps {
   priority: string;
   backgroundColor: string;
   livraisons: TrpcLivraison[];
-  droppedItems: Record<string, string[]>;
 }
 
 const MAX_ITEMS = 5;
@@ -22,7 +21,6 @@ export const PriorityZone = ({
   priority,
   backgroundColor,
   livraisons,
-  droppedItems,
 }: PriorityZoneProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,15 +31,12 @@ export const PriorityZone = ({
 
   const availableLots = useMemo(() => {
     return livraisons.filter((livraison) => {
-      // Check if this command is already dropped in any livreur zone
-      const isDropped = Object.values(droppedItems).some((items) => items.includes(livraison.id));
-
       // Filter by priority
       let matchesPriority = false;
       if (priority === 'LATE') {
-        matchesPriority = !isDropped;
+        matchesPriority = true; // LATE zone shows all livraisons passed to it
       } else {
-        matchesPriority = !isDropped && livraison.priority === priority;
+        matchesPriority = livraison.priority === priority;
       }
 
       if (!matchesPriority) return false;
@@ -55,7 +50,7 @@ export const PriorityZone = ({
 
       return matchesRef || matchesClient;
     });
-  }, [livraisons, droppedItems, priority, searchQuery]);
+  }, [livraisons, priority, searchQuery]);
 
   const totalPages = Math.ceil(availableLots.length / MAX_ITEMS);
   const startIndex = currentPage * MAX_ITEMS;

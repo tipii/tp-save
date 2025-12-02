@@ -9,7 +9,7 @@ import { PackageOpen, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function Homepage() {
-  const { data: chargement, isLoading, refetch } = useCurrentChargement();
+  const { data: chargements, isLoading, refetch } = useCurrentChargement();
   const { user } = useUser();
 
   return (
@@ -32,7 +32,7 @@ export default function Homepage() {
               </CardContent>
             </Card>
           )}
-          {!isLoading && !chargement && (
+          {!isLoading && !chargements && (
             <Card className="border-dashed">
               <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-8">
                 <div className="rounded-full bg-blue-50 p-4">
@@ -47,7 +47,10 @@ export default function Homepage() {
               </CardContent>
             </Card>
           )}
-          {chargement && <ChargementCard chargement={chargement} />}
+          {chargements &&
+            chargements.map((chargement) => (
+              <ChargementCard key={chargement.id} chargement={chargement} />
+            ))}
         </div>
       </div>
     </div>

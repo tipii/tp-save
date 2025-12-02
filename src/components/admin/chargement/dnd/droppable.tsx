@@ -16,9 +16,6 @@ import {
 import { useMemo, useState } from 'react';
 import CommandeModal from '@/components/modals/commande-modal/commande-modal';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useTRPC } from '@/trpc/client';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import ChargementModal from '@/components/modals/chargement-modal/chargement-modal';
 import DraggableLot from './draggable';
 import { statusToIcon, statusToTailwindColor } from '@/components/ui/enum-to-ui';
@@ -38,139 +35,38 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { getTahitiToday } from '@/lib/date-utils';
+import {
+  useCreateChargementMutation,
+  useDeleteChargementMutation,
+} from '../hooks/use-chargement-mutations';
 
 export const DroppableLivreur = ({
   livreur,
-  droppedItems,
   livraisons,
-  onRemoveLivraison,
-  setDroppedItems,
   selectedDate,
+  onRemove,
 }: {
   livreur: TrpcLivreur;
-  droppedItems: Record<string, string[]>;
   livraisons: TrpcLivraison[];
-  onRemoveLivraison: (livraisonId: string) => void;
-  setDroppedItems: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
   selectedDate: Date;
+  onRemove: (livraisonId: string) => void;
 }) => {
-  const trpc = useTRPC();
-  const { refetch } = useQuery(
-    trpc.livreurs.getLivreurs.queryOptions(undefined, {
-      refetchInterval: 1000 * 10, // 30 seconds
-    }),
-  );
-  const { data: allLivraisons, refetch: refetchLivraisons } = useQuery(
-    trpc.livraisons.getPendingLivraisons.queryOptions(
-      {
-        expectedDeliveryDate: selectedDate,
-      },
-      {
-        refetchOnMount: true,
-        refetchOnWindowFocus: true,
-        refetchOnReconnect: true,
-        refetchInterval: 1000 * 10, // 10 seconds
-        refetchIntervalInBackground: true,
-        enabled: !!selectedDate, // Only fetch when a date is selected
-      },
-    ),
-  );
-
-  const { data: livraisonsEnRetard, refetch: refetchLivraisonsEnRetard } = useQuery(
-    trpc.livraisons.getLivraisonsEnRetard.queryOptions(undefined, {
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-      refetchInterval: 1000 * 10, // 10 seconds
-      refetchIntervalInBackground: true,
-    }),
-  );
-
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-${livreur.id}`,
   });
 
-  const droppedLivraisons = useMemo(() => {
-    const droppedLotIds = droppedItems[`droppable-${livreur.id}`] || [];
-    return droppedLotIds
-      .map((lotId) => livraisons.find((c) => c.id === lotId))
-      .filter((lot): lot is TrpcLivraison => lot !== undefined);
-  }, [droppedItems, livreur.id, livraisons]);
+  // Get tmp chargement (PENDING status) for this livreur
+  const tmpChargement = useMemo(() => {
+    return livreur.chargements.find((c) => c.status === Status.PENDING);
+  }, [livreur.chargements]);
 
-  const { mutate: deleteChargement } = useMutation(
-    trpc.chargements.deleteChargement.mutationOptions({
-      onSuccess: (_data, variables) => {
-        toast.success('Chargement supprimé avec succès');
+  // Get livraisons from tmp chargement
+  const tmpLivraisons = useMemo(() => {
+    return tmpChargement?.livraisons || [];
+  }, [tmpChargement]);
 
-        // Find the deleted chargement to get its livraisons
-        const deletedChargement = livreur.chargements.find((c) => c.id === variables.id);
-        if (deletedChargement && deletedChargement.livraisons.length > 0) {
-          // Add the livraisons back to the drop zone
-          setDroppedItems((prev) => {
-            const livraisonIds = deletedChargement.livraisons.map((l) => l.id);
-            const existingIds = prev[`droppable-${livreur.id}`] || [];
-
-            return {
-              ...prev,
-              [`droppable-${livreur.id}`]: [...existingIds, ...livraisonIds],
-            };
-          });
-        }
-      },
-      onError: (error) => {
-        console.error(error);
-        toast.error('Erreur lors de la suppression du chargement');
-      },
-      onSettled: () => {
-        refetchLivraisonsEnRetard();
-        refetchLivraisons();
-        refetch();
-      },
-    }),
-  );
-  const { mutate } = useMutation(
-    trpc.chargements.createChargement.mutationOptions({
-      onSuccess: (data) => {
-        if (data.success) {
-          toast.success('Chargement créé avec succès');
-
-          // Only clear items from this droppable zone
-          setDroppedItems((prev) => {
-            const newItems = { ...prev };
-            delete newItems[`droppable-${livreur.id}`];
-            return newItems;
-          });
-        } else {
-          toast.error('Erreur lors de la création du chargement');
-        }
-      },
-      onError: (error) => {
-        console.error(error);
-      },
-      onSettled: () => {
-        refetchLivraisonsEnRetard();
-        refetchLivraisons();
-        refetch();
-      },
-    }),
-  );
-  const handleCreateChargement = (lotIds: string[], livreurId: string) => {
-    mutate(
-      {
-        livraisons: lotIds,
-        livreurId,
-      },
-      {
-        onSuccess: () => {
-          refetch();
-          refetchLivraisons();
-        },
-        onError: (error) => {
-          console.error(error);
-        },
-      },
-    );
-  };
+  const { mutate: deleteChargement } = useDeleteChargementMutation(selectedDate);
+  const { mutate: createChargement } = useCreateChargementMutation(selectedDate);
 
   return (
     <div
@@ -193,56 +89,58 @@ export const DroppableLivreur = ({
         </Link>
       </div>
       <div className="flex flex-col gap-1">
-        {livreur.chargements.map((chargement) => (
-          <div
-            key={chargement.id}
-            className={cn(
-              'flex items-center justify-between gap-2 rounded-sm border px-2',
-              statusToTailwindColor(chargement.status).border,
-              statusToTailwindColor(chargement.status).background,
-            )}
-          >
-            <div className="flex items-center gap-2">
-              <p className="text-xs text-slate-500">{statusToIcon(chargement.status)}</p>
-              <p className="text-sm">{chargement.name}</p>
-            </div>
-            <div className="flex items-center">
-              {chargement.status === Status.READY && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Trash size={16} />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Êtes-vous sûr de vouloir supprimer le chargement "{chargement.name}" ? Cette
-                        action est irréversible.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Annuler</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          deleteChargement({ id: chargement.id });
-                        }}
-                      >
-                        Supprimer
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+        {livreur.chargements
+          .filter((c) => c.status === Status.DELIVERING || c.status === Status.READY)
+          .map((chargement) => (
+            <div
+              key={chargement.id}
+              className={cn(
+                'flex items-center justify-between gap-2 rounded-sm border px-2',
+                statusToTailwindColor(chargement.status).border,
+                statusToTailwindColor(chargement.status).background,
               )}
-              <ChargementModal chargementId={chargement.id}>
-                <Button variant="ghost" size="icon">
-                  <Eye size={16} />
-                </Button>
-              </ChargementModal>
+            >
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-slate-500">{statusToIcon(chargement.status)}</p>
+                <p className="text-sm">{chargement.name}</p>
+              </div>
+              <div className="flex items-center">
+                {chargement.status === Status.READY && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Trash size={16} />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Êtes-vous sûr de vouloir supprimer le chargement "{chargement.name}" ?
+                          Cette action est irréversible.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => {
+                            deleteChargement({ id: chargement.id });
+                          }}
+                        >
+                          Supprimer
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+                <ChargementModal chargementId={chargement.id}>
+                  <Button variant="ghost" size="icon">
+                    <Eye size={16} />
+                  </Button>
+                </ChargementModal>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
       <div
         ref={setNodeRef}
@@ -251,7 +149,7 @@ export const DroppableLivreur = ({
         <div className="flex w-full flex-1 flex-col items-center justify-center">
           <h3 className="mb-1 text-sm font-bold text-slate-900">Chargement</h3>
           <div className="flex w-full flex-col items-center justify-center gap-1 pb-4">
-            {droppedLivraisons.map((livraison) => (
+            {tmpLivraisons.map((livraison) => (
               <div key={livraison.id} className="flex w-full items-center">
                 <DraggableLot key={livraison.id} livraison={livraison} />
                 <div className="">
@@ -263,14 +161,14 @@ export const DroppableLivreur = ({
                   <Button
                     variant="ghost"
                     className="h-5 w-5"
-                    onClick={() => onRemoveLivraison(livraison.id)}
+                    onClick={() => onRemove(livraison.id)}
                   >
                     <X size={16} />
                   </Button>
                 </div>
               </div>
             ))}
-            {droppedLivraisons.length === 0 && (
+            {tmpLivraisons.length === 0 && (
               <div className="text-xs text-slate-500">Déposer les commandes ici</div>
             )}
           </div>
@@ -279,18 +177,71 @@ export const DroppableLivreur = ({
         <Button
           variant="outline"
           className="w-full bg-transparent"
+          disabled={tmpLivraisons.length === 0}
           onClick={() => {
-            const commandeIds = droppedLivraisons.map((livraison) => livraison.id);
-
-            handleCreateChargement(commandeIds, livreur.id);
-            console.log(
-              `Livreur ${livreur.name} (${livreur.id}) - Commandes validées:`,
-              commandeIds,
-            );
+            createChargement({
+              livreurId: livreur.id,
+              dateLivraison: selectedDate,
+            });
           }}
         >
           Valider
         </Button>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        {livreur.chargements
+          .filter((c) => c.status === Status.DELIVERED)
+          .map((chargement) => (
+            <div
+              key={chargement.id}
+              className={cn(
+                'flex items-center justify-between gap-2 rounded-sm border px-2',
+                statusToTailwindColor(chargement.status).border,
+                statusToTailwindColor(chargement.status).background,
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-slate-500">{statusToIcon(chargement.status)}</p>
+                <p className="text-sm">{chargement.name}</p>
+              </div>
+              <div className="flex items-center">
+                {chargement.status === Status.READY && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Trash size={16} />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Êtes-vous sûr de vouloir supprimer le chargement "{chargement.name}" ?
+                          Cette action est irréversible.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => {
+                            deleteChargement({ id: chargement.id });
+                          }}
+                        >
+                          Supprimer
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+                <ChargementModal chargementId={chargement.id}>
+                  <Button variant="ghost" size="icon">
+                    <Eye size={16} />
+                  </Button>
+                </ChargementModal>
+              </div>
+            </div>
+          ))}
       </div>
     </div>
   );

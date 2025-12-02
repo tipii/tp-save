@@ -1,15 +1,15 @@
 import z from 'zod';
-import { adminProcedure, createTRPCRouter, protectedProcedure } from '../init';
+import { createTRPCRouter, secretariatOrAdminProcedure } from '../init';
 import { Prisma, Status } from '@/generated/prisma';
 import {
   formatDateForTahiti,
-  getTahitiNow,
   getTahitiDayStart,
   getTahitiDayEnd,
 } from '@/lib/date-utils';
+import { TRPCError } from '@trpc/server';
 
 export const chargementsRouter = createTRPCRouter({
-  getChargements: protectedProcedure.query(async ({ ctx }) => {
+  getChargements: secretariatOrAdminProcedure.query(async ({ ctx }) => {
     const chargements = await ctx.prisma.chargement.findMany({
       include: {
         livreur: true,
@@ -28,7 +28,7 @@ export const chargementsRouter = createTRPCRouter({
     });
     return chargements;
   }),
-  getChargementById: protectedProcedure
+  getChargementById: secretariatOrAdminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const chargement = await ctx.prisma.chargement.findUnique({
@@ -60,7 +60,7 @@ export const chargementsRouter = createTRPCRouter({
       });
       return chargement;
     }),
-  getArchivedChargements: protectedProcedure
+  getArchivedChargements: secretariatOrAdminProcedure
     .input(
       z.object({
         search: z.string().optional(),
@@ -157,71 +157,328 @@ export const chargementsRouter = createTRPCRouter({
         },
       };
     }),
-  createChargement: adminProcedure
+  addToTmpChargement: secretariatOrAdminProcedure
     .input(
       z.object({
-        name: z.string().optional(),
+        livraisonId: z.string(),
         livreurId: z.string(),
-        livraisons: z.array(z.string()),
+        dateLivraison: z.date(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const chargement = await ctx.prisma.chargement.create({
-        data: {
-          name: input.name || 'Chargement ' + formatDateForTahiti(getTahitiNow()),
-          livreurId: input.livreurId,
-          status: Status.READY,
-          livraisons: {
-            connect: input.livraisons.map((livraisonId) => ({ id: livraisonId })),
-          },
-        },
-      });
-
-      const updatedLivraisons = await ctx.prisma.livraison.updateMany({
-        where: {
-          id: { in: input.livraisons },
-        },
-        data: { status: Status.READY, livreurId: input.livreurId },
-      });
-
-      console.log(updatedLivraisons);
-      //TODO : update commande
-
-      if (!chargement) {
-        return {
-          success: false,
-          error: 'Failed to create chargement',
-          chargement: null,
-        };
-      }
-
       try {
-        await ctx.prisma.chargementHistory.create({
-          data: {
-            chargementId: chargement.id,
-            userId: ctx.user.id,
-            action: 'create',
-            snapshot: chargement,
+        const dayStart = getTahitiDayStart(input.dateLivraison);
+        const dayEnd = getTahitiDayEnd(input.dateLivraison);
+
+        const existingTmpChargement = await ctx.prisma.chargement.findFirst({
+          where: {
+            livreurId: input.livreurId,
+            status: Status.PENDING,
+            dateLivraison: {
+              gte: dayStart,
+              lte: dayEnd,
+            },
           },
         });
+
+        if (existingTmpChargement) {
+          await ctx.prisma.chargement.update({
+            where: { id: existingTmpChargement.id },
+            data: {
+              livraisons: {
+                connect: { id: input.livraisonId },
+              },
+            },
+          });
+          return {
+            success: true,
+            chargement: existingTmpChargement,
+            error: null,
+            message: 'Livraison ajoutée au chargement temporaire',
+          };
+        } else {
+          const livreur = await ctx.prisma.user.findUnique({
+            where: {
+              id: input.livreurId,
+            },
+          });
+
+          if (!livreur) {
+            return {
+              success: false,
+              message: 'Livreur non trouvé',
+              chargement: null,
+              error: 'Livreur non trouvé',
+            };
+          }
+
+          const chargement = await ctx.prisma.chargement.create({
+            data: {
+              name: 'Tmp Chargement ' + livreur.name,
+              livreurId: input.livreurId,
+              status: Status.PENDING,
+              dateLivraison: input.dateLivraison,
+              livraisons: {
+                connect: { id: input.livraisonId },
+              },
+            },
+          });
+
+          return {
+            success: true,
+            chargement,
+            message: 'Chargement temporaire créé avec succès',
+            error: null,
+          };
+        }
       } catch (error) {
         console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: "Erreur lors de l'ajout de la livraison au chargement temporaire",
+        });
       }
+    }),
+  removeFromTmpChargement: secretariatOrAdminProcedure
+    .input(
+      z.object({
+        livraisonId: z.string(),
+        livreurId: z.string(),
+        dateLivraison: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const dayStart = getTahitiDayStart(input.dateLivraison);
+        const dayEnd = getTahitiDayEnd(input.dateLivraison);
 
-      // await ctx.prisma.commande.updateMany({
-      //   where: {
-      //     id: { in: input.commandes },
-      //   },
-      //   data: { chargementId: chargement.id },
-      // });
-      return {
-        success: true,
-        chargement,
-        error: null,
-      };
+        const tmpChargement = await ctx.prisma.chargement.findFirst({
+          where: {
+            livreurId: input.livreurId,
+            status: Status.PENDING,
+            dateLivraison: {
+              gte: dayStart,
+              lte: dayEnd,
+            },
+          },
+          include: { livraisons: true },
+        });
+
+        if (!tmpChargement) {
+          return {
+            success: false,
+            error: 'Chargement temporaire non trouvé',
+          };
+        }
+
+        // Disconnect livraison from chargement
+        await ctx.prisma.chargement.update({
+          where: { id: tmpChargement.id },
+          data: {
+            livraisons: { disconnect: { id: input.livraisonId } },
+          },
+        });
+
+        // If chargement has only 1 livraison (the one we just removed), delete it
+        if (tmpChargement.livraisons.length === 1) {
+          await ctx.prisma.chargement.delete({
+            where: { id: tmpChargement.id },
+          });
+        }
+
+        return {
+          success: true,
+          message: 'Livraison retirée du chargement temporaire',
+        };
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Erreur lors du retrait de la livraison du chargement temporaire',
+        });
+      }
+    }),
+  moveToAnotherTmpChargement: secretariatOrAdminProcedure
+    .input(
+      z.object({
+        livraisonId: z.string(),
+        fromLivreurId: z.string(),
+        toLivreurId: z.string(),
+        dateLivraison: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const dayStart = getTahitiDayStart(input.dateLivraison);
+        const dayEnd = getTahitiDayEnd(input.dateLivraison);
+
+        // 1. Remove from source tmp chargement
+        const sourceTmpChargement = await ctx.prisma.chargement.findFirst({
+          where: {
+            livreurId: input.fromLivreurId,
+            status: Status.PENDING,
+            dateLivraison: { gte: dayStart, lte: dayEnd },
+          },
+          include: { livraisons: true },
+        });
+
+        if (sourceTmpChargement) {
+          await ctx.prisma.chargement.update({
+            where: { id: sourceTmpChargement.id },
+            data: {
+              livraisons: { disconnect: { id: input.livraisonId } },
+            },
+          });
+
+          // Delete source tmp chargement if empty
+          if (sourceTmpChargement.livraisons.length === 1) {
+            await ctx.prisma.chargement.delete({
+              where: { id: sourceTmpChargement.id },
+            });
+          }
+        }
+
+        // 2. Add to destination tmp chargement (find or create)
+        const destTmpChargement = await ctx.prisma.chargement.findFirst({
+          where: {
+            livreurId: input.toLivreurId,
+            status: Status.PENDING,
+            dateLivraison: { gte: dayStart, lte: dayEnd },
+          },
+        });
+
+        if (destTmpChargement) {
+          // Destination tmp chargement exists - connect livraison
+          await ctx.prisma.chargement.update({
+            where: { id: destTmpChargement.id },
+            data: {
+              livraisons: { connect: { id: input.livraisonId } },
+            },
+          });
+        } else {
+          // Destination tmp chargement doesn't exist - create it
+          const toLivreur = await ctx.prisma.user.findUnique({
+            where: { id: input.toLivreurId },
+          });
+
+          if (!toLivreur) {
+            return {
+              success: false,
+              error: 'Livreur de destination non trouvé',
+            };
+          }
+
+          await ctx.prisma.chargement.create({
+            data: {
+              name: 'Tmp Chargement ' + toLivreur.name,
+              livreurId: input.toLivreurId,
+              status: Status.PENDING,
+              dateLivraison: input.dateLivraison,
+              livraisons: {
+                connect: { id: input.livraisonId },
+              },
+            },
+          });
+        }
+
+        return {
+          success: true,
+          message: 'Livraison déplacée avec succès',
+        };
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Erreur lors du déplacement de la livraison',
+        });
+      }
+    }),
+  createChargement: secretariatOrAdminProcedure
+    .input(
+      z.object({
+        livreurId: z.string(),
+        dateLivraison: z.date(),
+        name: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Find tmp chargement for this livreur + date
+        const dayStart = getTahitiDayStart(input.dateLivraison);
+        const dayEnd = getTahitiDayEnd(input.dateLivraison);
+
+        const tmpChargement = await ctx.prisma.chargement.findFirst({
+          where: {
+            livreurId: input.livreurId,
+            status: Status.PENDING,
+            dateLivraison: { gte: dayStart, lte: dayEnd },
+          },
+          include: { livraisons: true },
+        });
+
+        if (!tmpChargement) {
+          return {
+            success: false,
+            error: 'Aucun chargement temporaire trouvé',
+            chargement: null,
+          };
+        }
+
+        if (tmpChargement.livraisons.length === 0) {
+          return {
+            success: false,
+            error: 'Le chargement temporaire est vide',
+            chargement: null,
+          };
+        }
+
+        // Update chargement: PENDING → READY
+        const chargement = await ctx.prisma.chargement.update({
+          where: { id: tmpChargement.id },
+          data: {
+            status: Status.READY,
+            name: input.name || `Chargement ${formatDateForTahiti(input.dateLivraison)}`,
+          },
+        });
+
+        // Update all livraisons: status PENDING → READY
+        await ctx.prisma.livraison.updateMany({
+          where: { id: { in: tmpChargement.livraisons.map((l) => l.id) } },
+          data: {
+            status: Status.READY,
+            livreurId: input.livreurId,
+          },
+        });
+
+        // Create history entry
+        try {
+          await ctx.prisma.chargementHistory.create({
+            data: {
+              chargementId: chargement.id,
+              userId: ctx.user.id,
+              action: 'create',
+              snapshot: chargement,
+            },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+
+        return {
+          success: true,
+          chargement,
+          error: null,
+        };
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Erreur lors de la validation du chargement',
+        });
+      }
     }),
 
-  deleteChargement: adminProcedure
+  deleteChargement: secretariatOrAdminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const chargement = await ctx.prisma.chargement.findUnique({
@@ -256,7 +513,7 @@ export const chargementsRouter = createTRPCRouter({
    * Livreurs procedures
    *
    */
-  getChargementsByLivreur: protectedProcedure.query(async ({ ctx }) => {
+  getChargementsByLivreur: secretariatOrAdminProcedure.query(async ({ ctx }) => {
     const chargements = await ctx.prisma.chargement.findMany({
       where: { livreurId: ctx.user.id, status: Status.READY },
       include: {

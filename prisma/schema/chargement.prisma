@@ -3,8 +3,9 @@ model Chargement {
   name       String
   livraisons Livraison[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  dateLivraison DateTime? @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   livreurId String?
   livreur   User?   @relation(fields: [livreurId], references: [id])
@@ -12,6 +13,8 @@ model Chargement {
 
   history ChargementHistory[]
 
+  // Ensure only one PENDING chargement per livreur per day
+  @@unique([livreurId, status, dateLivraison], name: "unique_pending_chargement_per_day")
   @@map("chargement")
 }
 
