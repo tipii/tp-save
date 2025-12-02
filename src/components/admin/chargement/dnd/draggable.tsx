@@ -36,7 +36,7 @@ export default function DraggableLot({ livraison }: { livraison: TrpcLivraison }
         <div className="text-sm font-bold">{livraison.commande.ref} </div>
         {priorityToBadge(livraison.priority)}
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between text-sm">
         {livraison.commande.client?.name || 'Sans client'}
         {livraison.priority === Priority.ILES && livraison.commande.docVente?.expedit && (
           <div className="text-sm font-medium">{livraison.commande.docVente?.expedit}</div> //TODO: Add expedition name from Maxime table
