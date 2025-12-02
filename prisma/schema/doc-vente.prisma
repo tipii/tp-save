@@ -1,197 +1,197 @@
 model DocVente {
   id      String @id @default(cuid())
   // Primary Key & Identifiers
-  piece   String @map("DO_Piece")
-  cbPiece String @map("cbDO_Piece")
-  guid    String @map("DO_GUID")
+  piece   String @map("DO_Piece") // USED: import logic, filtering
+  cbPiece String @map("cbDO_Piece") // USED: import from SAGE
+  guid    String @map("DO_GUID") // USED: import from SAGE
 
   // Document Information
-  domaine    String   @map("DO_Domaine")
-  type       String   @map("DO_Type")
-  date       DateTime @map("DO_Date")
-  ref        String   @map("DO_Ref")
-  souche     String   @map("DO_Souche")
-  period     String   @map("DO_Period")
-  heure      String   @map("DO_Heure")
-  statut     String   @map("DO_Statut")
-  eStatut    String   @map("DO_EStatut")
-  docType    String   @map("DO_DocType")
-  refExterne String?  @map("DO_RefExterne")
-  noWeb      String?  @map("DO_NoWeb")
+  domaine    String   @map("DO_Domaine") // USED: import from SAGE
+  type       String   @map("DO_Type") // USED: import from SAGE
+  date       DateTime @map("DO_Date") // USED: import from SAGE, indexed
+  ref        String   @map("DO_Ref") // USED: import from SAGE
+  souche     String   @map("DO_Souche") // UNUSED in app - only imported
+  period     String   @map("DO_Period") // USED: import from SAGE
+  heure      String   @map("DO_Heure") // UNUSED in app - only imported
+  statut     String   @map("DO_Statut") // USED: import from SAGE, indexed
+  eStatut    String   @map("DO_EStatut") // UNUSED in app - only imported
+  docType    String   @map("DO_DocType") // UNUSED in app - only imported
+  refExterne String?  @map("DO_RefExterne") // UNUSED in app - only imported
+  noWeb      String?  @map("DO_NoWeb") // UNUSED in app - only imported
 
   // Client/Tiers Information
-  tiers         String  @map("DO_Tiers")
-  cbTiers       String  @map("cbDO_Tiers")
-  numPayeur     String  @map("CT_NumPayeur")
-  cbNumPayeur   String  @map("cbCT_NumPayeur")
-  numCentrale   String? @map("CT_NumCentrale")
-  cbNumCentrale String? @map("cbCT_NumCentrale")
-  contact       String? @map("DO_Contact")
+  tiers         String  @map("DO_Tiers") // USED: import, client lookup, indexed
+  cbTiers       String  @map("cbDO_Tiers") // USED: import from SAGE
+  numPayeur     String  @map("CT_NumPayeur") // USED: import from SAGE, indexed
+  cbNumPayeur   String  @map("cbCT_NumPayeur") // USED: import from SAGE
+  numCentrale   String? @map("CT_NumCentrale") // USED: import from SAGE
+  cbNumCentrale String? @map("cbCT_NumCentrale") // USED: import from SAGE
+  contact       String? @map("DO_Contact") // UNUSED in app - only imported
 
   // Financial Information
-  devise       String   @map("DO_Devise")
-  cours        String   @map("DO_Cours")
-  totalHT      Decimal  @map("DO_TotalHT") @db.Decimal(18, 2)
-  totalHTNet   Decimal  @map("DO_TotalHTNet") @db.Decimal(18, 2)
-  totalTTC     Decimal  @map("DO_TotalTTC") @db.Decimal(18, 2)
-  netAPayer    Decimal  @map("DO_NetAPayer") @db.Decimal(18, 2)
-  montantRegle Decimal  @map("DO_MontantRegle") @db.Decimal(18, 2)
-  escompte     Decimal  @map("DO_Escompte") @db.Decimal(18, 2)
-  txEscompte   Decimal  @map("DO_TxEscompte") @db.Decimal(5, 2)
-  ecart        Decimal? @map("DO_Ecart") @db.Decimal(18, 2)
+  devise       String   @map("DO_Devise") // USED: import from SAGE
+  cours        String   @map("DO_Cours") // USED: import from SAGE
+  totalHT      Decimal  @map("DO_TotalHT") @db.Decimal(18, 2) // UNUSED in app - only imported
+  totalHTNet   Decimal  @map("DO_TotalHTNet") @db.Decimal(18, 2) // UNUSED in app - only imported
+  totalTTC     Decimal  @map("DO_TotalTTC") @db.Decimal(18, 2) // UNUSED in app - only imported
+  netAPayer    Decimal  @map("DO_NetAPayer") @db.Decimal(18, 2) // UNUSED in app - only imported
+  montantRegle Decimal  @map("DO_MontantRegle") @db.Decimal(18, 2) // UNUSED in app - only imported
+  escompte     Decimal  @map("DO_Escompte") @db.Decimal(18, 2) // UNUSED in app - only imported
+  txEscompte   Decimal  @map("DO_TxEscompte") @db.Decimal(5, 2) // UNUSED in app - only imported
+  ecart        Decimal? @map("DO_Ecart") @db.Decimal(18, 2) // UNUSED in app - only imported
 
   // Tax Information
-  taxe1     Decimal @map("DO_Taxe1") @db.Decimal(18, 2)
-  typeTaux1 String  @map("DO_TypeTaux1")
-  typeTaxe1 String  @map("DO_TypeTaxe1")
-  codeTaxe1 String  @map("DO_CodeTaxe1")
-  taxe2     Decimal @map("DO_Taxe2") @db.Decimal(18, 2)
-  typeTaux2 String  @map("DO_TypeTaux2")
-  typeTaxe2 String  @map("DO_TypeTaxe2")
-  codeTaxe2 String  @map("DO_CodeTaxe2")
-  taxe3     Decimal @map("DO_Taxe3") @db.Decimal(18, 2)
-  typeTaux3 String  @map("DO_TypeTaux3")
-  typeTaxe3 String  @map("DO_TypeTaxe3")
-  codeTaxe3 String  @map("DO_CodeTaxe3")
-  tvaDebit  String? @map("DO_TVADebit")
+  taxe1     Decimal @map("DO_Taxe1") @db.Decimal(18, 2) // UNUSED in app - only imported
+  typeTaux1 String  @map("DO_TypeTaux1") // UNUSED in app - only imported
+  typeTaxe1 String  @map("DO_TypeTaxe1") // UNUSED in app - only imported
+  codeTaxe1 String  @map("DO_CodeTaxe1") // UNUSED in app - only imported
+  taxe2     Decimal @map("DO_Taxe2") @db.Decimal(18, 2) // UNUSED in app - only imported
+  typeTaux2 String  @map("DO_TypeTaux2") // UNUSED in app - only imported
+  typeTaxe2 String  @map("DO_TypeTaxe2") // UNUSED in app - only imported
+  codeTaxe2 String  @map("DO_CodeTaxe2") // UNUSED in app - only imported
+  taxe3     Decimal @map("DO_Taxe3") @db.Decimal(18, 2) // UNUSED in app - only imported
+  typeTaux3 String  @map("DO_TypeTaux3") // UNUSED in app - only imported
+  typeTaxe3 String  @map("DO_TypeTaxe3") // UNUSED in app - only imported
+  codeTaxe3 String  @map("DO_CodeTaxe3") // UNUSED in app - only imported
+  tvaDebit  String? @map("DO_TVADebit") // UNUSED in app - only imported
 
   // Shipping & Delivery
-  expedit          String?   @map("DO_Expedit")
-  dateLivr         DateTime? @map("DO_DateLivr")
-  dateLivrRealisee DateTime? @map("DO_DateLivrRealisee")
-  dateExpedition   DateTime? @map("DO_DateExpedition")
-  colisage         String?   @map("DO_Colisage")
-  typeColis        String?   @map("DO_TypeColis")
-  creneauLivraison String?   @map("Créneau de livraison")
-  personneContact  String?   @map("Personne à contacter sur place")
-  adresseLivraison String?   @map("Adresse liv° / sce à livrer")
+  expedit          String?   @map("DO_Expedit") // USED: displayed in UI (commandes-docvente-infos)
+  dateLivr         DateTime? @map("DO_DateLivr") // USED: displayed in UI, import logic
+  dateLivrRealisee DateTime? @map("DO_DateLivrRealisee") // UNUSED in app - only imported
+  dateExpedition   DateTime? @map("DO_DateExpedition") // UNUSED in app - only imported
+  colisage         String?   @map("DO_Colisage") // UNUSED in app - only imported
+  typeColis        String?   @map("DO_TypeColis") // UNUSED in app - only imported
+  creneauLivraison String?   @map("Créneau de livraison") // USED: displayed in UI
+  personneContact  String?   @map("Personne à contacter sur place") // USED: displayed in UI
+  adresseLivraison String?   @map("Adresse liv° / sce à livrer") // USED: displayed in UI
 
-  // References & Links
-  coNo      String? @map("CO_No")
-  cbCoNo    String? @map("cbCO_No")
-  deNo      String? @map("DE_No")
-  cbDeNo    String? @map("cbDE_No")
-  liNo      String? @map("LI_No")
-  cbLiNo    String? @map("cbLI_No")
-  caNum     String? @map("CA_Num")
-  cbCaNum   String? @map("cbCA_Num")
-  caNo      String? @map("CA_No")
-  cbCaNo    String? @map("cbCA_No")
-  caNumIFRS String? @map("CA_NumIFRS")
-  cgNum     String? @map("CG_Num")
-  cbCgNum   String? @map("cbCG_Num")
-  etNo      String? @map("ET_No")
-  cbEtNo    String? @map("cbET_No")
-  ebNo      String? @map("EB_No")
-  cfarNo    String? @map("CFAR_No")
-  cbCfarNo  String? @map("cbCFAR_No")
-  facNo     String? @map("FAC_No")
-  cbFacNo   String? @map("cbFAC_No")
+  // References & Links - ALL UNUSED in app (only imported from SAGE)
+  coNo      String? @map("CO_No") // UNUSED
+  cbCoNo    String? @map("cbCO_No") // UNUSED
+  deNo      String? @map("DE_No") // UNUSED
+  cbDeNo    String? @map("cbDE_No") // UNUSED
+  liNo      String? @map("LI_No") // UNUSED
+  cbLiNo    String? @map("cbLI_No") // UNUSED
+  caNum     String? @map("CA_Num") // UNUSED
+  cbCaNum   String? @map("cbCA_Num") // UNUSED
+  caNo      String? @map("CA_No") // UNUSED
+  cbCaNo    String? @map("cbCA_No") // UNUSED
+  caNumIFRS String? @map("CA_NumIFRS") // UNUSED
+  cgNum     String? @map("CG_Num") // UNUSED
+  cbCgNum   String? @map("cbCG_Num") // UNUSED
+  etNo      String? @map("ET_No") // UNUSED
+  cbEtNo    String? @map("cbET_No") // UNUSED
+  ebNo      String? @map("EB_No") // UNUSED
+  cfarNo    String? @map("CFAR_No") // UNUSED
+  cbCfarNo  String? @map("cbCFAR_No") // UNUSED
+  facNo     String? @map("FAC_No") // UNUSED
+  cbFacNo   String? @map("cbFAC_No") // UNUSED
 
-  // Coordinates
-  coord01 String? @map("DO_Coord01")
-  coord02 String? @map("DO_Coord02")
-  coord03 String? @map("DO_Coord03")
-  coord04 String? @map("DO_Coord04")
+  // Coordinates - USED in import parsing
+  coord01 String? @map("DO_Coord01") // USED: import from SAGE
+  coord02 String? @map("DO_Coord02") // USED: import from SAGE
+  coord03 String? @map("DO_Coord03") // UNUSED
+  coord04 String? @map("DO_Coord04") // UNUSED
 
-  // Pricing & Conditions
-  condition  String? @map("DO_Condition")
-  tarif      String? @map("DO_Tarif")
-  typeCalcul String? @map("DO_TypeCalcul")
-  conversion String? @map("DO_Conversion")
+  // Pricing & Conditions - ALL UNUSED
+  condition  String? @map("DO_Condition") // UNUSED
+  tarif      String? @map("DO_Tarif") // UNUSED
+  typeCalcul String? @map("DO_TypeCalcul") // UNUSED
+  conversion String? @map("DO_Conversion") // UNUSED
 
-  // Fees & Franco
-  typeFrais       String?  @map("DO_TypeFrais")
-  valFrais        Decimal? @map("DO_ValFrais") @db.Decimal(18, 2)
-  typeLigneFrais  String?  @map("DO_TypeLigneFrais")
-  typeFranco      String?  @map("DO_TypeFranco")
-  valFranco       Decimal? @map("DO_ValFranco") @db.Decimal(18, 2)
-  typeLigneFranco String?  @map("DO_TypeLigneFranco")
+  // Fees & Franco - ALL UNUSED
+  typeFrais       String?  @map("DO_TypeFrais") // UNUSED
+  valFrais        Decimal? @map("DO_ValFrais") @db.Decimal(18, 2) // UNUSED
+  typeLigneFrais  String?  @map("DO_TypeLigneFrais") // UNUSED
+  typeFranco      String?  @map("DO_TypeFranco") // UNUSED
+  valFranco       Decimal? @map("DO_ValFranco") @db.Decimal(18, 2) // UNUSED
+  typeLigneFranco String?  @map("DO_TypeLigneFranco") // UNUSED
 
-  // Status & Workflow
-  nbFacture    String? @map("DO_NbFacture")
-  blFact       String? @map("DO_BLFact")
-  reliquat     String? @map("DO_Reliquat")
-  imprim       String? @map("DO_Imprim")
-  ventile      String? @map("DO_Ventile")
-  transfere    String? @map("DO_Transfere")
-  cloture      String? @map("DO_Cloture")
-  attente      String? @map("DO_Attente")
-  valide       String? @map("DO_Valide")
-  statutBAP    String? @map("DO_StatutBAP")
-  demandeRegul String? @map("DO_DemandeRegul")
-  exclure      String? @map("DO_Exclure")
+  // Status & Workflow - ALL UNUSED
+  nbFacture    String? @map("DO_NbFacture") // UNUSED
+  blFact       String? @map("DO_BLFact") // UNUSED
+  reliquat     String? @map("DO_Reliquat") // UNUSED
+  imprim       String? @map("DO_Imprim") // UNUSED
+  ventile      String? @map("DO_Ventile") // UNUSED
+  transfere    String? @map("DO_Transfere") // UNUSED
+  cloture      String? @map("DO_Cloture") // UNUSED
+  attente      String? @map("DO_Attente") // UNUSED
+  valide       String? @map("DO_Valide") // UNUSED
+  statutBAP    String? @map("DO_StatutBAP") // UNUSED
+  demandeRegul String? @map("DO_DemandeRegul") // UNUSED
+  exclure      String? @map("DO_Exclure") // UNUSED
 
-  // Payment Information
-  refPaiement     String? @map("DO_RefPaiement")
-  adressePaiement String? @map("DO_AdressePaiement")
-  paiementLigne   String? @map("DO_PaiementLigne")
+  // Payment Information - ALL UNUSED
+  refPaiement     String? @map("DO_RefPaiement") // UNUSED
+  adressePaiement String? @map("DO_AdressePaiement") // UNUSED
+  paiementLigne   String? @map("DO_PaiementLigne") // UNUSED
 
-  // Transaction & Accounting
-  transaction String? @map("DO_Transaction")
-  typeTransac String? @map("DO_TypeTransac")
-  regime      String? @map("DO_Regime")
-  catCompta   String? @map("N_CatCompta")
-  majCpta     String? @map("DO_MajCpta")
-  langue      String? @map("DO_Langue")
+  // Transaction & Accounting - ALL UNUSED
+  transaction String? @map("DO_Transaction") // UNUSED
+  typeTransac String? @map("DO_TypeTransac") // UNUSED
+  regime      String? @map("DO_Regime") // UNUSED
+  catCompta   String? @map("N_CatCompta") // UNUSED
+  majCpta     String? @map("DO_MajCpta") // UNUSED
+  langue      String? @map("DO_Langue") // UNUSED
 
-  // Additional Information
-  provenance   String? @map("DO_Provenance")
-  motif        String? @map("DO_Motif")
-  motifDevis   String? @map("DO_MotifDevis")
-  factureElec  String? @map("DO_FactureElec")
-  factureFile  String? @map("DO_FactureFile")
-  factureFrs   String? @map("DO_FactureFrs")
-  cbFactureFrs String? @map("cbDO_FactureFrs")
-  pieceOrig    String? @map("DO_PieceOrig")
-  cbPieceOrig  String? @map("cbDO_PieceOrig")
+  // Additional Information - ALL UNUSED
+  provenance   String? @map("DO_Provenance") // UNUSED
+  motif        String? @map("DO_Motif") // UNUSED
+  motifDevis   String? @map("DO_MotifDevis") // UNUSED
+  factureElec  String? @map("DO_FactureElec") // UNUSED
+  factureFile  String? @map("DO_FactureFile") // UNUSED
+  factureFrs   String? @map("DO_FactureFrs") // UNUSED
+  cbFactureFrs String? @map("cbDO_FactureFrs") // UNUSED
+  pieceOrig    String? @map("DO_PieceOrig") // UNUSED
+  cbPieceOrig  String? @map("cbDO_PieceOrig") // UNUSED
 
-  // Subscription (Abonnement)
-  abNo        String?   @map("AB_No")
-  debutAbo    DateTime? @map("DO_DebutAbo")
-  finAbo      DateTime? @map("DO_FinAbo")
-  debutPeriod DateTime? @map("DO_DebutPeriod")
-  finPeriod   DateTime? @map("DO_FinPeriod")
+  // Subscription (Abonnement) - ALL UNUSED
+  abNo        String?   @map("AB_No") // UNUSED
+  debutAbo    DateTime? @map("DO_DebutAbo") // UNUSED
+  finAbo      DateTime? @map("DO_FinAbo") // UNUSED
+  debutPeriod DateTime? @map("DO_DebutPeriod") // UNUSED
+  finPeriod   DateTime? @map("DO_FinPeriod") // UNUSED
 
-  // Cashier Information
-  noCaissier   String? @map("CO_NoCaissier")
-  cbNoCaissier String? @map("cbCO_NoCaissier")
-  coffre       String? @map("DO_Coffre")
+  // Cashier Information - ALL UNUSED
+  noCaissier   String? @map("CO_NoCaissier") // UNUSED
+  cbNoCaissier String? @map("cbCO_NoCaissier") // UNUSED
+  coffre       String? @map("DO_Coffre") // UNUSED
 
   // Expedition Information
-  expeIle    String? @map("EXPE : ILE")
-  expeNoCsnt String? @map("EXPE N° CSNT")
+  expeIle    String? @map("EXPE : ILE") // USED: displayed in UI
+  expeNoCsnt String? @map("EXPE N° CSNT") // USED: displayed in UI
 
   // Observations & Comments
-  obs1 String? @map("OBS. 1")
-  obs2 String? @map("OBS. 2")
-  obs3 String? @map("OBS. 3")
-  obs4 String? @map("OBS. 4")
+  obs1 String? @map("OBS. 1") // USED: displayed in UI
+  obs2 String? @map("OBS. 2") // USED: displayed in UI
+  obs3 String? @map("OBS. 3") // USED: displayed in UI
+  obs4 String? @map("OBS. 4") // USED: displayed in UI
 
   // Order Information
-  bcClient         String? @map("BC client")
-  cdeSaisiePar     String? @map("Cde saisie par")
-  cdeTransmissePar String? @map("Cde transmisse par")
-  cdeModeReception String? @map("Cde : mode de réception")
-  heureDebut       String? @map("Heure début")
+  bcClient         String? @map("BC client") // USED: displayed in UI
+  cdeSaisiePar     String? @map("Cde saisie par") // USED: displayed in UI
+  cdeTransmissePar String? @map("Cde transmisse par") // USED: displayed in UI
+  cdeModeReception String? @map("Cde : mode de réception") // USED: displayed in UI
+  heureDebut       String? @map("Heure début") // USED: displayed in UI
 
-  // Service & Other
-  mrNo        String? @map("MR_No")
-  codeService String? @map("DO_CodeService")
+  // Service & Other - UNUSED
+  mrNo        String? @map("MR_No") // UNUSED
+  codeService String? @map("DO_CodeService") // UNUSED
 
-  // System Fields (cb prefix - likely Cbase/internal fields)
-  cbProt         Int       @map("cbProt")
-  cbMarq         Int       @map("cbMarq")
-  cbCreateur     String    @map("cbCreateur")
-  cbModification DateTime  @map("cbModification")
-  cbReplication  Int       @map("cbReplication")
-  cbFlag         Int       @map("cbFlag")
-  cbCreation     DateTime  @default(now()) @map("cbCreation")
-  cbCreationUser String    @map("cbCreationUser")
-  cbHash         String?   @map("cbHash")
-  cbHashVersion  Int?      @map("cbHashVersion")
-  cbHashDate     DateTime? @map("cbHashDate")
-  cbHashOrder    Int?      @map("cbHashOrder")
+  // System Fields (cb prefix - Cbase/internal SAGE fields) - USED for import integrity
+  cbProt         Int       @map("cbProt") // USED: import from SAGE
+  cbMarq         Int       @map("cbMarq") // USED: import from SAGE
+  cbCreateur     String    @map("cbCreateur") // USED: import from SAGE
+  cbModification DateTime  @map("cbModification") // USED: import from SAGE
+  cbReplication  Int       @map("cbReplication") // USED: import from SAGE
+  cbFlag         Int       @map("cbFlag") // USED: import from SAGE
+  cbCreation     DateTime  @default(now()) @map("cbCreation") // USED: import from SAGE
+  cbCreationUser String    @map("cbCreationUser") // USED: import from SAGE
+  cbHash         String?   @map("cbHash") // USED: import from SAGE
+  cbHashVersion  Int?      @map("cbHashVersion") // USED: import from SAGE
+  cbHashDate     DateTime? @map("cbHashDate") // USED: import from SAGE
+  cbHashOrder    Int?      @map("cbHashOrder") // USED: import from SAGE
 
   commande Commande?
 

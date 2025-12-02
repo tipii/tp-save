@@ -21,17 +21,21 @@ export function usePendingLivraisons(selectedDate: Date | null) {
   );
 }
 
-export function useLivraisonsEnRetard() {
+export function useLivraisonsEnRetard(selectedDate: Date | null) {
   const trpc = useTRPC();
 
   return useQuery(
-    trpc.livraisons.getLivraisonsEnRetard.queryOptions(undefined, {
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-      refetchInterval: 1000 * 10, // 10 seconds
-      refetchIntervalInBackground: true,
-    }),
+    trpc.livraisons.getLivraisonsEnRetard.queryOptions(
+      { selectedDate: selectedDate! },
+      {
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+        refetchInterval: 1000 * 10, // 10 seconds
+        refetchIntervalInBackground: true,
+        enabled: !!selectedDate, // Only fetch when a date is selected
+      },
+    ),
   );
 }
 

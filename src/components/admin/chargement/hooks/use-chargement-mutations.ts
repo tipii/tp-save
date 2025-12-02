@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTRPC } from '@/trpc/client';
-import { Priority } from '@/generated/prisma';
 import { toast } from 'sonner';
 import { TrpcLivraison } from '@/types/trpc-types';
 
@@ -215,18 +214,16 @@ export function useRemoveFromTmpMutation(selectedDate: Date) {
         },
       );
 
-      // Optimistic update 2: Add back to priority zones (with updated priority if provided in variables)
+      // Optimistic update 2: Add back to priority zones (with updated priority if provided)
       const removedLivraison = previousLivreurs
         ?.find((l) => l.id === variables.livreurId)
         ?.chargements.find((c) => c.status === 'PENDING')
         ?.livraisons.find((liv) => liv.id === variables.livraisonId);
 
       if (removedLivraison) {
-        // Check if variables has a newPriority field (for optimistic priority update)
-        const variablesWithPriority = variables as typeof variables & { newPriority?: Priority };
-        const newPriority = variablesWithPriority.newPriority;
-        const livraisonWithUpdatedPriority = newPriority
-          ? { ...removedLivraison, priority: newPriority }
+        // Apply new priority if provided (for optimistic update)
+        const livraisonWithUpdatedPriority = variables.newPriority
+          ? { ...removedLivraison, priority: variables.newPriority }
           : removedLivraison;
 
         queryClient.setQueryData(
@@ -388,73 +385,18 @@ export function useDeleteChargementMutation(selectedDate: Date) {
 
   return useMutation({
     ...trpc.chargements.deleteChargement.mutationOptions(),
-    onMutate: async (variables) => {
-      // Cancel outgoing queries
-      await queryClient.cancelQueries({
-        queryKey: trpc.livreurs.getLivreurs.queryKey({ selectedDate }),
-      });
-      await queryClient.cancelQueries({
-        queryKey: trpc.livraisons.getPendingLivraisons.queryKey({
-          expectedDeliveryDate: selectedDate,
-        }),
-      });
-
-      // Get previous data for rollback
-      const previousLivreurs = queryClient.getQueryData(
-        trpc.livreurs.getLivreurs.queryKey({ selectedDate }),
-      );
-      const previousLivraisons = queryClient.getQueryData(
-        trpc.livraisons.getPendingLivraisons.queryKey({ expectedDeliveryDate: selectedDate }),
-      );
-
-      // Find the chargement being deleted
-      const chargementToDelete = previousLivreurs
-        ?.flatMap((l) => l.chargements)
-        .find((c) => c.id === variables.id);
-
-      // Optimistic update 1: Remove chargement from livreurs
-      queryClient.setQueryData(
-        trpc.livreurs.getLivreurs.queryKey({ selectedDate }),
-        (old) => {
-          if (!old) return old;
-
-          return old.map((livreur) => ({
-            ...livreur,
-            chargements: livreur.chargements.filter((c) => c.id !== variables.id),
-          }));
-        },
-      );
-
-      // Optimistic update 2: Add livraisons back to pending list
-      if (chargementToDelete?.livraisons && chargementToDelete.livraisons.length > 0) {
-        queryClient.setQueryData(
-          trpc.livraisons.getPendingLivraisons.queryKey({ expectedDeliveryDate: selectedDate }),
-          (old) => (old ? [...old, ...chargementToDelete.livraisons] : chargementToDelete.livraisons),
-        );
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success(data.message || 'Chargement supprimé avec succès');
+      } else {
+        toast.error(data.error || 'Erreur lors de la suppression du chargement');
       }
-
-      return { previousLivreurs, previousLivraisons };
     },
-    onSuccess: () => {
-      toast.success('Chargement supprimé avec succès');
-    },
-    onError: (_error, _variables, context) => {
+    onError: () => {
       toast.error('Erreur lors de la suppression du chargement');
-      // Rollback on error
-      if (context?.previousLivreurs) {
-        queryClient.setQueryData(
-          trpc.livreurs.getLivreurs.queryKey({ selectedDate }),
-          context.previousLivreurs,
-        );
-      }
-      if (context?.previousLivraisons) {
-        queryClient.setQueryData(
-          trpc.livraisons.getPendingLivraisons.queryKey({ expectedDeliveryDate: selectedDate }),
-          context.previousLivraisons,
-        );
-      }
     },
     onSettled: () => {
+      // Backend handles all logic, just invalidate queries
       queryClient.invalidateQueries({
         queryKey: trpc.livreurs.getLivreurs.queryKey({ selectedDate }),
       });

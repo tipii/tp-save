@@ -13,8 +13,6 @@ model Chargement {
 
   history ChargementHistory[]
 
-  // Ensure only one PENDING chargement per livreur per day
-  @@unique([livreurId, status, dateLivraison], name: "unique_pending_chargement_per_day")
   @@map("chargement")
 }
 

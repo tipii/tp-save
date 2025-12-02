@@ -79,39 +79,41 @@ export const livraisonsRouter = createTRPCRouter({
         });
       }
     }),
-  getLivraisonsEnRetard: secretariatOrAdminProcedure.query(async ({ ctx }) => {
-    try {
-      // Get all pending livraisons with expected delivery date before today (start of today)
-      const todayStart = getTahitiToday();
+  getLivraisonsEnRetard: secretariatOrAdminProcedure
+    .input(z.object({ selectedDate: z.date() }))
+    .query(async ({ ctx, input }) => {
+      try {
+        // Get all pending livraisons with expected delivery date before the selected date
+        const selectedDateStart = getTahitiDayStart(input.selectedDate);
 
-      const livraisons = await ctx.prisma.livraison.findMany({
-        where: {
-          expectedDeliveryDate: { lt: todayStart },
-          status: Status.PENDING,
-          chargementId: null, // Exclude livraisons already in tmp chargements
-          commande: {
-            ...baseWhereCommande,
-          },
-        },
-        include: {
-          commande: {
-            include: {
-              docVente: true,
-              client: true,
-              livraisons: true,
+        const livraisons = await ctx.prisma.livraison.findMany({
+          where: {
+            expectedDeliveryDate: { lt: selectedDateStart },
+            status: Status.PENDING,
+            chargementId: null, // Exclude livraisons already in tmp chargements
+            commande: {
+              ...baseWhereCommande,
             },
           },
-        },
-      });
-      return livraisons;
-    } catch (error) {
-      console.error(error);
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Erreur lors de la récupération des livraisons en retard',
-      });
-    }
-  }),
+          include: {
+            commande: {
+              include: {
+                docVente: true,
+                client: true,
+                livraisons: true,
+              },
+            },
+          },
+        });
+        return livraisons;
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Erreur lors de la récupération des livraisons en retard',
+        });
+      }
+    }),
   changePriority: secretariatOrAdminProcedure
     .input(
       z.object({

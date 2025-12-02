@@ -36,7 +36,7 @@ export default function ChargementDnd() {
 
   // Queries with loading states
   const { data: livraisons, isLoading: isLoadingLivraisons } = usePendingLivraisons(selectedDate);
-  const { data: livraisonsEnRetard, isLoading: isLoadingEnRetard } = useLivraisonsEnRetard();
+  const { data: livraisonsEnRetard, isLoading: isLoadingEnRetard } = useLivraisonsEnRetard(selectedDate);
   const { data: livreurs, isLoading: isLoadingLivreurs } = useLivreurs(selectedDate);
 
   // Mutations

@@ -43,7 +43,7 @@ export function useChargementDrag(
 
     // Determine source zone
     const isFromLateZone = !!livraisonsEnRetard?.find((l) => l.id === livraisonId);
-    const isFromPriorityZone = !isFromLateZone && !!(livraisons?.find((l) => l.id === livraisonId));
+    const isFromPriorityZone = !isFromLateZone && !!livraisons?.find((l) => l.id === livraisonId);
 
     // Find which livreur the livraison is currently in (if any)
     const sourceLivreur = livreurs?.find((livreur) =>
@@ -71,17 +71,16 @@ export function useChargementDrag(
       // If dropping from a livreur zone back to priority zone
       if (sourceLivreur) {
         // Get the new priority if not LATE zone
-        const newPriority = overId !== 'priority-LATE'
-          ? (overId.replace('priority-', '') as Priority)
-          : undefined;
+        const newPriority =
+          overId !== 'priority-LATE' ? (overId.replace('priority-', '') as Priority) : undefined;
 
         // Remove from tmp chargement (with optimistic priority update)
         removeFromTmpMutation.mutate({
           livraisonId,
           livreurId: sourceLivreur.id,
           dateLivraison: selectedDate,
-          newPriority, // Pass priority for optimistic update
-        } as any); // Type assertion needed because TRPC doesn't expect this extra field
+          newPriority,
+        });
 
         // Also call the actual priority change mutation if needed
         if (newPriority) {

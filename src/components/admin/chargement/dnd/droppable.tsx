@@ -112,23 +112,33 @@ export const DroppableLivreur = ({
                         <Trash size={16} />
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="max-w-2xl">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                        <AlertDialogTitle>Supprimer le chargement</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir supprimer le chargement "{chargement.name}" ?
-                          Cette action est irréversible.
+                          Que souhaitez-vous faire avec les livraisons du chargement "{chargement.name}" ?
                         </AlertDialogDescription>
                       </AlertDialogHeader>
-                      <AlertDialogFooter>
+                      <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
                         <AlertDialogCancel>Annuler</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => {
-                            deleteChargement({ id: chargement.id });
-                          }}
-                        >
-                          Supprimer
-                        </AlertDialogAction>
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                          <AlertDialogAction
+                            onClick={() => {
+                              deleteChargement({ id: chargement.id, action: 'transfer_to_tmp' });
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            Transférer au tmp
+                          </AlertDialogAction>
+                          <AlertDialogAction
+                            onClick={() => {
+                              deleteChargement({ id: chargement.id, action: 'reset_and_delete' });
+                            }}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Réinitialiser
+                          </AlertDialogAction>
+                        </div>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
@@ -213,23 +223,33 @@ export const DroppableLivreur = ({
                         <Trash size={16} />
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="max-w-2xl">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                        <AlertDialogTitle>Supprimer le chargement</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir supprimer le chargement "{chargement.name}" ?
-                          Cette action est irréversible.
+                          Que souhaitez-vous faire avec les livraisons du chargement "{chargement.name}" ?
                         </AlertDialogDescription>
                       </AlertDialogHeader>
-                      <AlertDialogFooter>
+                      <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
                         <AlertDialogCancel>Annuler</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => {
-                            deleteChargement({ id: chargement.id });
-                          }}
-                        >
-                          Supprimer
-                        </AlertDialogAction>
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                          <AlertDialogAction
+                            onClick={() => {
+                              deleteChargement({ id: chargement.id, action: 'transfer_to_tmp' });
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            Transférer au tmp
+                          </AlertDialogAction>
+                          <AlertDialogAction
+                            onClick={() => {
+                              deleteChargement({ id: chargement.id, action: 'reset_and_delete' });
+                            }}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Réinitialiser
+                          </AlertDialogAction>
+                        </div>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
